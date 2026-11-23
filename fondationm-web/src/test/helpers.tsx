@@ -12,7 +12,16 @@ type MeResponse = components['schemas']['MeResponse']
 type Handler = (request: Request, init?: RequestInit) => Response | Promise<Response>
 
 export const FAKE_TOKEN = 'jeton-factice-de-test'
+export const FAKE_NEW_TOKEN = 'nouveau-jeton-factice-de-test'
 export const FAKE_PASSWORD = 'valeur-factice'
+export const FAKE_NEW_PASSWORD = 'nouvelle-valeur-factice'
+
+export function recordBodies(bodies: unknown[], response: () => Response) {
+  return async (request: Request): Promise<Response> => {
+    bodies.push(await request.json())
+    return response()
+  }
+}
 
 export function jsonResponse(status: number, body: unknown, headers: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(body), {

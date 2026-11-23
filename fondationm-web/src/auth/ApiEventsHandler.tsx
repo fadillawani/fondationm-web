@@ -14,7 +14,7 @@ export function ApiEventsHandler() {
       onApiEvent((event) => {
         if (event === 'unauthenticated') {
           endSession(queryClient)
-          const state: LoginRedirectState = { sessionExpired: true }
+          const state: LoginRedirectState = { notice: 'session-expired' }
           void navigate(PATHS.login, { replace: true, state })
           return
         }

@@ -81,11 +81,26 @@ src/
   components/ui/      composants de base (Button, FormField, Input, Modal…)
   components/layout/  mises en page (barre latérale ≥ 1024 px, navigation basse sur mobile)
   pages/              connexion, accueils provisoires, compte en attente / refusé, mot de passe, 404
+    register/         choix du type de compte, inscription établissement et intervenant (schémas Zod)
+    status/           frise et récapitulatif de la page d'attente
   routes/             définition des routes et gardes
-  lib/                utilitaires (cn, QueryClient)
+  lib/                utilitaires (cn, QueryClient, données de référence, dates, erreurs de formulaire)
   styles/theme.css    jetons de design (couleurs, rayons, ombres, espacements, polices)
   test/               configuration et utilitaires de test (API simulée, aucun appel réseau)
 ```
+
+## Routes
+
+| Route | Accès | Page |
+| --- | --- | --- |
+| `/connexion` | public (connecté → accueil) | Connexion |
+| `/inscription` | public (connecté → accueil) | Choix du type de compte |
+| `/inscription/ecole` | public (connecté → accueil) | Inscription d'un établissement |
+| `/inscription/intervenant` | public (connecté → accueil) | Inscription d'un intervenant |
+| `/compte-en-attente` | connecté, statut PENDING | Demande en cours de vérification |
+| `/compte-refuse` | connecté, statut REJECTED | Demande refusée et motif |
+| `/mot-de-passe-obligatoire` | connecté, `mustChangePassword` | Changement de mot de passe obligatoire |
+| `/ecole`, `/intervenant`, `/fondation`, `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
 
 ## Règles de session
 

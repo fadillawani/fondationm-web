@@ -8,6 +8,9 @@ import { LoginPage } from '../pages/LoginPage'
 import { MustChangePasswordPage } from '../pages/MustChangePasswordPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { PendingAccountPage } from '../pages/PendingAccountPage'
+import { RegisterChoicePage } from '../pages/register/RegisterChoicePage'
+import { RegisterSchoolPage } from '../pages/register/RegisterSchoolPage'
+import { RegisterSpeakerPage } from '../pages/register/RegisterSpeakerPage'
 import { RejectedAccountPage } from '../pages/RejectedAccountPage'
 import { GuestOnly, HomeRedirect, RequireAuth, RequireDestination, RequireRole } from './guards'
 
@@ -17,14 +20,14 @@ export const routes: RouteObject[] = [
   {
     element: <RootLayout />,
     children: [
-      {
-        path: PATHS.login,
-        element: (
-          <GuestOnly>
-            <LoginPage />
-          </GuestOnly>
-        ),
-      },
+      ...(
+        [
+          [PATHS.login, <LoginPage key="login" />],
+          [PATHS.register, <RegisterChoicePage key="register" />],
+          [PATHS.registerSchool, <RegisterSchoolPage key="register-school" />],
+          [PATHS.registerSpeaker, <RegisterSpeakerPage key="register-speaker" />],
+        ] as const
+      ).map(([path, page]): RouteObject => ({ path, element: <GuestOnly>{page}</GuestOnly> })),
       {
         element: <RequireAuth />,
         children: [

@@ -1,6 +1,6 @@
 # État du frontend — Fondation M
 
-Dernière mise à jour : 23 novembre 2026 — lot F0.1 (design « Marché »).
+Dernière mise à jour : 23 novembre 2026 — lot F1 (inscription, attente de validation, mot de passe).
 
 ## Avancement
 
@@ -8,10 +8,34 @@ Dernière mise à jour : 23 novembre 2026 — lot F0.1 (design « Marché »).
 | --- | --------------------------------------------------------------------------- | -------- |
 | F0  | Configuration, jetons de design, composants de base, client d'API, session, gardes, erreurs, connexion, accueils provisoires | Terminé |
 | F0.1 | Design de la maquette « Marché » appliqué (thème, composants, connexion, mise en page) | Terminé |
-| F1+ | Écrans métier                                                               | À faire  |
+| F1  | Inscription établissement et intervenant, pages « en attente » et « refusé », changement de mot de passe obligatoire | Terminé |
+| F2+ | Écrans métier                                                               | À faire  |
 
-Vérifications au moment de la livraison de F0.1 : `npm run build`, `npm run lint` et `npm test`
-(44 tests) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F1 : `npm run build`, `npm run lint` et `npm test`
+(69 tests) passent sans erreur ni avertissement.
+
+## Ce que F1 livre
+
+- **`/inscription`** : choix du type de compte (deux cartes : établissement en terracotta, intervenant
+  en orange), lien « Déjà un compte ? Se connecter ». Le lien « Pas encore de compte ? » de la
+  connexion y mène.
+- **`/inscription/ecole`** → `POST /api/auth/register/school` et **`/inscription/intervenant`** →
+  `POST /api/auth/register/speaker` : deux colonnes sur PC (colonne de la couleur du rôle avec 3 étapes),
+  bandeau sur téléphone, onglets « Se connecter » / « Créer un compte », groupes de champs, suggestions
+  (datalist) pour le pays et la ville, charte obligatoire, compétences en pastilles à bascule avec ajout libre.
+- **Après inscription (201)** : connexion automatique (`POST /api/auth/login` avec les mêmes identifiants),
+  `GET /api/me`, puis `/compte-en-attente`. Si la connexion automatique échoue : `/connexion` avec
+  « Compte créé. Connectez-vous pour suivre votre demande. »
+- **`/compte-en-attente`** (PENDING seulement) : en-tête blanc (logo, nom, « Se déconnecter »), pastille
+  « Compte en attente », « Merci {nom}, votre demande est bien arrivée », frise en 4 étapes avec la date
+  de `createdAt`, récapitulatif tiré de `/api/me`, bloc « En attendant », bouton « Actualiser mon statut »
+  (relit `/api/me` ; redirection vers l'accueil si le compte est validé).
+- **`/compte-refuse`** (REJECTED seulement) : pastille « Demande refusée », motif `rejectionReason` dans un
+  bloc « Motif indiqué par la Fondation M », adresse de contact, « Se déconnecter ».
+- **`/mot-de-passe-obligatoire`** (`mustChangePassword` seulement) : mot de passe actuel, nouveau,
+  confirmation (vérifiée côté client) → `POST /api/me/password` ; le nouveau jeton remplace l'ancien,
+  `/api/me` est relu, puis redirection vers l'accueil du rôle.
+- Aucun texte ne promet d'e-mail : le backend n'en envoie pas.
 
 ## Ce que F0 livre
 
@@ -34,7 +58,6 @@ Vérifications au moment de la livraison de F0.1 : `npm run build`, `npm run lin
   (voir décision 10).
 - **Connexion au design de la maquette** : deux colonnes sur PC (colonne terracotta + carte blanche),
   une colonne sur téléphone (< 768 px) avec bandeau terracotta et carte qui le chevauche.
-  Le lien « Pas encore de compte ? » est désactivé jusqu'à l'inscription (F1).
 
 ## Décisions prises
 
@@ -75,13 +98,47 @@ Vérifications au moment de la livraison de F0.1 : `npm run build`, `npm run lin
       `#E8EFDC`, `#FBE3E3`.
     - La bordure des champs `#E6DECB` sur blanc (1,34:1) suit la maquette ; au focus, bordure
       terracotta et anneau.
+    - F1 : texte `#1B1F3B` sur orange (5,71:1 ; le blanc échouerait à 2,82:1), crème-jaune sur `#1B1F3B`
+      (13,14:1), légendes terracotta sur blanc (5,22:1).
+11. **Inscription sans jeton** : le contrat renvoie un `MeResponse` (201), pas de jeton ; la connexion
+    automatique passe donc par `POST /api/auth/login`.
+12. **Champs obligatoires côté client, plus stricts que le contrat (volontaire)** : ils servent à la
+    validation par la Fondation et au filtrage de l'annuaire.
+    - Établissement : nom, type, pays, ville, fonction du référent, e-mail, téléphone, mot de passe, charte.
+      Le contrat n'exige que `email`, `password`, `schoolName`, `city`, `country`.
+    - Intervenant : nom, métier, secteur, pays, ville, au moins une compétence (20 max, 100 caractères
+      chacune), e-mail, téléphone, mot de passe, charte. Facultatifs : structure et motivation (non
+      envoyés s'ils sont vides). Le contrat exige `email`, `password`, `fullName`, `city`, `country`, `skills`.
+    - Téléphone : motif du contrat `[0-9 +().\-]{6,30}`.
+13. **Charte** : case obligatoire côté client ; `charterAccepted: true` toujours envoyé (le contrat
+    ne l'exige pas).
+14. **Mot de passe** : règles du contrat, 8 à 72 caractères, sans exigence de chiffre. Aide affichée :
+    « 8 caractères minimum ». Au changement, le nouveau doit différer de l'actuel (vérifié aussi côté client).
+15. **Compétences** envoyées dans la requête d'inscription (`skills`) ; `PUT /api/speaker/profile/skills`
+    n'est pas appelé.
+16. **Erreurs du serveur dans les formulaires** (`lib/serverFieldErrors.ts`) : chaque `fieldErrors` va sous
+    son champ (le premier reçoit le focus). Sans `fieldErrors`, un 409 ou un code contenant « EMAIL » va sous
+    le champ e-mail. Sinon, alerte au-dessus du bouton.
+17. **Gardes** : `/inscription/*` publiques (utilisateur connecté → son accueil) ; `/compte-en-attente`,
+    `/compte-refuse` et `/mot-de-passe-obligatoire` n'acceptent que le statut correspondant. Priorité
+    inchangée : PENDING / REJECTED avant `mustChangePassword`.
+18. **Build** : le bundle dépassait 500 kB ; les dépendances sont séparées en deux chunks (`react`,
+    `vendor`) via `build.rolldownOptions.output.codeSplitting` dans `vite.config.ts`.
 
 ## Écarts
 
 - `--legacy-peer-deps` remplacé par l'exécution `npx` isolée (voir décision 3).
-- La page de changement de mot de passe obligatoire est provisoire (explication + déconnexion) ; le
-  formulaire, qui utilisera `POST /api/me/password`, viendra en F1.
 - La navigation par rôle ne contient que « Accueil » : les entrées viendront avec les écrans métier.
+
+## Écarts maquette / backend
+
+| Élément de la maquette | Situation dans le contrat | Choix frontend |
+| --- | --- | --- |
+| « Prénom et nom » du référent d'établissement | Absent de `RegisterSchoolRequest` et de `SchoolProfileResponse` | Champ non affiché ; « Merci {nom de l'établissement} » sur la page d'attente. **À ajouter côté backend plus tard.** |
+| Lien « Lire la charte » | Aucun texte de charte n'existe | Lien inactif (`aria-disabled`) |
+| Lien « Modifier » de la page d'attente | Aucun point d'accès de modification pour un compte en attente | Non affiché |
+| Case « Rester connecté », lien « Mot de passe oublié » (connexion) | Pas de point d'accès | Non affichés |
+| Code d'erreur « e-mail déjà utilisé » | Non documenté (aucun 409 ni code dans le contrat) | Règle de la décision 16. Code réellement observé : `EMAIL_ALREADY_USED` (HTTP 409, message « Cette adresse e-mail est déjà utilisée. ») |
 
 ## Points ouverts
 
@@ -94,3 +151,7 @@ Vérifications au moment de la livraison de F0.1 : `npm run build`, `npm run lin
 3. **`MeResponse` sans champs obligatoires** dans le contrat : le frontend rejette une réponse sans `id`,
    `role` ou `status` (`INVALID_RESPONSE`). Marquer ces champs `required` côté backend rendrait les types plus précis.
 4. **Expiration du jeton (8 h)** : gérée au premier 401 ; pas de déconnexion préventive basée sur `expiresIn`.
+5. **Champs obligatoires du contrat** : `email`, `schoolName`, `city`, `country` et `fullName` sont déclarés
+   `minLength: 0`. Le frontend refuse les valeurs vides ; le backend devrait les rejeter aussi (`@NotBlank`).
+   `schoolType`, `referentRole`, `phone`, `jobTitle`, `sector` et `charterAccepted` sont facultatifs côté
+   serveur alors que le frontend les exige (décision 12) : un client direct de l'API peut s'en passer.

@@ -4,6 +4,18 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/ },
+            { name: 'vendor', test: /node_modules/ },
+          ],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     strictPort: true,

@@ -66,7 +66,7 @@ describe('Gardes de routes', () => {
     await act(() => api.GET('/api/school/dashboard'))
 
     expect(
-      await screen.findByRole('heading', { name: 'Changement de mot de passe obligatoire' }),
+      await screen.findByRole('heading', { name: 'Choisissez votre mot de passe' }),
     ).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/mot-de-passe-obligatoire')
   })
@@ -83,7 +83,7 @@ describe('Gardes de routes', () => {
     me = makeMe({ status: 'PENDING' })
     await act(() => api.GET('/api/school/dashboard'))
 
-    expect(await screen.findByRole('heading', { name: 'Compte en attente de validation' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Merci Lycée des Tisserands, votre demande est bien arrivée' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/compte-en-attente')
   })
 })

@@ -8,10 +8,26 @@ import { toCurrentUser, type CurrentUser } from './currentUser'
 import { PATHS, destinationFor } from './roles'
 import { tokenStorage } from './tokenStorage'
 
-export type LoginCredentials = components['schemas']['LoginRequest']
+type Schemas = components['schemas']
+
+export type LoginCredentials = Schemas['LoginRequest']
+export type RegisterSchoolBody = Schemas['RegisterSchoolRequest']
+export type RegisterSpeakerBody = Schemas['RegisterSpeakerRequest']
+export type ChangePasswordBody = Schemas['ChangeOwnPasswordRequest']
+
+export type Registration =
+  | { kind: 'school'; body: RegisterSchoolBody }
+  | { kind: 'speaker'; body: RegisterSpeakerBody }
+
+export type LoginNotice = 'session-expired' | 'account-created'
 
 export interface LoginRedirectState {
-  sessionExpired: true
+  notice: LoginNotice
+}
+
+export function readLoginNotice(state: unknown): LoginNotice | null {
+  if (typeof state !== 'object' || state === null || !('notice' in state)) return null
+  return state.notice === 'session-expired' || state.notice === 'account-created' ? state.notice : null
 }
 
 export const meQuery = queryOptions({
@@ -29,24 +45,77 @@ export function endSession(queryClient: QueryClient): void {
   queryClient.clear()
 }
 
+function storeToken(token: Schemas['TokenResponse']): void {
+  if (!token.accessToken) throw invalidResponseError()
+  tokenStorage.set(token.accessToken)
+}
+
+async function signIn(queryClient: QueryClient, credentials: LoginCredentials): Promise<CurrentUser> {
+  tokenStorage.clear()
+  queryClient.removeQueries()
+  storeToken(await unwrap(api.POST('/api/auth/login', { body: credentials })))
+  try {
+    return await queryClient.fetchQuery(meQuery)
+  } catch (error) {
+    tokenStorage.clear()
+    queryClient.removeQueries()
+    throw error
+  }
+}
+
 export function useLogin() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
   return useMutation({
-    mutationFn: async (credentials: LoginCredentials): Promise<CurrentUser> => {
-      tokenStorage.clear()
-      queryClient.removeQueries()
-      const token = await unwrap(api.POST('/api/auth/login', { body: credentials }))
-      if (!token.accessToken) throw invalidResponseError()
-      tokenStorage.set(token.accessToken)
+    mutationFn: (credentials: LoginCredentials) => signIn(queryClient, credentials),
+    onSuccess: (user) => {
+      void navigate(destinationFor(user), { replace: true })
+    },
+  })
+}
+
+async function submitRegistration(registration: Registration): Promise<void> {
+  if (registration.kind === 'school') {
+    await unwrap(api.POST('/api/auth/register/school', { body: registration.body }))
+  } else {
+    await unwrap(api.POST('/api/auth/register/speaker', { body: registration.body }))
+  }
+}
+
+export function useRegister() {
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+
+  return useMutation({
+    mutationFn: async (registration: Registration): Promise<CurrentUser | null> => {
+      await submitRegistration(registration)
+      const { email, password } = registration.body
       try {
-        return await queryClient.fetchQuery(meQuery)
-      } catch (error) {
-        tokenStorage.clear()
-        queryClient.removeQueries()
-        throw error
+        return await signIn(queryClient, { email, password })
+      } catch {
+        return null
       }
+    },
+    onSuccess: (user) => {
+      if (user === null) {
+        const state: LoginRedirectState = { notice: 'account-created' }
+        void navigate(PATHS.login, { replace: true, state })
+        return
+      }
+      void navigate(destinationFor(user), { replace: true })
+    },
+  })
+}
+
+export function useChangePassword() {
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+
+  return useMutation({
+    mutationFn: async (body: ChangePasswordBody): Promise<CurrentUser> => {
+      storeToken(await unwrap(api.POST('/api/me/password', { body })))
+      return queryClient.fetchQuery({ ...meQuery, staleTime: 0 })
     },
     onSuccess: (user) => {
       void navigate(destinationFor(user), { replace: true })

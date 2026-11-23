@@ -2,6 +2,9 @@ import type { CurrentUser, Role } from './currentUser'
 
 export const PATHS = {
   login: '/connexion',
+  register: '/inscription',
+  registerSchool: '/inscription/ecole',
+  registerSpeaker: '/inscription/intervenant',
   pending: '/compte-en-attente',
   rejected: '/compte-refuse',
   mustChangePassword: '/mot-de-passe-obligatoire',
