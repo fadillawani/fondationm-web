@@ -61,6 +61,16 @@ describe('Demandes reçues — onglets et détail', () => {
     expect(requests().getAllByRole('button')).toHaveLength(6)
   })
 
+  it('affiche telle quelle une demande en ligne ancienne', async () => {
+    const data = defaultData()
+    setupSpeaker({ ...data, meetings: data.meetings.map((meeting) => (meeting.id === REQUEST_A.id ? { ...meeting, format: 'ONLINE' } : meeting)) })
+    renderApp('/intervenant/demandes', { token: true })
+
+    const card = await detail()
+    expect(card.getByRole('heading', { name: 'Lycée des Tisserands' })).toBeInTheDocument()
+    expect(factValue(card, 'Format souhaité')).toBe('En ligne')
+  })
+
   it('affiche le détail, la zone, le mot de l’école et les deux demandes sur le même créneau', async () => {
     setupSpeaker()
     const { user } = renderApp('/intervenant/demandes', { token: true })
@@ -70,7 +80,8 @@ describe('Demandes reçues — onglets et détail', () => {
     expect(card.getByRole('heading', { name: 'Lycée des Tisserands' })).toBeInTheDocument()
     expect(card.getByText('Dans votre zone')).toBeInTheDocument()
     expect(factValue(card, 'Créneau demandé')).toBe('Vendredi 27 novembre, 14h00 – 15h00')
-    expect(factValue(card, 'Format souhaité')).toBe('En classe')
+    // En classe seulement (F6.1) : pas de « Format souhaité » pour une demande en classe.
+    expect(card.queryByText('Format souhaité', { selector: 'dt' })).not.toBeInTheDocument()
     expect(factValue(card, 'Classe')).toBe('Terminale S2')
     expect(factValue(card, 'Élèves')).toBe('32 élèves')
     expect(card.getByRole('region', { name: "Le mot de l'école" })).toHaveTextContent(

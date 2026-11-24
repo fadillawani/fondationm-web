@@ -117,7 +117,7 @@ src/
 | `/intervenant/agenda` | connecté, validé, rôle SPEAKER | Mon agenda (`?mois=AAAA-MM`) |
 | `/intervenant/demandes` | connecté, validé, rôle SPEAKER | Demandes reçues (`?onglet=`, `page=`, `demande=`) |
 | `/ecole` | connecté, validé, rôle SCHOOL | Redirige vers `/ecole/intervenants` |
-| `/ecole/intervenants` | connecté, validé, rôle SCHOOL | Intervenants disponibles (`?zone=`, `secteur=`, `format=`, `q=`) |
+| `/ecole/intervenants` | connecté, validé, rôle SCHOOL | Intervenants disponibles (`?zone=`, `secteur=`, `q=` ; `format=` ignoré tant que les rencontres sont en classe seulement, `src/lib/features.ts`) |
 | `/ecole/intervenants/{id}/demande` | connecté, validé, rôle SCHOOL | Demander une rencontre |
 | `/ecole/rencontres` | connecté, validé, rôle SCHOOL | Mes rencontres (`?mois=AAAA-MM`, `rencontre={id}`) |
 | `/ecole/etablissement` | connecté, validé, rôle SCHOOL | Mon établissement : classes, élèves, fiches d'accès (`?classe={id}`) |

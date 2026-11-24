@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { PageTitle } from '../../components/layout/PageTitle'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { errorMessage } from '../../api/errors'
 import { useCurrentUser } from '../../auth/currentUserContext'
 import { Alert } from '../../components/ui/Alert'
@@ -13,6 +13,7 @@ import { Spinner } from '../../components/ui/Spinner'
 import { parseIso } from '../../lib/dateTime'
 import { normalizeName, sameName } from '../../lib/normalize'
 import { SECTORS, type Sector } from '../../lib/referenceData'
+import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
 import { useNow } from '../../lib/useNow'
 import { NetworkSection, type ChosenCity } from './NetworkSection'
 import { useSchoolMeetings, type SchoolMeeting } from './meetingsData'
@@ -91,9 +92,11 @@ interface SectionProps {
   emptyText: string
   /** Lignes compactes sur mobile (maquette : « Autres zones · en ligne »). */
   compactOnMobile?: boolean
+  /** Sous la liste, vide ou non (F6.1 : « Voir les intervenants des autres zones »). */
+  footer?: ReactNode
 }
 
-function DirectorySection({ title, headingId: givenId, filter, exclude, showCity, emptyText, compactOnMobile = false }: SectionProps) {
+function DirectorySection({ title, headingId: givenId, filter, exclude, showCity, emptyText, compactOnMobile = false, footer }: SectionProps) {
   const directory = useDirectory(filter)
   const speakers = (directory.data?.items ?? []).filter((speaker) => !exclude?.(speaker))
   const headingId = givenId ?? `section-${normalizeName(title).replace(/[^a-z0-9]+/g, '-')}`
@@ -140,6 +143,7 @@ function DirectorySection({ title, headingId: givenId, filter, exclude, showCity
           )}
         </>
       )}
+      {!directory.isPending && !directory.isError && footer}
     </section>
   )
 }
@@ -160,11 +164,12 @@ export function SpeakersPage() {
   const zoneParam = params.get('zone') ?? MY_ZONE
   const zone = zoneParam === MY_ZONE && !myCity ? ALL_ZONES : zoneParam
   const sector = SECTORS.find((value) => value === params.get('secteur'))
-  const format = (['IN_PERSON', 'ONLINE'] as const).find((value) => value === params.get('format'))
+  // En classe seulement (F6.1) : le paramètre `format` est ignoré et aucun filtre de format n'est envoyé (point ouvert 13).
+  const format = ONLINE_MEETINGS_ENABLED ? (['IN_PERSON', 'ONLINE'] as const).find((value) => value === params.get('format')) : undefined
   const q = params.get('q')?.trim() || undefined
   const [search, setSearch] = useState(q ?? '')
 
-  // Chiffres de la carte : statistiques sans filtre ; sous filtre (secteur, format ou recherche), comptage des
+  // Chiffres de la carte : statistiques sans filtre ; sous filtre (secteur ou recherche ; format s'il est réactivé), comptage des
   // intervenants réellement chargés, avec la requête de la liste « Toutes les zones » (cache partagé).
   const filtered = sector !== undefined || format !== undefined || q !== undefined
   const allFilter: DirectoryFilter = {
@@ -236,6 +241,19 @@ export function SpeakersPage() {
   const setFormat = (value: FormatChoice) => update({ format: value === 'TOUS' ? null : value })
   const setZone = (value: string) => update({ zone: value === MY_ZONE ? null : value })
 
+  // En classe seulement (F6.1) : plus de section « Autres zones · disponibles en ligne » ; un lien vers toutes les zones.
+  const allZonesSearch = new URLSearchParams(params)
+  allZonesSearch.set('zone', ALL_ZONES)
+  const otherZonesLink = (
+    <Link
+      to={{ search: `?${allZonesSearch.toString()}` }}
+      replace
+      className="inline-flex min-h-touch items-center self-start text-sm font-extrabold text-indigo underline underline-offset-2 hover:text-ink"
+    >
+      Voir les intervenants des autres zones
+    </Link>
+  )
+
   /**
    * Carte et pastilles (Carte-Q1) : la ville de l'école donne « ma zone » ; une autre ville, `?zone={ville}` ;
    * re-cliquer la ville choisie revient à « ma zone » (ou « Toutes les zones » sans ville d'école).
@@ -305,18 +323,20 @@ export function SpeakersPage() {
           </span>
           <ChoiceGroup label="Secteur" value={sectorValue} onChange={setSector} options={sectorOptions} look="filter" />
         </div>
-        <label className="flex flex-col gap-1.5 text-xs font-black uppercase tracking-[0.08em] text-muted">
-          Format
-          <Select
-            className="h-11 font-bold normal-case tracking-normal"
-            value={formatValue} onChange={(event) => setFormat(event.target.value === 'IN_PERSON' ? 'IN_PERSON' : event.target.value === 'ONLINE' ? 'ONLINE' : 'TOUS')}>
-            {formatOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-        </label>
+        {ONLINE_MEETINGS_ENABLED && (
+          <label className="flex flex-col gap-1.5 text-xs font-black uppercase tracking-[0.08em] text-muted">
+            Format
+            <Select
+              className="h-11 font-bold normal-case tracking-normal"
+              value={formatValue} onChange={(event) => setFormat(event.target.value === 'IN_PERSON' ? 'IN_PERSON' : event.target.value === 'ONLINE' ? 'ONLINE' : 'TOUS')}>
+              {formatOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          </label>
+        )}
       </section>
 
       {/* B8 — pastilles-filtres mobiles (40 px) ; la zone est mise en avant en indigo / crème. */}
@@ -335,13 +355,15 @@ export function SpeakersPage() {
         >
           Secteur{sector ? ` · ${sectorName(sector)}` : ''}
         </button>
-        <button
-          type="button"
-          onClick={() => setSheet('format')}
-          className="inline-flex min-h-10 shrink-0 items-center rounded-pill border-2 border-line bg-surface px-3 text-[13px] font-extrabold text-ink"
-        >
-          Format{format ? ` · ${FORMAT_LABEL[format]}` : ''}
-        </button>
+        {ONLINE_MEETINGS_ENABLED && (
+          <button
+            type="button"
+            onClick={() => setSheet('format')}
+            className="inline-flex min-h-10 shrink-0 items-center rounded-pill border-2 border-line bg-surface px-3 text-[13px] font-extrabold text-ink"
+          >
+            Format{format ? ` · ${FORMAT_LABEL[format]}` : ''}
+          </button>
+        )}
       </div>
 
       <Modal
@@ -350,7 +372,7 @@ export function SpeakersPage() {
         onClose={() => setSheet(null)}
       >
         <ul className="flex flex-col gap-2">
-          {(sheet === 'zone' ? zoneOptions : sheet === 'secteur' ? sectorOptions : formatOptions).map((option) => {
+          {(sheet === 'zone' ? zoneOptions : sheet === 'secteur' ? sectorOptions : sheet === 'format' ? formatOptions : []).map((option) => {
             const current = sheet === 'zone' ? zone : sheet === 'secteur' ? sectorValue : formatValue
             return (
               <li key={option.value}>
@@ -403,8 +425,9 @@ export function SpeakersPage() {
             headingId={CITY_LIST_ID}
             filter={cityFilter ?? allFilter}
             emptyText={`Aucun intervenant à ${myCity} pour ces critères.`}
+            footer={ONLINE_MEETINGS_ENABLED ? undefined : otherZonesLink}
           />
-          {format !== 'IN_PERSON' && (
+          {ONLINE_MEETINGS_ENABLED && format !== 'IN_PERSON' && (
             <DirectorySection
               title="Autres zones · disponibles en ligne"
               filter={{ ...common, format: 'ONLINE' }}

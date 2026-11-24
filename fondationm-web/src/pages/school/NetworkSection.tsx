@@ -1,5 +1,6 @@
 import type { MouseEvent } from 'react'
 import { cn } from '../../lib/cn'
+import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
 import { normalizeName, sameName } from '../../lib/normalize'
 import { MAP_CITIES, MAP_COUNTRY } from './mapCities'
 import { NetworkMap } from './NetworkMap'
@@ -18,7 +19,7 @@ interface NetworkSectionProps {
   /** Villes et nombres sous les filtres actifs (statistiques sans filtre). */
   byCity: readonly CityCount[]
   total: number
-  /** Au moins un filtre (secteur, format, recherche) est actif. */
+  /** Au moins un filtre (secteur, recherche ; format s'il est réactivé) est actif. */
   filtered: boolean
   /** Le comptage sous filtres a atteint la limite de pages. */
   partial: boolean
@@ -139,7 +140,7 @@ export function NetworkSection({
         {selected !== null ? (
           <div aria-live="polite" className="flex flex-col gap-2">
             <p className="text-xs font-black uppercase tracking-[0.1em] text-terra">
-              {isMine ? 'Votre zone' : 'Autre zone · en ligne possible'}
+              {isMine ? 'Votre zone' : ONLINE_MEETINGS_ENABLED ? 'Autre zone · en ligne possible' : 'Autre zone'}
             </p>
             <h3 className="text-[28px] leading-none text-ink">{selected.city}</h3>
             <p className="text-sm font-bold text-muted">

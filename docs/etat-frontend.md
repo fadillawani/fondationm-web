@@ -1,6 +1,6 @@
 # État du frontend — Fondation M
 
-Dernière mise à jour : 24 novembre 2026 — lot F6 (« Mon établissement ») et F6-bis (carte du réseau interactive).
+Dernière mise à jour : 24 novembre 2026 — lot F6.1 (rencontres uniquement en classe).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 
@@ -19,10 +19,11 @@ Dernière mise à jour : 24 novembre 2026 — lot F6 (« Mon établissement ») 
 | F5.2 | Une page de connexion par persona (W3, W4, W5 ; école et intervenant), Pays et Zone (ville) en listes fermées | Terminé |
 | F6-bis | Carte du réseau interactive (W1-E3) : villes cliquables au clavier, état unique `?zone=`, chiffres sous filtres | Terminé |
 | F6  | « Mon établissement » (W5-E2) : classes, élèves, fiches d'accès, ajout en série | Terminé |
+| F6.1 | Rencontres uniquement en classe : drapeau `ONLINE_MEETINGS_ENABLED`, aucun choix ni envoi « en ligne » | Terminé |
 | F7+ | Autres écrans métier (retours d'expérience, espace élève, tableau de bord Fondation, donateurs…) | À faire  |
 
-Vérifications au moment de la livraison de F6 et F6-bis : `npm run build`, `npm run lint` et `npm test`
-(207 tests, deux passages) passent sans erreur ni avertissement. Après la seule partie carte : 182 tests.
+Vérifications au moment de la livraison de F6.1 : `npm run build`, `npm run lint` et `npm test`
+(213 tests, deux passages) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -50,6 +51,34 @@ Vérifications au moment de la livraison de F6 et F6-bis : `npm run build`, `npm
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
 
+## Ce que F6.1 livre — rencontres uniquement en classe
+
+Drapeau unique `ONLINE_MEETINGS_ENABLED = false` (`src/lib/features.ts`) : le frontend ne propose et n'envoie jamais
+ONLINE ; le backend garde IN_PERSON / ONLINE / BOTH. Une donnée ONLINE déjà en base reste affichée « En ligne ».
+
+- **Agenda** : plus de champ « Format » dans « Publier un créneau » ; créneau envoyé avec `formats: "IN_PERSON"`
+  (nom du champ du contrat, `CreateSlotRequest.formats`). Un créneau IN_PERSON ou BOTH affiche « En classe » ;
+  un créneau ONLINE hérité, « En ligne ».
+- **Demandes reçues** : « Format souhaité » retiré (toujours en classe), sauf pour une demande ONLINE ancienne
+  (« En ligne ») ; « Lieu » inchangé.
+- **Annuaire** : filtre « Format » retiré (select PC, bouton-filtre et feuille mobile) ; `?format=` ignoré ; aucune
+  requête n'envoie `format` (point ouvert 13). Section « Autres zones · disponibles en ligne » supprimée : « ma zone »
+  = « À {ville} · {n} intervenants » et le lien « Voir les intervenants des autres zones » (`?zone=toutes`), aussi
+  sous « Aucun intervenant à {ville} pour ces critères. ». Carte : le filtre actif = secteur ou recherche ; panneau
+  « Votre zone » / « Autre zone » (plus de « en ligne possible »).
+- **Demander une rencontre** : seuls les créneaux IN_PERSON ou BOTH sont proposés ; sans créneau en classe :
+  « Cet intervenant n'a pas de créneau en classe disponible pour le moment. » + « Changer d'intervenant ». Plus de
+  choix « En classe / En ligne » : `format: "IN_PERSON"` toujours envoyé, « Lieu » obligatoire (1–150).
+- **Mes rencontres** : « En classe · {lieu} » (ou « En classe ») ; une rencontre ONLINE ancienne : « En ligne · {lieu} ».
+- **Textes d'accueil** : « … dans vos classes, ou en ligne, … » (colonne école) et « en classe ou en ligne » (choix du
+  type de compte) deviennent « … dans vos classes … » et « en classe ».
+
+**Fichiers** : `src/lib/features.ts` (nouveau), `src/pages/speaker/SlotForm.tsx`, `speakerText.ts`, `RequestDetail.tsx`,
+`AgendaPage.test.tsx`, `RequestsPage.test.tsx`, `src/pages/school/SpeakersPage.tsx`, `NetworkSection.tsx`,
+`MeetingRequestPage.tsx`, `meetingText.ts`, `SpeakersPage.test.tsx`, `MeetingRequestPage.test.tsx`,
+`MeetingsPage.test.tsx`, `src/pages/register/authColumns.ts`, `RegisterChoicePage.tsx`, `README.md`,
+`docs/etat-frontend.md`.
+
 ## Ce que F6-bis livre — carte du réseau interactive (W1-E3)
 
 **Un seul état : `?zone=`.** Carte, pastilles « Choisir une ville », select « Zone », feuille mobile, panneau de ville,
@@ -70,8 +99,8 @@ statistiques est ajoutée aux options du select, qui reste synchronisé.
 - **Les 8 villes sont toujours dessinées** ; une ville à 0 : cercle blanc, bord pointillé `#2B337A`, « 0 » en encre
   (16,08:1), sans opacité, cliquable. Ville de l'école : losange terracotta au-dessus du cercle et « · vous »
   après l'étiquette (`#B8492A` sur `#F7F3EA`, 4,72:1).
-- **Chiffres fidèles aux filtres** : sans filtre, `GET /api/school/speakers/stats` ; avec un secteur, un format ou une
-  recherche, `GET /api/school/speakers` sans ville (toutes les pages), compté par ville sans casse ni accents
+- **Chiffres fidèles aux filtres** : sans filtre, `GET /api/school/speakers/stats` ; avec un secteur ou une recherche
+  (le format ne compte plus depuis F6.1), `GET /api/school/speakers` sans ville (toutes les pages), compté par ville sans casse ni accents
   (`countByCity`) — c'est la requête de la liste « Toutes les zones » (cache partagé). Les villes des statistiques
   gardent leur pastille (0 si personne ne correspond). Titre : « {n} intervenants correspondent à vos critères » au
   lieu de « {n} bénévoles au Sénégal ». Limite de 25 pages atteinte : « Chiffres partiels : affinez la recherche pour
@@ -583,9 +612,10 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 37. **Couleurs par secteur** (`pages/school/sectorStyle.ts`) : contrastes tous ≥ 4,5:1 (avatars 5,01 à
     9,24 ; libellés sur blanc 5,65 à 11,31 et sur `#F7F3EA` ≥ 5,10). Les 5 secteurs sans couleur dans la
     maquette (BTP et industrie, Commerce, Éducation, Arts et médias, Autre) : avatar encre / crème, libellé encre.
-38. **Zones de l'annuaire** : « ma zone » = deux requêtes, `city` + `country` de l'école, puis
-    `format=ONLINE` sans ville (intervenants de ma ville exclus côté client, comparaison sans casse ni
-    accents) ; la seconde section disparaît si « Format » vaut « En classe ». « Toutes les zones » : une
+38. **Zones de l'annuaire** (mis à jour en F6.1) : « ma zone » = une requête, `city` + `country` de l'école, puis
+    le lien « Voir les intervenants des autres zones » (`?zone=toutes`) ; plus de seconde section
+    `format=ONLINE` ni de filtre de format (décision 74 ; avec le drapeau réactivé : seconde requête `format=ONLINE`
+    sans ville, intervenants de ma ville exclus côté client). « Toutes les zones » : une
     liste sans filtre de ville ; une ville choisie : une liste filtrée par cette ville (et son pays, pris
     dans les statistiques). Toutes les pages sont chargées (`size=100`, 25 pages au plus). Sans ville
     d'école connue, « Toutes les zones » par défaut.
@@ -594,10 +624,10 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 40. **Classes** : « Ajouter une classe » dans l'étape 2 (intitulé 1–100, filière 1–100, effectif 1–500 ;
     `POST /api/school/classes`), classe créée sélectionnée automatiquement. Ce n'est pas un `<form>`
     (imbriqué dans le formulaire de demande) : Entrée dans ses champs ajoute la classe.
-41. **Formulaire de demande** : créneau et classe obligatoires ; format imposé par le créneau
-    (IN_PERSON / ONLINE) ou à choisir (BOTH, pastilles « En classe / En ligne », sans valeur par défaut),
-    toujours envoyé ; lieu obligatoire « En classe » (1–150), facultatif en ligne ; message facultatif
-    (1000 max). Lieu et message vides ne sont pas envoyés (`minLength: 1` du contrat).
+41. **Formulaire de demande** (mis à jour en F6.1) : créneau et classe obligatoires ; seuls les créneaux IN_PERSON
+    ou BOTH sont proposés ; `format: "IN_PERSON"` toujours envoyé, sans choix ; lieu obligatoire (1–150) ; message
+    facultatif (1000 max), non envoyé s'il est vide (`minLength: 1` du contrat). Avec le drapeau réactivé : format
+    imposé par le créneau ou à choisir pour BOTH, lieu facultatif en ligne.
 42. **Bandeau de refus** : rencontre REFUSED la plus récente avec `closedBy=SPEAKER` et `refusedAt` de
     14 jours au plus (`GET /api/school/meetings?status=REFUSED`, toutes les pages). Pas de mémoire « déjà vu ».
 43. **Erreurs de la demande, par code quel que soit le statut HTTP** : `SLOT_NOT_AVAILABLE`, `SLOT_PASSED`
@@ -686,6 +716,13 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     (avec `accountsCount`) ; toute action invalide le préfixe `['school', 'classes']`, partagé avec F4.
 73. **Placement responsive sans doublon de champs** : le panneau de l'élève et « Imprimer les fiches » sont rendus une
     seule fois, à la place PC ou mobile (`useMediaQuery`, 1024 px) ; sans `matchMedia` (tests), place mobile.
+74. **Rencontres uniquement en classe pour le moment** (F6.1) : drapeau `ONLINE_MEETINGS_ENABLED = false`
+    (`src/lib/features.ts`). Écrans touchés : agenda (formulaire de créneau sans format, envoi IN_PERSON ; BOTH affiché
+    « En classe »), demandes reçues (« Format souhaité » seulement pour une demande ONLINE ancienne), annuaire (filtre
+    « Format » et section « Autres zones · disponibles en ligne » retirés, `?format=` ignoré, aucun `format` envoyé,
+    carte filtrée par secteur et recherche), demander une rencontre (créneaux ONLINE seuls non proposés, envoi IN_PERSON,
+    lieu obligatoire), mes rencontres (« En classe · {lieu} »), textes d'accueil de l'école et du choix de compte. Les
+    données ONLINE existantes restent affichées « En ligne ».
 
 ## Écarts
 
@@ -780,11 +817,11 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 11. **Rafraîchissement** : pas de rechargement périodique ; une décision de la Fondation ou une nouvelle
     demande n'apparaît qu'après une action ou un rechargement de la page.
 12. **Codes d'erreur des créneaux et rencontres** (décision 32) à documenter dans le contrat.
-13. **`format=ONLINE` et les créneaux BOTH (non vérifié).** Aucun compte école de test n'était disponible
-    pour un vrai appel. Vérification : se connecter avec un compte école validé, puis
-    `GET /api/school/speakers?format=ONLINE` avec `Authorization: Bearer {jeton}` ; un intervenant dont les
-    créneaux sont tous BOTH doit y figurer. S'il manque, la section « Autres zones · disponibles en ligne »
-    l'omet à tort : à corriger côté backend (ou appeler aussi sans filtre de format).
+13. **À vérifier avant de réactiver le format** (`ONLINE_MEETINGS_ENABLED`) : `GET /api/school/speakers?format=IN_PERSON`
+    (et `format=ONLINE`) inclut-il les intervenants dont les créneaux sont BOTH ? Vérification : compte école validé,
+    appel avec `Authorization: Bearer {jeton}`, un intervenant aux créneaux tous BOTH doit y figurer. Tant que ce n'est
+    pas vérifié, l'annuaire n'envoie aucun filtre de format (F6.1). Approximation connue : « {n} créneaux libres » et
+    « Prochain créneau » des cartes de l'annuaire peuvent compter un créneau ONLINE hérité, non proposé à la demande.
 14. **Annuaire** : pas de tri, pas de prochains créneaux ni de formats par intervenant, pas de filtre par
     date, un seul secteur par requête ; taille de page maximale non documentée (100 demandé).
 15. **Codes d'erreur de la demande** à documenter (`SLOT_NOT_AVAILABLE`, `SLOT_PASSED`,
@@ -850,7 +887,9 @@ attendue (maquette) et la raison.
 | Comptes | idem | Seulement 4 faits | Pays, e-mail, téléphone et charte conservés en plus (utiles à la vérification). |
 | Comptes | `pages/foundation/RejectForm.tsx` | Motif « (facultatif, …) » | Motif obligatoire (décision 21). |
 | Comptes | `pages/foundation/AccountsPage.tsx` | Surtitre « E11 · E12 » | Code d'écran : « Comptes » (décision validée). |
-| Agenda (W2-E8) | `pages/speaker/SlotForm.tsx` | Format par défaut « En classe » ; heures proposées de 8h00 à 17h30 | Format par défaut « En classe ou en ligne » (BOTH, cahier des charges F3) et pas de 15 min de 0h00 à 23h45 (décision 28) : comportement inchangé. |
+| Agenda (W2-E8) | `pages/speaker/SlotForm.tsx` | Heures proposées de 8h00 à 17h30 | Pas de 15 min de 0h00 à 23h45 (décision 28) : comportement inchangé. |
+| Agenda (W2-E8) | `pages/speaker/SlotForm.tsx`, `speakerText.ts` | Champ « Format » (« En classe », « En ligne », « En classe ou en ligne ») | Retiré volontairement (F6.1, décision 74) : rencontres en classe seulement ; BOTH affiché « En classe ». |
+| Demandes (W2-E9) | `pages/speaker/RequestDetail.tsx` | Fait « Format souhaité » | Retiré (toujours en classe), sauf demande ONLINE ancienne (décision 74). |
 | Agenda | `pages/speaker/AgendaItemDetail.tsx` | Ligne « Retour d'expérience » et bouton « Partager mon retour » d'une rencontre réalisée ; invite du bandeau | Demanderait `/api/speaker/feedbacks*` (décision 33) ; écran des retours non livré. |
 | Agenda | `pages/speaker/MonthGrid.tsx` | Pastille Confirmé / Réalisé « 10h00 · Thiès » seule | Seconde ligne d'état conservée (décision 59, accessibilité). |
 | Agenda | `pages/speaker/MonthGrid.tsx` | « + Créneau » seulement sur les jours à venir sans élément (hors aujourd'hui) | Publication possible aujourd'hui et sur un jour occupé (décision 28) : comportement inchangé. |
@@ -864,6 +903,10 @@ attendue (maquette) et la raison.
 | Annuaire (carte) | `pages/school/mapCities.ts` | — | Cibles de 24 px au moins sur mobile pour Saint-Louis–Louga et Dakar–Thiès (médiatrice), pas 44 px ; alternative : filtre « Zone ». |
 | Annuaire (carte) | `pages/school/NetworkSection.tsx` | « {n} bénévoles au Sénégal » | Sous filtre : « {n} intervenants correspondent à vos critères » ; « Chiffres partiels » au-delà de 25 pages. |
 | Annuaire | `pages/school/SpeakersPage.tsx` | Bouton-filtre « Date » (mobile) | Aucun filtre par date côté backend. |
+| Annuaire | `pages/school/SpeakersPage.tsx` | Filtre « Format » (PC et mobile) ; section « Autres zones · disponibles en ligne » (lignes compactes sur mobile) | Retirés volontairement (F6.1, décision 74) : rencontres en classe seulement ; lien « Voir les intervenants des autres zones ». |
+| Annuaire | `pages/school/NetworkSection.tsx` | « Autre zone · en ligne possible » | « Autre zone » (F6.1). |
+| Demande (W1-E4) | `pages/school/MeetingRequestPage.tsx` | Choix « En classe / En ligne » ; créneaux de tous formats | Retirés (F6.1) : envoi IN_PERSON, créneaux ONLINE seuls non proposés. |
+| Inscription, choix du compte | `pages/register/authColumns.ts`, `RegisterChoicePage.tsx` | « … dans vos classes, ou en ligne, … », « en classe ou en ligne » | « … dans vos classes … », « en classe » (F6.1). |
 | Annuaire | `pages/school/NetworkMap.tsx` | Libellé « SÉNÉGAL » `#B8AE98` | Contraste 1,99:1, couleur conservée (décoratif, point ouvert 16). |
 | Demande (W1-E4) | `pages/school/MeetingRequestPage.tsx` | Libellé « Intervenante » | Genre inconnu : « Intervenant ». |
 | Mes rencontres (W1-E5) | voir « Écarts maquette / backend » | Opacité des rencontres passées, « Presque confirmée », retours « Bientôt », liste « Passées » sur PC, heure dans les listes mobiles | Contraste, données absentes, décisions validées. |

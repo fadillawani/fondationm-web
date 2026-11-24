@@ -176,10 +176,13 @@ export function whenLabel(start: Date, now: Date): string {
   return `Dans ${days} jours`
 }
 
-/** Lieu affiché : « En ligne · salle informatique », « Salle 12 », « En ligne ». */
+/**
+ * Lieu affiché : « En classe · Salle 12 », « En classe » ; une rencontre en ligne ancienne : « En ligne · salle
+ * informatique », « En ligne » (F6.1).
+ */
 export function placeLabel(meeting: SchoolMeeting): string | null {
   if (meeting.format === 'ONLINE') return meeting.place ? `En ligne · ${meeting.place}` : 'En ligne'
-  return meeting.place
+  return meeting.place ? `En classe · ${meeting.place}` : 'En classe'
 }
 
 /** Rencontres groupées par jour local du début du créneau. */

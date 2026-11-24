@@ -1,17 +1,15 @@
 import { formatCompactDay, formatSlot, formatTime, parseIso } from '../../lib/dateTime'
+import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
 import type { Meeting, MeetingFormat, MeetingStatus, SlotFormats } from './speakerData'
 
+/** Un créneau BOTH se fait en classe tant que les rencontres en ligne sont désactivées ; ONLINE hérité : « En ligne ». */
 export const SLOT_FORMAT_LABEL: Record<SlotFormats, string> = {
   IN_PERSON: 'En classe',
   ONLINE: 'En ligne',
-  BOTH: 'En classe ou en ligne',
+  BOTH: ONLINE_MEETINGS_ENABLED ? 'En classe ou en ligne' : 'En classe',
 }
 
-export const SLOT_FORMAT_DETAIL: Record<SlotFormats, string> = {
-  IN_PERSON: 'En classe',
-  ONLINE: 'En ligne',
-  BOTH: 'En classe ou en ligne',
-}
+export const SLOT_FORMAT_DETAIL: Record<SlotFormats, string> = SLOT_FORMAT_LABEL
 
 export const MEETING_FORMAT_LABEL: Record<MeetingFormat, string> = {
   IN_PERSON: 'En classe',

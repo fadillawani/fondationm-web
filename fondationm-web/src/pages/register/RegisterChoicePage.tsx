@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
 import { PATHS } from '../../auth/roles'
 import { CenteredLayout } from '../../components/layout/CenteredLayout'
 import { cn } from '../../lib/cn'
@@ -48,7 +49,11 @@ export function RegisterChoicePage() {
           <ChoiceCard
             to={PATHS.registerSpeaker}
             title="Je suis un professionnel et je veux transmettre"
-            description="Partagez votre métier avec des élèves, en classe ou en ligne, à votre rythme."
+            description={
+              ONLINE_MEETINGS_ENABLED
+                ? 'Partagez votre métier avec des élèves, en classe ou en ligne, à votre rythme.'
+                : 'Partagez votre métier avec des élèves, en classe, à votre rythme.'
+            }
             className="bg-orange text-ink"
           />
         </div>

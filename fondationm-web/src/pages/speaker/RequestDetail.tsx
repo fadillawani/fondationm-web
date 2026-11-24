@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
 import { errorMessage } from '../../api/errors'
 import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
@@ -34,7 +35,11 @@ export function RequestDetail({ meeting, all, inMyZone, onProcessed, onConflict 
   const sameSlot = pendingOnSameSlot(meeting, all)
   const facts = [
     { label: 'Créneau demandé', value: slotText(meeting) },
-    { label: 'Format souhaité', value: meeting.format ? MEETING_FORMAT_LABEL[meeting.format] : null },
+    // En classe seulement (F6.1) : le format n'est montré que pour une demande en ligne ancienne.
+    {
+      label: 'Format souhaité',
+      value: meeting.format && (ONLINE_MEETINGS_ENABLED || meeting.format === 'ONLINE') ? MEETING_FORMAT_LABEL[meeting.format] : null,
+    },
     { label: 'Classe', value: meeting.classTitle || null },
     // Maquette : « Filière · élèves » ; la filière est absente de ClassInfo.
     {

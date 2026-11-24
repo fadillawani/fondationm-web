@@ -5,6 +5,7 @@ import {
   COMPLETED_PUBLISHED,
   COMPLETED_TO_WRITE,
   CONFIRMED,
+  PENDING,
   REFUSED_BY_SPEAKER,
   setupMeetings,
 } from '../../test/meetingsFixtures'
@@ -69,10 +70,19 @@ describe('Mes rencontres', () => {
     expect(detail().getByText('Tout est prêt')).toBeInTheDocument()
     expect(detail().getByText('Pensez à prévenir vos élèves et à rassembler leurs questions pour Awa.')).toBeInTheDocument()
     expect(detail().getByText('Samedi 28 novembre · 10h00')).toBeInTheDocument()
+    // Rencontre en ligne ancienne : affichée telle quelle, sans erreur (F6.1).
     expect(detail().getByText('En ligne · salle informatique')).toBeInTheDocument()
     expect(decision('Intervenant')).toBe('Validé')
     expect(decision('Fondation M')).toBe('Validé')
     expect(router.state.location.search).toBe(`?rencontre=${CONFIRMED.id}&mois=2026-11`)
+  })
+
+  it('affiche « En classe » et le lieu d’une rencontre en classe', async () => {
+    setupMeetings()
+    renderApp(`/ecole/rencontres?rencontre=${PENDING.id}&mois=2026-11`, { token: true })
+
+    expect(await screen.findByRole('region', { name: 'Détail de la rencontre' })).toBeInTheDocument()
+    expect(await detail().findByText('En classe · CDI, bâtiment B')).toBeInTheDocument()
   })
 
   it('invite à partager le retour d’une rencontre terminée (bientôt)', async () => {

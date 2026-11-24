@@ -1,7 +1,7 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { jsonResponse, mockApi, renderApp, speakerMe } from '../../test/helpers'
-import { AWA, refusedMeeting, setupSchool, speakerJson } from '../../test/schoolFixtures'
+import { AWA, MOUSSA, refusedMeeting, setupSchool, speakerJson } from '../../test/schoolFixtures'
 import { freezeNow } from '../../test/speakerFixtures'
 
 beforeEach(freezeNow)
@@ -74,22 +74,40 @@ describe('Espace établissement — navigation', () => {
 })
 
 describe('Intervenants disponibles', () => {
-  it('affiche ma zone d’abord puis les autres zones disponibles en ligne', async () => {
+  it('affiche ma zone seule, avec un lien vers les autres zones (rencontres en classe seulement)', async () => {
     const { queries } = setupSchool()
-    renderApp('/ecole/intervenants', { token: true })
+    const { router, user } = renderApp('/ecole/intervenants', { token: true })
 
     expect(await screen.findByRole('heading', { name: 'À Dakar · 2 intervenants' })).toBeInTheDocument()
     expect(cardNames(section(/^À Dakar/))).toEqual(['Awa Diallo', 'Fatou Sarr'])
-    expect(await screen.findByRole('heading', { name: 'Autres zones · disponibles en ligne' })).toBeInTheDocument()
-    await waitFor(() => expect(cardNames(section(/^Autres zones/))).toEqual(['Moussa Ndiaye']))
-    expect(section(/^Autres zones/).getByText('Finance · Thiès')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /Autres zones/ })).not.toBeInTheDocument()
+    expect(screen.queryByText(/en ligne/i)).not.toBeInTheDocument()
+    expect(queries('/api/school/speakers')).toEqual([{ city: 'Dakar', country: 'Sénégal', page: '0', size: '100' }])
 
-    expect(queries('/api/school/speakers')).toEqual(
-      expect.arrayContaining([
-        { city: 'Dakar', country: 'Sénégal', page: '0', size: '100' },
-        { format: 'ONLINE', page: '0', size: '100' },
-      ]),
-    )
+    await user.click(section(/^À Dakar/).getByRole('link', { name: 'Voir les intervenants des autres zones' }))
+    expect(router.state.location.search).toBe('?zone=toutes')
+    expect(await screen.findByRole('heading', { name: 'Toutes les zones · 4 intervenants' })).toBeInTheDocument()
+  })
+
+  it('propose les autres zones quand ma zone est vide', async () => {
+    setupSchool({ speakers: [MOUSSA] })
+    renderApp('/ecole/intervenants', { token: true })
+
+    expect(await screen.findByText('Aucun intervenant à Dakar pour ces critères.')).toBeInTheDocument()
+    expect(section(/^À Dakar/).getByRole('link', { name: 'Voir les intervenants des autres zones' })).toBeInTheDocument()
+  })
+
+  it('n’a plus de filtre « Format » et ignore ?format= (aucune requête n’envoie format)', async () => {
+    const { queries } = setupSchool()
+    const { user } = renderApp('/ecole/intervenants?format=ONLINE&zone=toutes', { token: true })
+
+    expect(await screen.findByRole('heading', { name: 'Toutes les zones · 4 intervenants' })).toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: 'Format' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Format/ })).not.toBeInTheDocument()
+    await user.click(within(screen.getByRole('group', { name: 'Secteur' })).getByRole('button', { name: 'Finance' }))
+    expect(await screen.findByRole('heading', { name: 'Toutes les zones · 1 intervenant' })).toBeInTheDocument()
+    expect(queries('/api/school/speakers').length).toBeGreaterThan(0)
+    expect(queries('/api/school/speakers').filter((query) => 'format' in query)).toEqual([])
   })
 
   it('affiche une carte d’intervenant complète', async () => {
@@ -125,14 +143,8 @@ describe('Intervenants disponibles', () => {
     expect(queries('/api/school/speakers')).toContainEqual({ city: 'Dakar', country: 'Sénégal', sector: 'HEALTH', page: '0', size: '100' })
     expect(within(screen.getByRole('group', { name: 'Secteur' })).getByRole('button', { name: 'Santé' })).toHaveAttribute('aria-pressed', 'true')
 
-    // « En classe » : la section « Autres zones · disponibles en ligne » disparaît.
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Format' }), 'IN_PERSON')
-    expect(router.state.location.search).toBe('?secteur=HEALTH&format=IN_PERSON')
-    expect(screen.queryByRole('heading', { name: 'Autres zones · disponibles en ligne' })).not.toBeInTheDocument()
-
     await user.selectOptions(screen.getByRole('combobox', { name: 'Zone' }), 'toutes')
     await user.click(within(screen.getByRole('group', { name: 'Secteur' })).getByRole('button', { name: 'Tous' }))
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Format' }), 'TOUS')
     expect(await screen.findByRole('heading', { name: 'Toutes les zones · 4 intervenants' })).toBeInTheDocument()
 
     await user.type(screen.getByRole('searchbox', { name: 'Rechercher un intervenant' }), 'comptable{Enter}')
@@ -206,7 +218,8 @@ describe('Intervenants disponibles', () => {
     expect(map.getByRole('button', { name: 'Dakar, 12 intervenants, votre ville' })).toHaveAttribute('aria-pressed', 'false')
     const cities = within(screen.getByRole('group', { name: 'Choisir une ville' }))
     expect(cities.getByRole('button', { name: 'Thiès · 4' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByText('Autre zone · en ligne possible')).toBeInTheDocument()
+    expect(screen.getByText('Autre zone')).toBeInTheDocument()
+    expect(screen.queryByText(/en ligne/i)).not.toBeInTheDocument()
     expect(await screen.findByRole('list', { name: 'Intervenants à Thiès' })).toHaveTextContent('Moussa Ndiaye')
     // Bouton-filtre de zone (mobile) mis à jour par le même état.
     expect(screen.getByRole('button', { name: 'Thiès' })).toBeInTheDocument()
