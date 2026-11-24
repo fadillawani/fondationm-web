@@ -7,6 +7,8 @@ import { AccountsPage } from '../pages/foundation/AccountsPage'
 import { AgendaPage } from '../pages/speaker/AgendaPage'
 import { RequestsPage } from '../pages/speaker/RequestsPage'
 import { HomePage } from '../pages/HomePage'
+import { MeetingRequestPage } from '../pages/school/MeetingRequestPage'
+import { SpeakersPage } from '../pages/school/SpeakersPage'
 import { LoginPage } from '../pages/LoginPage'
 import { MustChangePasswordPage } from '../pages/MustChangePasswordPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
@@ -32,6 +34,13 @@ function rolePages(role: Role): RouteObject[] {
       { path: ROLE_HOME.SPEAKER, element: <Navigate to={PATHS.speakerAgenda} replace /> },
       { path: PATHS.speakerAgenda, element: <AgendaPage /> },
       { path: PATHS.speakerRequests, element: <RequestsPage /> },
+    ]
+  }
+  if (role === 'SCHOOL') {
+    return [
+      { path: ROLE_HOME.SCHOOL, element: <Navigate to={PATHS.schoolSpeakers} replace /> },
+      { path: PATHS.schoolSpeakers, element: <SpeakersPage /> },
+      { path: `${PATHS.schoolSpeakers}/:id/demande`, element: <MeetingRequestPage /> },
     ]
   }
   return [{ path: ROLE_HOME[role], element: <HomePage /> }]

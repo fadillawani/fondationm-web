@@ -26,8 +26,8 @@ describe('Connexion', () => {
 
     await fillLoginForm(user)
 
-    expect(await screen.findByRole('heading', { name: 'Bonjour Lycée des Tisserands !' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/ecole')
+    expect(await screen.findByRole('heading', { name: 'Intervenants disponibles' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ecole/intervenants')
     expect(tokenStorage.get()).toBe(FAKE_TOKEN)
 
     const meRequest = fetchMock.mock.calls.map(([request]) => request).find((r) => r.url.endsWith('/api/me'))

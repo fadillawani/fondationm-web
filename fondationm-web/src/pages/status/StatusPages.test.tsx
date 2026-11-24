@@ -60,8 +60,8 @@ describe('Page « Compte en attente »', () => {
     me = { ...pendingSchool, status: 'VALIDATED' }
     await user.click(refresh)
 
-    expect(await screen.findByRole('heading', { name: 'Bonjour Lycée des Tisserands !' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/ecole')
+    expect(await screen.findByRole('heading', { name: 'Intervenants disponibles' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ecole/intervenants')
   })
 
   it('est réservée aux comptes PENDING', async () => {
@@ -94,7 +94,7 @@ describe('Page « Compte refusé »', () => {
     mockApi({ 'GET /api/me': () => jsonResponse(200, makeMe()) })
     const { router } = renderApp('/compte-refuse', { token: true })
 
-    expect(await screen.findByRole('heading', { name: 'Bonjour Lycée des Tisserands !' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/ecole')
+    expect(await screen.findByRole('heading', { name: 'Intervenants disponibles' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ecole/intervenants')
   })
 })

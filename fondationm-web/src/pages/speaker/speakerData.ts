@@ -1,7 +1,8 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, unwrap } from '../../api/client'
-import { errorFromException, invalidResponseError } from '../../api/errors'
-import { asRecord, integer, oneOf, recordList, text, type WireRecord } from '../../api/wire'
+import { errorFromException } from '../../api/errors'
+import { FETCH_PAGE_SIZE, fetchAllPages } from '../../api/paging'
+import { asRecord, integer, oneOf, text, type WireRecord } from '../../api/wire'
 
 export const SLOT_STATUSES = ['AVAILABLE', 'CONFIRMED'] as const
 export const SLOT_FORMATS = ['IN_PERSON', 'ONLINE', 'BOTH'] as const
@@ -16,11 +17,6 @@ export type MeetingStatus = (typeof MEETING_STATUSES)[number]
 export type Decision = (typeof DECISIONS)[number]
 export type Closer = (typeof CLOSERS)[number]
 export type MeetingFormat = (typeof MEETING_FORMATS)[number]
-
-/** Taille demandée ; le serveur peut la plafonner (on suit alors `totalPages` qu'il renvoie). */
-export const FETCH_PAGE_SIZE = 100
-/** Limite de sécurité du parcours des pages. */
-export const MAX_PAGES = 25
 
 export interface Slot {
   id: string
@@ -46,12 +42,6 @@ export interface Meeting {
   format: MeetingFormat | null
   place: string | null
   message: string | null
-}
-
-export interface Collection<T> {
-  items: T[]
-  /** true si la limite de MAX_PAGES a été atteinte avant la dernière page. */
-  truncated: boolean
 }
 
 export function readSlot(value: unknown): Slot | null {
@@ -98,28 +88,6 @@ export function readMeeting(value: unknown): Meeting | null {
     place: text(record, 'place'),
     message: text(record, 'message'),
   }
-}
-
-/** Parcourt toutes les pages (au plus MAX_PAGES). */
-async function fetchAllPages<T>(
-  fetchPage: (page: number) => Promise<unknown>,
-  readItem: (value: unknown) => T | null,
-): Promise<Collection<T>> {
-  const items: T[] = []
-  let page = 0
-  let totalPages = 1
-  while (page < totalPages && page < MAX_PAGES) {
-    const record = asRecord(await fetchPage(page))
-    if (record === null) throw invalidResponseError()
-    const content = recordList(record, 'content')
-    for (const entry of content) {
-      const item = readItem(entry)
-      if (item !== null) items.push(item)
-    }
-    totalPages = integer(record, 'totalPages') ?? (content.length === 0 ? 0 : page + 1)
-    page += 1
-  }
-  return { items, truncated: page < totalPages }
 }
 
 const SPEAKER_KEY = ['speaker'] as const
