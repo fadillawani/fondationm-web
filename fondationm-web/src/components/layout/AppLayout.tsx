@@ -2,9 +2,9 @@ import { useEffect, useId, useState, type ComponentType } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { useCurrentUser } from '../../auth/currentUserContext'
 import { useLogout } from '../../auth/hooks'
-import { ROLE_LABEL, ROLE_TAGLINE, accountCardName, navItemsFor, type NavIcon, type NavItem } from '../../auth/roles'
+import { ROLE_LABEL, ROLE_TAGLINE, accountCard, navItemsFor, type NavIcon, type NavItem } from '../../auth/roles'
 import { cn } from '../../lib/cn'
-import { usePendingTotal } from '../../pages/foundation/accounts'
+import { useNavBadges } from '../../nav/badges'
 import { initialsOf } from '../../lib/initials'
 import {
   AccountsIcon,
@@ -115,11 +115,14 @@ export function AppLayout() {
   const user = useCurrentUser()
   const logout = useLogout()
   const items = navItemsFor(user.role)
-  const pendingTotal = usePendingTotal(items.some((item) => item.badge === 'pendingAccounts'))
-  const badgeCount = (item: NavItem) => (item.badge === 'pendingAccounts' ? pendingTotal : undefined)
+  const badges = useNavBadges(user.role)
+  const badgeCount = (item: NavItem) => (item.badge === undefined ? undefined : badges[item.badge])
   const activeItems = items.filter((item) => item.to !== undefined)
   const disabledItems = items.filter((item) => item.to === undefined)
-  const cardName = accountCardName(user)
+  // Navigation basse : 5 entrées au plus (déconnexion comprise) ; au-delà, les entrées désactivées
+  // sont regroupées sous « Plus ».
+  const groupDisabled = items.length + 1 > 5
+  const card = accountCard(user)
 
   return (
     <div className="min-h-dvh bg-canvas lg:flex">
@@ -166,11 +169,11 @@ export function AppLayout() {
               aria-hidden="true"
               className="inline-flex size-10 shrink-0 items-center justify-center rounded-pill bg-cream font-display text-lg text-terra-dark"
             >
-              {initialsOf(cardName, 1)}
+              {initialsOf(card.name, card.initials)}
             </span>
             <div className="min-w-0">
-              <p className="truncate font-extrabold text-white">{cardName}</p>
-              <p className="truncate text-sm font-bold text-cream">{user.email || ROLE_LABEL[user.role]}</p>
+              <p className="truncate font-extrabold text-white">{card.name}</p>
+              <p className="truncate text-sm font-bold text-cream">{card.detail || ROLE_LABEL[user.role]}</p>
             </div>
           </div>
           <button type="button" onClick={logout} className={cn(SIDEBAR_ITEM, 'text-white hover:bg-white/10')}>
@@ -195,11 +198,23 @@ export function AppLayout() {
         className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         <ul className="relative flex">
-          {activeItems.map((item) => {
+          {(groupDisabled ? activeItems : items).map((item) => {
             const Icon = ICONS[item.icon]
+            if (item.to === undefined) {
+              return (
+                <li
+                  key={item.label}
+                  className={cn(bottomLinkClass({ isActive: false }), 'cursor-not-allowed opacity-70')}
+                >
+                  <Icon className="size-6" />
+                  {item.label}
+                  <span className="text-[10px] font-black uppercase">Bientôt</span>
+                </li>
+              )
+            }
             return (
               <li key={item.label} className="flex flex-1">
-                <NavLink to={item.to ?? '/'} className={bottomLinkClass}>
+                <NavLink to={item.to} className={bottomLinkClass}>
                   <span className="relative">
                     <Icon className="size-6" />
                     <CountBadge count={badgeCount(item)} className="absolute -right-4 -top-2" />
@@ -209,7 +224,7 @@ export function AppLayout() {
               </li>
             )
           })}
-          {disabledItems.length > 0 && <MoreMenu items={disabledItems} />}
+          {groupDisabled && disabledItems.length > 0 && <MoreMenu items={disabledItems} />}
           <li className="flex flex-1">
             <button type="button" onClick={logout} className={bottomLinkClass({ isActive: false })}>
               <LogoutIcon className="size-6" />

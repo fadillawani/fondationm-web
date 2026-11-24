@@ -2,7 +2,7 @@ import { act, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { api } from '../api/client'
 import { tokenStorage } from '../auth/tokenStorage'
-import { errorResponse, jsonResponse, makeMe, mockApi, renderApp, speakerMe } from '../test/helpers'
+import { errorResponse, jsonResponse, makeMe, mockApi, pagedHandler, renderApp, speakerMe } from '../test/helpers'
 
 describe('Gardes de routes', () => {
   it('renvoie vers la connexion sans jeton', async () => {
@@ -15,11 +15,16 @@ describe('Gardes de routes', () => {
   })
 
   it('renvoie un mauvais rôle vers l’accueil de son propre rôle', async () => {
-    mockApi({ 'GET /api/me': () => jsonResponse(200, speakerMe) })
+    mockApi({
+      'GET /api/me': () => jsonResponse(200, speakerMe),
+      'GET /api/speaker/slots': pagedHandler(() => []),
+      'GET /api/speaker/meetings': pagedHandler(() => []),
+    })
     const { router } = renderApp('/ecole', { token: true })
 
-    expect(await screen.findByRole('heading', { name: 'Bonjour Awa Diallo !' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/intervenant')
+    // L'accueil de l'intervenant redirige vers son agenda (lot F3).
+    expect(await screen.findByRole('heading', { name: 'Mon agenda' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/intervenant/agenda')
   })
 
   it('renvoie un compte validé hors de la page d’attente', async () => {
