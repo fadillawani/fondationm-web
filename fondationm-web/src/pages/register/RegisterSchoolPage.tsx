@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { errorMessage } from '../../api/errors'
 import { useRegister } from '../../auth/hooks'
 import { AuthSplitLayout } from '../../components/layout/AuthSplitLayout'
@@ -13,14 +13,11 @@ import { FormField } from '../../components/ui/FormField'
 import { Input } from '../../components/ui/Input'
 import { PasswordInput } from '../../components/ui/PasswordInput'
 import { Select } from '../../components/ui/Select'
-import { Suggestions } from '../../components/ui/Suggestions'
-import {
-  SCHOOL_TYPES,
-  SCHOOL_TYPE_LABELS,
-  SUGGESTED_CITIES,
-  SUGGESTED_COUNTRIES,
-} from '../../lib/referenceData'
+import { DEFAULT_COUNTRY } from '../../lib/places'
+import { SCHOOL_TYPES, SCHOOL_TYPE_LABELS } from '../../lib/referenceData'
 import { applyServerFieldErrors } from '../../lib/serverFieldErrors'
+import { SCHOOL_COLUMN } from './authColumns'
+import { PlaceFields } from './PlaceFields'
 import { schoolSchema, type SchoolFormInput, type SchoolFormValues } from './schemas'
 
 const FIELDS = [
@@ -35,26 +32,22 @@ const FIELDS = [
   'charterAccepted',
 ] as const satisfies readonly (keyof SchoolFormInput)[]
 
-const STEPS = [
-  'Créez le compte de votre établissement',
-  'La Fondation M vérifie et ouvre votre accès',
-  'Choisissez un intervenant et demandez une rencontre',
-] as const
-
 export function RegisterSchoolPage() {
   const registration = useRegister()
   const [formError, setFormError] = useState<unknown>(null)
   const {
+    control: formControl,
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<SchoolFormInput, unknown, SchoolFormValues>({
     resolver: zodResolver(schoolSchema),
     defaultValues: {
       schoolName: '',
       schoolType: '',
-      country: '',
+      country: DEFAULT_COUNTRY,
       city: '',
       referentRole: '',
       email: '',
@@ -63,6 +56,8 @@ export function RegisterSchoolPage() {
       charterAccepted: false,
     },
   })
+
+  const country = useWatch({ control: formControl, name: 'country' })
 
   const submit = (values: SchoolFormValues) => {
     setFormError(null)
@@ -79,15 +74,10 @@ export function RegisterSchoolPage() {
 
   return (
     <AuthSplitLayout
-      tone="terra"
+      {...SCHOOL_COLUMN}
       wide
-      eyebrow="Espace établissement"
-      title="Ouvrez les métiers à vos élèves"
-      intro="Des professionnels bénévoles viennent dans vos classes, ou en ligne, pour parler de leur métier. La Fondation M accompagne chaque rencontre."
-      mobileIntro="Des professionnels bénévoles rencontrent vos classes. La Fondation M accompagne chaque rencontre."
-      steps={STEPS}
     >
-      <AuthTabs activeLabel="Créer un compte" activeTone="indigo" />
+      <AuthTabs persona="school" active="register" />
 
       <div>
         <h1 className="text-[26px] leading-tight md:text-[30px]">Créer le compte de l'établissement</h1>
@@ -113,26 +103,13 @@ export function RegisterSchoolPage() {
               </Select>
             )}
           </FormField>
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Pays" error={errors.country?.message} required>
-              {(control) => (
-                <Input {...control} {...register('country')} list="pays-suggeres" autoComplete="country-name" />
-              )}
-            </FormField>
-            <FormField label="Zone (ville)" error={errors.city?.message} required>
-              {(control) => (
-                <Input
-                  {...control}
-                  {...register('city')}
-                  list="villes-suggerees"
-                  autoComplete="address-level2"
-                  className={errors.city ? undefined : 'border-terra font-bold'}
-                />
-              )}
-            </FormField>
-          </div>
-          <Suggestions id="pays-suggeres" options={SUGGESTED_COUNTRIES} />
-          <Suggestions id="villes-suggerees" options={SUGGESTED_CITIES} />
+          <PlaceFields
+            country={country}
+            countryField={register('country', { onChange: () => setValue('city', '') })}
+            cityField={register('city')}
+            countryError={errors.country?.message}
+            cityError={errors.city?.message}
+          />
         </Fieldset>
 
         <Fieldset legend="Référent">

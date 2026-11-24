@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
-import { useController, useForm } from 'react-hook-form'
+import { useController, useForm, useWatch } from 'react-hook-form'
 import { errorMessage } from '../../api/errors'
 import { useRegister } from '../../auth/hooks'
 import { AuthSplitLayout } from '../../components/layout/AuthSplitLayout'
@@ -13,10 +13,12 @@ import { FormField } from '../../components/ui/FormField'
 import { Input } from '../../components/ui/Input'
 import { PasswordInput } from '../../components/ui/PasswordInput'
 import { Select } from '../../components/ui/Select'
-import { Suggestions } from '../../components/ui/Suggestions'
 import { Textarea } from '../../components/ui/Textarea'
-import { SECTORS, SUGGESTED_CITIES, SUGGESTED_COUNTRIES, sectorOptionLabel } from '../../lib/referenceData'
+import { DEFAULT_COUNTRY } from '../../lib/places'
+import { SECTORS, sectorOptionLabel } from '../../lib/referenceData'
 import { applyServerFieldErrors } from '../../lib/serverFieldErrors'
+import { SPEAKER_COLUMN } from './authColumns'
+import { PlaceFields } from './PlaceFields'
 import { speakerSchema, type SpeakerFormInput, type SpeakerFormValues } from './schemas'
 import { SkillPicker } from './SkillPicker'
 
@@ -35,12 +37,6 @@ const FIELDS = [
   'charterAccepted',
 ] as const satisfies readonly (keyof SpeakerFormInput)[]
 
-const STEPS = [
-  'Présentez-vous et ce que vous transmettez',
-  'La Fondation M valide votre compte',
-  'Publiez vos créneaux, les écoles vous sollicitent',
-] as const
-
 export function RegisterSpeakerPage() {
   const registration = useRegister()
   const [formError, setFormError] = useState<unknown>(null)
@@ -49,6 +45,7 @@ export function RegisterSpeakerPage() {
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<SpeakerFormInput, unknown, SpeakerFormValues>({
     resolver: zodResolver(speakerSchema),
@@ -57,7 +54,7 @@ export function RegisterSpeakerPage() {
       jobTitle: '',
       organization: '',
       sector: '',
-      country: '',
+      country: DEFAULT_COUNTRY,
       city: '',
       skills: [],
       motivation: '',
@@ -68,6 +65,7 @@ export function RegisterSpeakerPage() {
     },
   })
   const { field: skillsField } = useController({ control, name: 'skills' })
+  const country = useWatch({ control, name: 'country' })
 
   const submit = (values: SpeakerFormValues) => {
     setFormError(null)
@@ -84,15 +82,10 @@ export function RegisterSpeakerPage() {
 
   return (
     <AuthSplitLayout
-      tone="orange"
+      {...SPEAKER_COLUMN}
       wide
-      eyebrow="Espace intervenant"
-      title="Votre métier peut changer un avenir"
-      intro="Une heure de votre temps, c'est parfois le déclic d'une classe entière. Partagez ce que vous faites, vos débuts, vos doutes : c'est ce que les jeunes retiennent."
-      mobileIntro="Une heure de votre temps, c'est parfois le déclic d'une classe entière."
-      steps={STEPS}
     >
-      <AuthTabs activeLabel="Devenir intervenant" activeTone="ink" />
+      <AuthTabs persona="speaker" active="register" />
 
       <div>
         <h1 className="text-[26px] leading-tight md:text-[30px]">Créer mon compte intervenant</h1>
@@ -132,26 +125,13 @@ export function RegisterSpeakerPage() {
               </Select>
             )}
           </FormField>
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Pays" error={errors.country?.message} required>
-              {(fieldProps) => (
-                <Input {...fieldProps} {...register('country')} list="pays-suggeres" autoComplete="country-name" />
-              )}
-            </FormField>
-            <FormField label="Zone (ville)" error={errors.city?.message} required>
-              {(fieldProps) => (
-                <Input
-                  {...fieldProps}
-                  {...register('city')}
-                  list="villes-suggerees"
-                  autoComplete="address-level2"
-                  className={errors.city ? undefined : 'border-terra font-bold'}
-                />
-              )}
-            </FormField>
-          </div>
-          <Suggestions id="pays-suggeres" options={SUGGESTED_COUNTRIES} />
-          <Suggestions id="villes-suggerees" options={SUGGESTED_CITIES} />
+          <PlaceFields
+            country={country}
+            countryField={register('country', { onChange: () => setValue('city', '') })}
+            cityField={register('city')}
+            countryError={errors.country?.message}
+            cityError={errors.city?.message}
+          />
         </Fieldset>
 
         <Fieldset legend="Ce que vous transmettez">

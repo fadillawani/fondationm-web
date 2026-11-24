@@ -10,8 +10,12 @@ import { HomePage } from '../pages/HomePage'
 import { MeetingRequestPage } from '../pages/school/MeetingRequestPage'
 import { MeetingsPage } from '../pages/school/MeetingsPage'
 import { SpeakersPage } from '../pages/school/SpeakersPage'
-import { LoginPage } from '../pages/LoginPage'
 import { MustChangePasswordPage } from '../pages/MustChangePasswordPage'
+import { DonorLoginPage } from '../pages/login/DonorLoginPage'
+import { FoundationLoginPage } from '../pages/login/FoundationLoginPage'
+import { SchoolLoginPage } from '../pages/login/SchoolLoginPage'
+import { SpeakerLoginPage } from '../pages/login/SpeakerLoginPage'
+import { StudentLoginPage } from '../pages/login/StudentLoginPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { PendingAccountPage } from '../pages/PendingAccountPage'
 import { RegisterChoicePage } from '../pages/register/RegisterChoicePage'
@@ -54,7 +58,11 @@ export const routes: RouteObject[] = [
     children: [
       ...(
         [
-          [PATHS.login, <LoginPage key="login" />],
+          [PATHS.login, <SchoolLoginPage key="login" />],
+          [PATHS.loginSpeaker, <SpeakerLoginPage key="login-speaker" />],
+          [PATHS.loginFoundation, <FoundationLoginPage key="login-foundation" />],
+          [PATHS.loginDonor, <DonorLoginPage key="login-donor" />],
+          [PATHS.loginStudent, <StudentLoginPage key="login-student" />],
           [PATHS.register, <RegisterChoicePage key="register" />],
           [PATHS.registerSchool, <RegisterSchoolPage key="register-school" />],
           [PATHS.registerSpeaker, <RegisterSpeakerPage key="register-speaker" />],

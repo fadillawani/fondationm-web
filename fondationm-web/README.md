@@ -100,7 +100,11 @@ src/
 
 | Route | Accès | Page |
 | --- | --- | --- |
-| `/connexion` | public (connecté → accueil) | Connexion |
+| `/connexion` | public (connecté → accueil) | Connexion établissement (et page par défaut) |
+| `/connexion/intervenant` | public (connecté → accueil) | Connexion intervenant |
+| `/connexion/fondation` | public (connecté → accueil) | Connexion de l'équipe Fondation M |
+| `/connexion/donateur` | public (connecté → accueil) | Connexion donateur |
+| `/connexion/eleve` | public (connecté → accueil) | Connexion élève (identifiant de la fiche d'accès) |
 | `/inscription` | public (connecté → accueil) | Choix du type de compte |
 | `/inscription/ecole` | public (connecté → accueil) | Inscription d'un établissement |
 | `/inscription/intervenant` | public (connecté → accueil) | Inscription d'un intervenant |

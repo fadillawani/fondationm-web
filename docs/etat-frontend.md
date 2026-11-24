@@ -1,6 +1,6 @@
 # État du frontend — Fondation M
 
-Dernière mise à jour : 24 novembre 2026 — lot F5.1 (conformité à la maquette de F1 à F5).
+Dernière mise à jour : 24 novembre 2026 — lot F5.2 (connexions par persona, Pays et Zone en listes fermées).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 
@@ -16,10 +16,11 @@ Dernière mise à jour : 24 novembre 2026 — lot F5.1 (conformité à la maquet
 | F4  | Espace établissement : « Intervenants disponibles » (annuaire, carte du réseau), « Demander une rencontre » ; thèmes de barre latérale par persona | Terminé |
 | F5  | « Mes rencontres » de l'école (calendrier, détail, listes) ; socle commun aligné sur la maquette (barres latérales, navigation basse blanche, en-têtes de page, carte utilisateur) ; corrections D1, E2, E5, B2, C2, F2 | Terminé |
 | F5.1 | Conformité à la maquette de F1 à F5 (valeur par valeur), agenda mobile en calendrier compact | Terminé |
+| F5.2 | Une page de connexion par persona (W3, W4, W5 ; école et intervenant), Pays et Zone (ville) en listes fermées | Terminé |
 | F6+ | Autres écrans métier (mon établissement, retours d'expérience, tableau de bord Fondation, donateurs…) | À faire  |
 
-Vérifications au moment de la livraison de F5.1 : `npm run build`, `npm run lint` et `npm test`
-(153 tests) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F5.2 : `npm run build`, `npm run lint` et `npm test`
+(172 tests) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -46,6 +47,47 @@ Vérifications au moment de la livraison de F5.1 : `npm run build`, `npm run lin
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F5.2 livre
+
+**Une page de connexion par persona.** Toutes envoient le même `POST /api/auth/login`, puis lisent `/api/me`.
+La redirection suit le rôle réel du compte : un compte qui se connecte sur la page d'une autre persona
+arrive quand même dans son espace. Les messages d'erreur ne changent pas. Toutes ces pages sont publiques ;
+un utilisateur connecté est renvoyé vers son accueil.
+
+| Route | Maquette | Colonne | Formulaire |
+| --- | --- | --- | --- |
+| `/connexion` (établissement) | Colonne W1-E1 ; formulaire aux valeurs de W3 | terracotta, « Espace établissement », étapes 1 à 3, contact | onglets « Se connecter » (actif indigo / crème) / « Créer un compte » → `/inscription/ecole` |
+| `/connexion/intervenant` | Colonne W2-E1 | orange, « Espace intervenant » | onglets « Se connecter » (actif encre / crème) / « Devenir intervenant » → `/inscription/intervenant` |
+| `/connexion/fondation` | W3-connexion | terracotta | « Bon retour parmi nous », « Connectez-vous avec votre adresse de la Fondation. », bouton terracotta |
+| `/connexion/donateur` | W4-connexion | vert `#4E6A2C` | « Utilisez l'accès reçu par e-mail de la Fondation M. », bouton vert, « Accès perdu ? Écrivez à donateurs@fondationm.sn. » |
+| `/connexion/eleve` | W5-E1-connexion | jaune `#E5A60A`, pastilles des secteurs | « Content de te voir ! », « Identifiant », « Code d'accès ou mot de passe », bouton « Entrer » encre / crème |
+
+- **Fichiers** : `pages/login/LoginForm.tsx` (formulaire commun, mode e-mail ou élève), une page par persona
+  (`SchoolLoginPage`, `SpeakerLoginPage`, `FoundationLoginPage`, `DonorLoginPage`, `StudentLoginPage`),
+  `PersonaLinks.tsx` ; `components/layout/LoginSplitLayout.tsx` (colonnes W3, W4, W5 ; en-tête mobile à
+  bas arrondi 32) ; `pages/register/authColumns.ts` (colonne commune à l'inscription et à la connexion
+  école / intervenant). `pages/LoginPage.tsx` est remplacé par `pages/login/SchoolLoginPage.tsx`.
+- **Identifiant élève** (`lib/studentLogin.ts`) : sans « @ », le client envoie `{identifiant}@eleve.fondationm.sn` ;
+  avec « @ », la saisie part telle quelle. Aucun contrôle de format ; champ vide : « Indique ton identifiant. »
+  (tutoiement, comme toute la page).
+- **Liens entre les pages** : au bas de `/connexion`, « Vous êtes : Intervenant · Équipe Fondation M · Mécène · Élève » ;
+  au bas de `/connexion/intervenant`, même ligne avec « Établissement » au lieu d'« Intervenant » ; sur les pages
+  Fondation, donateur et élève, « Vous êtes une école ou un intervenant ? Se connecter ».
+- **Retour vers la bonne page** (`auth/lastRole.ts`) : le dernier rôle lu dans `/api/me` est gardé en mémoire vive
+  (aucun stockage). Déconnexion, session expirée et accès protégé sans jeton mènent à la connexion de cette
+  persona ; sans rôle connu (rechargement complet), à `/connexion`. Après une inscription dont la connexion
+  automatique échoue : `/connexion` (école) ou `/connexion/intervenant`.
+- **Pays et Zone (ville) en listes fermées** dans les deux inscriptions (`pages/register/PlaceFields.tsx`,
+  `lib/places.ts`) : les 9 pays de W1-E1 PC, Sénégal choisi par défaut ; pour le Sénégal, « Zone (ville) » est
+  une liste de 16 villes (Dakar, Saint-Louis, Thiès, Kaolack, Ziguinchor, Touba, Louga, Tambacounda, Mbour,
+  Diourbel, Fatick, Kaffrine, Kédougou, Kolda, Matam, Sédhiou) ; pour un autre pays, un champ libre. Changer de
+  pays vide la ville. Pas d'option « Autre ». Le backend ne change pas ; un ancien compte avec une ville hors liste
+  s'affiche tel quel. La carte du réseau garde ses 8 villes positionnées (test : leurs noms sont ceux de
+  `SENEGAL_CITIES`) ; les autres villes n'apparaissent que dans les pastilles « Choisir une ville ».
+- **Contrastes** : crème sur terracotta en `#FFF0C4` (4,60:1, décision 10) ; « Artisanat » de W5 en encre sur
+  orange (5,71:1 ; blanc : 2,82:1). Vert : crème 5,01:1, blanc 6,14:1 ; jaune : encre 7,50:1 ; bouton encre /
+  crème 13,14:1. Aucun échec.
 
 ## Ce que F5.1 livre
 
@@ -530,6 +572,15 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     sur une seconde ligne (jamais la couleur seule, accessibilité inchangée).
 60. **Comptes traités** : « Validé le / Refusé le » et « Délai » (jours entre `createdAt` et `decidedAt`) dans les
     faits, comme la maquette ; la date ne figure plus dans le bloc de résultat.
+61. **Connexion par persona** : cinq pages, un seul formulaire (`LoginForm`) et un seul appel ; la page ne
+    décide de rien, la redirection suit le rôle de `/api/me` (gardes inchangées).
+62. **Identifiant élève** : convention `{identifiant}@eleve.fondationm.sn` côté client (décision de l'équipe,
+    point ouvert 20) ; une saisie avec « @ » part telle quelle.
+63. **Dernier rôle en mémoire vive** (`auth/lastRole.ts`) : pas de stockage d'une information de session en
+    plus du jeton ; un rechargement complet ramène à `/connexion`.
+64. **Pays / Zone** : listes fermées (`lib/places.ts`, une seule orthographe pour l'inscription et la carte) ;
+    Zone libre hors Sénégal faute de villes dans la maquette ; pas d'« Autre ».
+65. **Bouton encre / crème** : variante `ink` de `Button` (connexion élève).
 
 ## Écarts
 
@@ -545,6 +596,8 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | Lien « Lire la charte » | Aucun texte de charte n'existe ; la maquette ne le montre que sur la page d'attente (« Lire la charte des rencontres ») | Affiché inactif sur la page d'attente de l'école, retiré des formulaires d'inscription |
 | Lien « Modifier » de la page d'attente | Aucun point d'accès de modification pour un compte en attente | Non affiché |
 | Case « Rester connecté », lien « Mot de passe oublié » (connexion) | Pas de point d'accès | Non affichés |
+| Encadré « Ce trimestre · 1 240 jeunes » (W3, W4) | Aucune donnée publique d'impact avant connexion | Non affiché : la colonne s'arrête au texte |
+| « Identifiant » de l'élève (W5, « khadija.ba.sor ») | `LoginRequest` n'a que `email` ; un élève est créé avec un e-mail | Convention `{identifiant}@eleve.fondationm.sn` (point ouvert 20) |
 | Motif de refus « facultatif » (maquette) | `RejectAccountRequest.reason` : ni obligatoire ni de longueur minimale (`minLength: 0`, `maxLength: 1000`) | Obligatoire côté client (1 à 1000 caractères). **Le backend devrait l'exiger ou le documenter.** |
 | « Délai » de traitement d'une demande | Absent du contrat | Non affiché |
 | Date et auteur de la décision | `decidedAt` fourni ; aucun auteur | « Décision du {date} » ; pas d'auteur |
@@ -636,6 +689,10 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     un champ du type `speakerDecision` / `foundationDecision` permettrait « Presque confirmée ».
 19. **Retours d'expérience de l'école** : deux listes complètes chargées pour connaître l'état de chaque
     rencontre ; un champ `feedbackStatus` dans `SchoolMeetingResponse` éviterait ces requêtes.
+20. **Identifiant des élèves** : la connexion élève complète un identifiant sans « @ » avec
+    `@eleve.fondationm.sn` (`lib/studentLogin.ts`). Le lot « Mon établissement » devra créer les comptes élèves
+    avec cette adresse générée (identifiant lisible = partie avant le « @ », `studentIdentifier`).
+    **Backend : un vrai champ identifiant éviterait cette convention.**
 
 ## Écarts de design restants
 
@@ -644,11 +701,17 @@ attendue (maquette) et la raison.
 
 | Écran | Fichier | Attendu (maquette) | Raison |
 | --- | --- | --- | --- |
-| Connexion (W3/W4/W5-connexion) | `pages/LoginPage.tsx` | Colonne et textes propres à chaque persona (« Espace équipe », « Chaque validation rapproche… », « Content de te voir ! », « Identifiant », bouton « Entrer »…) | Une seule page `/connexion` pour toutes les personas : la persona n'est connue qu'après connexion. Les valeurs communes (champs 50 px, bouton 56 px Lilita 20, titre 32) sont appliquées. |
-| Connexion | `pages/LoginPage.tsx` | Encadré « Ce trimestre · 1 240 jeunes » | Aucune donnée publique d'impact avant connexion. |
-| Connexion | `pages/LoginPage.tsx` | « Rester connecté(e) », « Mot de passe oublié ? » | Pas de point d'accès backend (déjà noté). |
+| Connexion école / intervenant | `pages/login/SchoolLoginPage.tsx`, `SpeakerLoginPage.tsx` | Aucune maquette (W1-E1 ne dessine que l'inscription) | Colonne W1-E1 / W2-E1, formulaire aux valeurs de W3, textes « Bon retour parmi nous » / « Connectez-vous avec votre adresse e-mail. ». |
+| Connexion Fondation / donateur (W3, W4) | `components/layout/LoginSplitLayout.tsx` | Encadré « Ce trimestre · 1 240 jeunes » | Aucune donnée publique d'impact avant connexion. |
+| Connexion (W3, W4) | `pages/login/LoginForm.tsx` | « Rester connecté(e) », « Mot de passe oublié ? » | Pas de point d'accès backend (déjà noté). |
+| Connexion Fondation (W3) | `components/layout/LoginSplitLayout.tsx` | Crème `#FDE7A6` sur terracotta | Contraste 4,26:1 : `#FFF0C4` (4,60:1), décision 10. |
+| Connexion élève (W5) | `pages/login/StudentLoginPage.tsx` | Pastille « Artisanat » blanc sur orange | Contraste 2,82:1 : encre (5,71:1). |
+| Connexion élève (W5) | `pages/login/LoginForm.tsx` | « Identifiant » libre | Envoyé comme `{identifiant}@eleve.fondationm.sn` (point ouvert 20). |
+| Connexion donateur (W4 mobile) | `components/layout/LoginSplitLayout.tsx` | Pied mobile « Accès réservé à l'équipe. Accès perdu ? … » | Phrase de l'équipe recopiée par erreur dans la maquette : pied de la colonne PC (« Votre accès vous a été envoyé par la Fondation M. ») sous le formulaire, phrase « Accès perdu ? … » dans la carte. |
+| Connexion (W3, W4, W5 mobile) | `components/layout/LoginSplitLayout.tsx`, `LoginForm.tsx` | Phrase de pied hors de la carte | Pied du formulaire dans la carte (comme sur PC), note de la colonne sous la carte. |
+| Toutes les connexions | `pages/login/PersonaLinks.tsx` | Aucun lien entre les pages de connexion | Ajoutés (« Vous êtes : … », « Vous êtes une école ou un intervenant ? Se connecter »). |
 | Inscription (W1-E1, W2-E1) | `components/layout/AuthSplitLayout.tsx` | Logo, titre et sous-titre `#FDE7A6` sur terracotta | Contraste 4,26:1 : `#FFF0C4` conservé (décision 10). |
-| Inscription | `pages/register/RegisterSchoolPage.tsx`, `RegisterSpeakerPage.tsx` | « Pays » et « Zone (ville) » en listes fermées | Le backend accepte toute ville / tout pays : champs libres avec suggestions conservés (aucun changement de comportement). Le style de la maquette est appliqué. |
+| Inscription | `pages/register/PlaceFields.tsx`, `lib/places.ts` | « Zone (ville) » : 5 villes du Sénégal, aucune pour les autres pays | 11 villes ajoutées pour le Sénégal (liste validée) ; Zone en champ libre pour un autre pays (la maquette n'en donne aucune). |
 | Inscription école | `pages/register/RegisterSchoolPage.tsx` | Champ « Prénom et nom » du référent | Absent du contrat (déjà noté). |
 | Inscription | idem | Aide « 8 caractères minimum, dont un chiffre » | Décision validée G4 : « 8 caractères minimum ». |
 | Attente (W1-E1-attente, W2-E7) | `pages/PendingAccountPage.tsx` | Lien « Modifier » ; référent « Moussa Ndiaye, … » | Pas de point d'accès de modification ; nom du référent absent. |

@@ -19,8 +19,7 @@ const pendingSchool = makeMe({ status: 'PENDING' })
 async function fillSchoolForm(user: User) {
   await user.type(screen.getByLabelText(/^Nom de l'établissement/), 'Lycée des Tisserands')
   await user.selectOptions(screen.getByLabelText(/^Type/), 'HIGH_SCHOOL')
-  await user.type(screen.getByLabelText(/^Pays/), 'Sénégal')
-  await user.type(screen.getByLabelText(/^Zone \(ville\)/), 'Dakar')
+  await user.selectOptions(screen.getByLabelText(/^Zone \(ville\)/), 'Dakar')
   await user.type(screen.getByLabelText(/^Fonction/), 'Proviseure')
   await user.type(screen.getByLabelText(/^E-mail professionnel/), 'referent@ecole.test')
   await user.type(screen.getByLabelText(/^Téléphone/), '+221 77 000 00 00')
@@ -91,6 +90,31 @@ describe('Inscription établissement', () => {
       },
     ])
     expect(loginBodies).toEqual([{ email: 'referent@ecole.test', password: FAKE_PASSWORD }])
+  })
+
+  it('propose Pays et Zone en listes fermées, avec une zone libre hors Sénégal', async () => {
+    mockApi({})
+    const { user } = renderApp('/inscription/ecole')
+
+    const country = screen.getByLabelText(/^Pays/)
+    expect(country).toHaveValue('Sénégal')
+    expect(screen.getAllByRole('option', { name: 'Mali' })).toHaveLength(1)
+    expect(screen.queryByRole('option', { name: 'Autre' })).not.toBeInTheDocument()
+
+    const zone = screen.getByLabelText(/^Zone \(ville\)/)
+    expect(zone.tagName).toBe('SELECT')
+    expect(screen.getByRole('option', { name: 'Sédhiou' })).toBeInTheDocument()
+    await user.selectOptions(zone, 'Thiès')
+
+    await user.selectOptions(country, 'Mali')
+    const freeZone = screen.getByLabelText(/^Zone \(ville\)/)
+    expect(freeZone.tagName).toBe('INPUT')
+    expect(freeZone).toHaveValue('')
+    await user.type(freeZone, 'Bamako')
+    expect(freeZone).toHaveValue('Bamako')
+
+    await user.selectOptions(country, 'Sénégal')
+    expect(screen.getByLabelText(/^Zone \(ville\)/)).toHaveValue('')
   })
 
   it('affiche les fieldErrors du serveur sous les champs concernés', async () => {

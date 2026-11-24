@@ -19,13 +19,15 @@ describe('Choix du type de compte', () => {
     expect(router.state.location.pathname).toBe('/inscription/intervenant')
   })
 
-  it('est accessible depuis la connexion', async () => {
+  it('la connexion de l’établissement mène à son inscription par l’onglet « Créer un compte »', async () => {
     mockApi({})
     const { router, user } = renderApp('/connexion')
 
-    await user.click(screen.getByRole('link', { name: 'Pas encore de compte ?' }))
+    expect(screen.getByText('Se connecter', { selector: '[aria-current="page"]' })).toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: 'Créer un compte' }))
 
-    expect(router.state.location.pathname).toBe('/inscription')
+    expect(await screen.findByRole('heading', { name: "Créer le compte de l'établissement" })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/inscription/ecole')
   })
 
   it.each(['/inscription', '/inscription/ecole', '/inscription/intervenant'])(

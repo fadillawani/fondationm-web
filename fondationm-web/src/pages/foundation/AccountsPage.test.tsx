@@ -116,8 +116,9 @@ describe('Espace Fondation — navigation', () => {
     const menu = document.getElementById(avatar.getAttribute('aria-controls') ?? '')
     if (menu === null) throw new Error('Menu absent')
     await user.click(within(menu).getByRole('button', { name: 'Se déconnecter' }))
+    // Retour sur la connexion de la persona qui vient de partir (lot F5.2).
     expect(await screen.findByRole('heading', { name: 'Bon retour parmi nous' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/connexion')
+    expect(router.state.location.pathname).toBe('/connexion/fondation')
   })
 
   it('refuse l’accès à un utilisateur d’un autre rôle', async () => {

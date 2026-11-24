@@ -5,7 +5,8 @@ import { api, unwrap } from '../api/client'
 import { invalidResponseError } from '../api/errors'
 import type { components } from '../api/schema'
 import { toCurrentUser, type CurrentUser } from './currentUser'
-import { PATHS, destinationFor } from './roles'
+import { lastRole } from './lastRole'
+import { PATHS, destinationFor, loginPathFor } from './roles'
 import { tokenStorage } from './tokenStorage'
 
 type Schemas = components['schemas']
@@ -32,7 +33,11 @@ export function readLoginNotice(state: unknown): LoginNotice | null {
 
 export const meQuery = queryOptions({
   queryKey: ['me'],
-  queryFn: async (): Promise<CurrentUser> => toCurrentUser(await unwrap(api.GET('/api/me'))),
+  queryFn: async (): Promise<CurrentUser> => {
+    const user = toCurrentUser(await unwrap(api.GET('/api/me')))
+    lastRole.set(user.role)
+    return user
+  },
   staleTime: 60_000,
 })
 
@@ -102,10 +107,10 @@ export function useRegister() {
         return null
       }
     },
-    onSuccess: (user) => {
+    onSuccess: (user, registration) => {
       if (user === null) {
         const state: LoginRedirectState = { notice: 'account-created' }
-        void navigate(PATHS.login, { replace: true, state })
+        void navigate(registration.kind === 'speaker' ? PATHS.loginSpeaker : PATHS.login, { replace: true, state })
         return
       }
       void navigate(destinationFor(user), { replace: true })
@@ -134,6 +139,6 @@ export function useLogout() {
 
   return useCallback(() => {
     endSession(queryClient)
-    void navigate(PATHS.login, { replace: true })
+    void navigate(loginPathFor(lastRole.get()), { replace: true })
   }, [queryClient, navigate])
 }

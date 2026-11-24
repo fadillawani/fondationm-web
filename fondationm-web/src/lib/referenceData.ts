@@ -44,20 +44,6 @@ export function sectorOptionLabel(sector: Sector): string {
   return detail ? `${name} — ${detail}` : name
 }
 
-export const SUGGESTED_COUNTRIES = [
-  'Sénégal',
-  'Bénin',
-  'Burkina Faso',
-  "Côte d'Ivoire",
-  'Gambie',
-  'Guinée',
-  'Mali',
-  'Mauritanie',
-  'Togo',
-] as const
-
-export const SUGGESTED_CITIES = ['Dakar', 'Saint-Louis', 'Thiès', 'Kaolack', 'Ziguinchor'] as const
-
 export const SUGGESTED_SKILLS = [
   'Réseaux',
   'Télécoms',
@@ -72,3 +58,6 @@ export const SUGGESTED_SKILLS = [
 export const CONTACT_EMAIL = 'contact@fondationm.sn'
 /** Téléphone de la maquette (W1-E1, W2-E1), repris tel quel. */
 export const CONTACT_PHONE = '+221 33 800 00 00'
+
+/** Contact des donateurs (maquette W4-connexion), repris tel quel. */
+export const DONOR_CONTACT_EMAIL = 'donateurs@fondationm.sn'

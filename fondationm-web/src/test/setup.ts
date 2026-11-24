@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup, configure } from '@testing-library/react'
 import { afterEach } from 'vitest'
+import { lastRole } from '../auth/lastRole'
 
 // Suite complète en parallèle sous jsdom : le premier rendu d'un fichier peut dépasser 1 s.
 configure({ asyncUtilTimeout: 4_000 })
@@ -22,4 +23,5 @@ if (typeof HTMLDialogElement !== 'undefined' && typeof HTMLDialogElement.prototy
 afterEach(() => {
   cleanup()
   sessionStorage.clear()
+  lastRole.clear()
 })
