@@ -1,4 +1,4 @@
-import { RequestTimeoutError } from './errors'
+import { NetworkFailureError, RequestTimeoutError } from './errors'
 import { endSlowRequest, startSlowRequest } from './wakeup'
 
 export const WAKEUP_NOTICE_DELAY_MS = 5_000
@@ -17,7 +17,7 @@ export async function timedFetch(request: Request): Promise<Response> {
     return await globalThis.fetch(request, { signal: controller.signal })
   } catch (error) {
     if (controller.signal.aborted) throw new RequestTimeoutError()
-    throw error
+    throw new NetworkFailureError({ cause: error })
   } finally {
     clearTimeout(wakeupTimer)
     clearTimeout(timeoutTimer)

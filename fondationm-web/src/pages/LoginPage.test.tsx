@@ -145,6 +145,80 @@ describe('Connexion', () => {
     expect(screen.getByRole('button', { name: 'Réessayer' })).toBeInTheDocument()
   })
 
+  it('accepte un /api/me avec profile null (FOUNDATION) et redirige vers /fondation', async () => {
+    mockApi({
+      'POST /api/auth/login': tokenResponse,
+      'GET /api/me': () =>
+        jsonResponse(200, {
+          id: '7f1c2a9e-0000-4000-8000-000000000009',
+          email: 'equipe@fondation.test',
+          role: 'FOUNDATION',
+          status: 'VALIDATED',
+          rejectionReason: null,
+          createdAt: '2026-09-01T08:00:00Z',
+          profile: null,
+          mustChangePassword: false,
+        }),
+    })
+    const { router, user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByRole('heading', { name: /^Bonjour/ })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/fondation')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('accepte un /api/me avec rejectionReason null (SCHOOL PENDING) et redirige vers /compte-en-attente', async () => {
+    mockApi({
+      'POST /api/auth/login': tokenResponse,
+      'GET /api/me': () =>
+        jsonResponse(200, {
+          id: '7f1c2a9e-0000-4000-8000-000000000010',
+          email: 'referent@ecole.test',
+          role: 'SCHOOL',
+          status: 'PENDING',
+          rejectionReason: null,
+          createdAt: '2026-11-20T12:00:00Z',
+          profile: {
+            type: 'SCHOOL',
+            schoolName: 'sncorp',
+            city: 'Dakar',
+            country: 'Sénégal',
+            schoolType: 'TRAINING_CENTER',
+            referentRole: 'referent',
+            phone: null,
+            charterAcceptedAt: '2026-11-20T12:00:00Z',
+          },
+          mustChangePassword: false,
+        }),
+    })
+    const { router, user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Merci sncorp, votre demande est bien arrivée' }),
+    ).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/compte-en-attente')
+  })
+
+  it('n’affiche pas une exception interne comme une panne réseau', async () => {
+    mockApi({
+      'POST /api/auth/login': tokenResponse,
+      'GET /api/me': () =>
+        new Response('<html>pas du JSON</html>', { status: 200, headers: { 'Content-Type': 'application/json' } }),
+    })
+    const { router, user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("Une erreur inattendue s'est produite. Réessayez.")
+    expect(screen.queryByText(/Impossible de joindre le serveur/)).not.toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/connexion')
+    expect(tokenStorage.get()).toBeNull()
+  })
+
   it('valide les champs avant tout appel réseau', async () => {
     const fetchMock = mockApi({})
     const { user } = renderApp('/connexion')

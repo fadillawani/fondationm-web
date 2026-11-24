@@ -14,6 +14,24 @@ Dernière mise à jour : 23 novembre 2026 — lot F1 (inscription, attente de va
 Vérifications au moment de la livraison de F1 : `npm run build`, `npm run lint` et `npm test`
 (69 tests) passent sans erreur ni avertissement.
 
+## Corrections
+
+- **24/11/2026 — connexion bloquée sur `/connexion` avec « Impossible de joindre le serveur ».**
+  `GET /api/me` renvoie des `null` explicites (`profile: null` pour FOUNDATION, `rejectionReason: null`
+  hors refus) alors que le contrat les déclare seulement facultatifs. La lecture du profil testait
+  `profile !== undefined`, puis `'schoolName' in null` levait une `TypeError`, convertie à tort en
+  `NETWORK_ERROR`.
+  - `auth/currentUser.ts` lit la réponse de `/api/me` comme une donnée non fiable : tout champ `null`,
+    absent ou d'un type inattendu est traité comme absent (profil et ses champs compris) ; `role`,
+    `status`, `schoolType` et `sector` sont vérifiés contre les valeurs connues. Seuls `id`, `role` et
+    `status` restent indispensables (`INVALID_RESPONSE` sinon).
+  - `api/errors.ts` : `NETWORK_ERROR` uniquement pour un vrai échec de `fetch` (aucune réponse), signalé par
+    `NetworkFailureError` dans `api/transport.ts`. Toute autre exception inattendue devient
+    `UNEXPECTED_ERROR` : « Une erreur inattendue s'est produite. Réessayez. » (bouton « Réessayer » proposé).
+  - Tests ajoutés : `/api/me` avec `profile: null` (FOUNDATION → `/fondation`), avec
+    `rejectionReason: null` (SCHOOL PENDING → `/compte-en-attente`), réponse illisible affichée comme
+    `UNEXPECTED_ERROR` et non comme panne réseau ; tests unitaires de `errors.ts` mis à jour. 74 tests.
+
 ## Ce que F1 livre
 
 - **`/inscription`** : choix du type de compte (deux cartes : établissement en terracotta, intervenant
@@ -71,12 +89,13 @@ Vérifications au moment de la livraison de F1 : `npm run build`, `npm run lint`
    `openapi-typescript@7.13.0` avec `typescript@5.9.3` dans un environnement `npx` isolé (versions épinglées,
    rien dans `package.json`).
 4. **Erreurs** : normalisation défensive dans `api/errors.ts`. Corps absent → code déduit du statut ;
-   panne réseau → `NETWORK_ERROR` ; délai dépassé → `TIMEOUT` ; tout 429 → `RATE_LIMITED`. Messages
+   échec de `fetch` sans réponse → `NETWORK_ERROR` ; délai dépassé → `TIMEOUT` ; tout 429 → `RATE_LIMITED` ;
+   toute autre exception → `UNEXPECTED_ERROR`. Messages
    français pour les codes connus ; pour un code inconnu, le message du serveur est affiché tel quel.
 5. **Pas de nouvelle tentative automatique** (TanStack Query `retry: false`) : le délai de 90 s couvre le
    réveil du serveur, et l'utilisateur garde la main avec « Réessayer ».
 6. **Nom affiché** : `schoolName` (SCHOOL), `fullName` (SPEAKER), `firstName lastName` (STUDENT),
-   `name` (DONOR) ; e-mail à défaut (FOUNDATION n'a pas de profil).
+   `name` (DONOR) ; e-mail à défaut (FOUNDATION a `profile: null`).
 7. **Lint** : oxlint conservé, catégories `correctness` et `suspicious` en erreur, `any`, `console` et
    assertions non nulles interdits, règles React, import et jsx-a11y ; `--deny-warnings`.
    `react-in-jsx-scope` (obsolète avec le runtime JSX automatique) et `prefer-tag-over-role` sont désactivées.
@@ -149,7 +168,8 @@ Vérifications au moment de la livraison de F1 : `npm run build`, `npm run lint`
 2. **Schéma d'erreur absent de `openapi.json`** (manque connu du backend) : le type `ApiError` est écrit
    à la main. Seules les réponses 2xx sont documentées.
 3. **`MeResponse` sans champs obligatoires** dans le contrat : le frontend rejette une réponse sans `id`,
-   `role` ou `status` (`INVALID_RESPONSE`). Marquer ces champs `required` côté backend rendrait les types plus précis.
+   `role` ou `status` (`INVALID_RESPONSE`). Le backend envoie aussi des `null` explicites, non déclarés
+   (`nullable`) dans le contrat ; le frontend les traite comme absents. Marquer ces champs `required` côté backend rendrait les types plus précis.
 4. **Expiration du jeton (8 h)** : gérée au premier 401 ; pas de déconnexion préventive basée sur `expiresIn`.
 5. **Champs obligatoires du contrat** : `email`, `schoolName`, `city`, `country` et `fullName` sont déclarés
    `minLength: 0`. Le frontend refuse les valeurs vides ; le backend devrait les rejeter aussi (`@NotBlank`).

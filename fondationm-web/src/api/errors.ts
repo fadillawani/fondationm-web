@@ -11,6 +11,7 @@ export const ERROR_CODES = {
   NETWORK_ERROR: 'NETWORK_ERROR',
   TIMEOUT: 'TIMEOUT',
   INVALID_RESPONSE: 'INVALID_RESPONSE',
+  UNEXPECTED_ERROR: 'UNEXPECTED_ERROR',
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
 } as const
 
@@ -47,6 +48,14 @@ export class RequestTimeoutError extends Error {
   constructor() {
     super('Délai de réponse dépassé')
     this.name = 'RequestTimeoutError'
+  }
+}
+
+/** Échec de fetch lui-même : aucune réponse du serveur (hors ligne, DNS, CORS, connexion coupée). */
+export class NetworkFailureError extends Error {
+  constructor(options?: ErrorOptions) {
+    super('Aucune réponse du serveur', options)
+    this.name = 'NetworkFailureError'
   }
 }
 
@@ -98,7 +107,9 @@ export function errorFromResponse(response: Response, body: unknown): ApiError {
 
 export function errorFromException(error: unknown): ApiError {
   if (error instanceof ApiError) return error
-  const code = error instanceof RequestTimeoutError ? ERROR_CODES.TIMEOUT : ERROR_CODES.NETWORK_ERROR
+  let code: string = ERROR_CODES.UNEXPECTED_ERROR
+  if (error instanceof RequestTimeoutError) code = ERROR_CODES.TIMEOUT
+  else if (error instanceof NetworkFailureError) code = ERROR_CODES.NETWORK_ERROR
   return new ApiError({ status: 0, code, message: '' })
 }
 
@@ -119,6 +130,7 @@ const MESSAGES: Partial<Record<string, string>> = {
     'Impossible de joindre le serveur. Vérifiez votre connexion internet puis réessayez.',
   [ERROR_CODES.TIMEOUT]: 'Le serveur met trop de temps à répondre. Réessayez dans un instant.',
   [ERROR_CODES.INVALID_RESPONSE]: 'Le serveur a envoyé une réponse inattendue. Réessayez plus tard.',
+  [ERROR_CODES.UNEXPECTED_ERROR]: "Une erreur inattendue s'est produite. Réessayez.",
 }
 
 export function errorMessage(error: unknown): string {
@@ -139,6 +151,7 @@ export function isRetryable(error: unknown): boolean {
   return (
     code === ERROR_CODES.NETWORK_ERROR ||
     code === ERROR_CODES.TIMEOUT ||
-    code === ERROR_CODES.SERVER_ERROR
+    code === ERROR_CODES.SERVER_ERROR ||
+    code === ERROR_CODES.UNEXPECTED_ERROR
   )
 }
