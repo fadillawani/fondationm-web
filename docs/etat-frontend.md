@@ -1,6 +1,6 @@
 # État du frontend — Fondation M
 
-Dernière mise à jour : 23 novembre 2026 — lot F1 (inscription, attente de validation, mot de passe).
+Dernière mise à jour : 24 novembre 2026 — lot F2 (espace Fondation : navigation et validation des comptes).
 
 ## Avancement
 
@@ -9,10 +9,11 @@ Dernière mise à jour : 23 novembre 2026 — lot F1 (inscription, attente de va
 | F0  | Configuration, jetons de design, composants de base, client d'API, session, gardes, erreurs, connexion, accueils provisoires | Terminé |
 | F0.1 | Design de la maquette « Marché » appliqué (thème, composants, connexion, mise en page) | Terminé |
 | F1  | Inscription établissement et intervenant, pages « en attente » et « refusé », changement de mot de passe obligatoire | Terminé |
-| F2+ | Écrans métier                                                               | À faire  |
+| F2  | Espace Fondation : navigation, « Comptes à valider » (liste, détail, validation, refus motivé) | Terminé |
+| F3+ | Autres écrans métier (tableau de bord Fondation, rencontres, retours, donateurs…) | À faire  |
 
-Vérifications au moment de la livraison de F1 : `npm run build`, `npm run lint` et `npm test`
-(69 tests) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F2 : `npm run build`, `npm run lint` et `npm test`
+(91 tests) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -31,6 +32,33 @@ Vérifications au moment de la livraison de F1 : `npm run build`, `npm run lint`
   - Tests ajoutés : `/api/me` avec `profile: null` (FOUNDATION → `/fondation`), avec
     `rejectionReason: null` (SCHOOL PENDING → `/compte-en-attente`), réponse illisible affichée comme
     `UNEXPECTED_ERROR` et non comme panne réseau ; tests unitaires de `errors.ts` mis à jour. 74 tests.
+
+## Ce que F2 livre
+
+- **Navigation Fondation** (barre latérale PC, sous-titre « Pilotage du programme ») : « Tableau de bord »,
+  « Comptes à valider » (pastille du nombre de comptes en attente, écoles + intervenants), « Demandes de
+  rencontre », « Rencontres », « Retours d'expérience », « Requêtes donateurs ». Seule « Comptes à valider »
+  est un lien ; les autres sont affichées avec « Bientôt », sans page. En bas : carte « Fondation M »
+  (initiale « F ») avec l'e-mail du compte, puis « Se déconnecter ». Sur téléphone, navigation basse :
+  « Comptes à valider », « Plus » (les 5 entrées « Bientôt ») et « Déconnexion ».
+- **`/fondation`** redirige vers **`/fondation/comptes`**, réservée au rôle FOUNDATION par les gardes
+  existantes (un autre rôle est renvoyé vers son accueil).
+- **`/fondation/comptes`** → `GET /api/foundation/accounts?role=&status=&page=&size=20` :
+  - onglets ARIA « Écoles · n », « Intervenants · n » (comptes PENDING) et « Déjà traités » ; texte d'aide
+    sur l'onglet Intervenants ;
+  - « Déjà traités » : deux groupes de pastilles envoyés au serveur, « Écoles / Intervenants » et
+    « Validés / Refusés » (par défaut Écoles + Validés) ;
+  - liste (pastille d'initiales indigo ou orange, nom, ligne de contexte, badge de statut) et détail
+    (type · date de la demande, faits renseignés, compétences, motivation, actions ou bloc de résultat) ;
+  - pagination « Précédent / Suivant » avec « Page x sur y » ;
+  - URL : `?onglet=ecoles|intervenants|traites`, `type=ecoles|intervenants`, `decision=valides|refuses`,
+    `page=` (à partir de 1), `compte={id}`. Sur téléphone, `compte` ouvre le détail en plein écran avec
+    « Retour » ; le retour du téléphone le referme. Un compte absent de la page chargée → la liste.
+- **Valider** → `POST /api/foundation/accounts/{id}/validate` (sans corps ni confirmation, bouton en
+  chargement). **Refuser** → `POST /api/foundation/accounts/{id}/reject` avec `{ reason }` (motif obligatoire).
+- Après une action réussie : bloc « Compte validé » / « Compte refusé » (avec « Décision du {date} »),
+  sélection du compte suivant, cache `['foundation','accounts']` invalidé (listes, compteurs et badge
+  rechargés depuis le serveur).
 
 ## Ce que F1 livre
 
@@ -143,6 +171,22 @@ Vérifications au moment de la livraison de F1 : `npm run build`, `npm run lint`
     inchangée : PENDING / REJECTED avant `mustChangePassword`.
 18. **Build** : le bundle dépassait 500 kB ; les dépendances sont séparées en deux chunks (`react`,
     `vendor`) via `build.rolldownOptions.output.codeSplitting` dans `vite.config.ts`.
+19. **Lecture défensive partagée** : `api/wire.ts` (null, absent ou type inattendu → absent) et
+    `lib/profiles.ts` (profils école / intervenant) servent à `/api/me` et à `AccountResponse`. Un compte
+    sans `id`, sans statut ou d'un rôle autre que SCHOOL / SPEAKER est ignoré dans la liste.
+20. **Compteurs** : « Écoles · n », « Intervenants · n » et le badge de la navigation viennent du
+    `totalElements` de la première page PENDING de chaque rôle (requêtes partagées avec la liste).
+21. **Motif de refus** obligatoire côté client : 1 à 1000 caractères après retrait des espaces (le motif
+    envoyé est le texte sans espaces de début et de fin). Erreur `fieldErrors` du serveur sous le champ.
+22. **Compte déjà traité** : tout 409 sur la validation ou le refus affiche « Ce compte a déjà été traité »
+    (le message du serveur n'est pas repris) et recharge les listes.
+23. **Après une action** : le bloc de résultat du compte traité s'affiche en tête du détail, et la sélection
+    passe au compte suivant de la page (ou au précédent s'il était le dernier). Si la page courante dépasse
+    la dernière page après rechargement, retour automatique à la dernière page existante.
+24. **Pas de `GET` d'un compte seul dans le contrat** : le détail vient de la page de liste chargée.
+25. **Tests** : délai des attentes asynchrones de Testing Library porté à 4 s et délai par test à 15 s
+    (`src/test/setup.ts`, `vite.config.ts`) : sous charge, la suite complète en parallèle dépassait
+    ponctuellement 1 s au premier rendu d'un fichier.
 
 ## Écarts
 
@@ -157,6 +201,12 @@ Vérifications au moment de la livraison de F1 : `npm run build`, `npm run lint`
 | Lien « Lire la charte » | Aucun texte de charte n'existe | Lien inactif (`aria-disabled`) |
 | Lien « Modifier » de la page d'attente | Aucun point d'accès de modification pour un compte en attente | Non affiché |
 | Case « Rester connecté », lien « Mot de passe oublié » (connexion) | Pas de point d'accès | Non affichés |
+| Motif de refus « facultatif » (maquette) | `RejectAccountRequest.reason` : ni obligatoire ni de longueur minimale (`minLength: 0`, `maxLength: 1000`) | Obligatoire côté client (1 à 1000 caractères). **Le backend devrait l'exiger ou le documenter.** |
+| « Délai » de traitement d'une demande | Absent du contrat | Non affiché |
+| Date et auteur de la décision | `decidedAt` fourni ; aucun auteur | « Décision du {date} » ; pas d'auteur |
+| « Un e-mail de bienvenue lui a été envoyé » | Le backend n'envoie aucun e-mail | Phrase retirée |
+| Code d'erreur « compte déjà traité » | Non documenté (aucune réponse d'erreur dans le contrat) | Tout 409 traité comme « déjà traité » (décision 22). Code vraisemblable : `INVALID_STATUS_TRANSITION` (HTTP 409), non documenté |
+| Ordre de la liste des comptes | Non précisé (pas de paramètre de tri) | Ordre du serveur |
 | Code d'erreur « e-mail déjà utilisé » | Non documenté (aucun 409 ni code dans le contrat) | Règle de la décision 16. Code réellement observé : `EMAIL_ALREADY_USED` (HTTP 409, message « Cette adresse e-mail est déjà utilisée. ») |
 
 ## Points ouverts
@@ -175,3 +225,10 @@ Vérifications au moment de la livraison de F1 : `npm run build`, `npm run lint`
    `minLength: 0`. Le frontend refuse les valeurs vides ; le backend devrait les rejeter aussi (`@NotBlank`).
    `schoolType`, `referentRole`, `phone`, `jobTitle`, `sector` et `charterAccepted` sont facultatifs côté
    serveur alors que le frontend les exige (décision 12) : un client direct de l'API peut s'en passer.
+6. **Filtres de `GET /api/foundation/accounts`** : `role` est obligatoire, et `role` comme `status`
+   n'acceptent qu'une valeur. « Déjà traités » passe donc par des pastilles (un rôle et un statut à la fois) ;
+   une vue « tous les comptes traités » demanderait un filtre multiple côté backend.
+7. **`INVALID_STATUS_TRANSITION`** à confirmer et à documenter dans le contrat, avec les autres réponses
+   d'erreur de la validation et du refus (404 d'un compte inconnu, 400 du motif).
+8. **Mise à jour du badge** : seulement après une action dans cet écran ou un rechargement ; pas de
+   rafraîchissement périodique des comptes en attente.

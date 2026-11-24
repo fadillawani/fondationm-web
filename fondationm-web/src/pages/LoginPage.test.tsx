@@ -4,6 +4,7 @@ import { onApiEvent, type ApiEvent } from '../api/events'
 import { tokenStorage } from '../auth/tokenStorage'
 import {
   FAKE_TOKEN,
+  accountsHandler,
   errorResponse,
   fillLoginForm,
   jsonResponse,
@@ -148,6 +149,7 @@ describe('Connexion', () => {
   it('accepte un /api/me avec profile null (FOUNDATION) et redirige vers /fondation', async () => {
     mockApi({
       'POST /api/auth/login': tokenResponse,
+      'GET /api/foundation/accounts': accountsHandler(() => []),
       'GET /api/me': () =>
         jsonResponse(200, {
           id: '7f1c2a9e-0000-4000-8000-000000000009',
@@ -164,8 +166,9 @@ describe('Connexion', () => {
 
     await fillLoginForm(user)
 
-    expect(await screen.findByRole('heading', { name: /^Bonjour/ })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/fondation')
+    // /fondation redirige vers les comptes à valider (lot F2).
+    expect(await screen.findByRole('heading', { name: 'Comptes à valider' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/fondation/comptes')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 

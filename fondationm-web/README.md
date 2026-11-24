@@ -75,6 +75,7 @@ src/
     transport.ts      fetch avec avis de réveil (5 s) et délai maximal (90 s)
     wakeup.ts         état « le serveur se réveille »
     errors.ts         ApiError, normalisation des erreurs, messages en français
+    wire.ts           lecture défensive des réponses (null traité comme absent)
     events.ts         événements de session émis par le client
     schema.d.ts       généré par npm run api:types — ne pas modifier à la main
   auth/               session : tokenStorage, utilisateur courant, rôles, hooks, gestion des événements
@@ -83,6 +84,7 @@ src/
   pages/              connexion, accueils provisoires, compte en attente / refusé, mot de passe, 404
     register/         choix du type de compte, inscription établissement et intervenant (schémas Zod)
     status/           frise et récapitulatif de la page d'attente
+    foundation/       espace Fondation : comptes à valider (liste, détail, validation, refus)
   routes/             définition des routes et gardes
   lib/                utilitaires (cn, QueryClient, données de référence, dates, erreurs de formulaire)
   styles/theme.css    jetons de design (couleurs, rayons, ombres, espacements, polices)
@@ -100,7 +102,9 @@ src/
 | `/compte-en-attente` | connecté, statut PENDING | Demande en cours de vérification |
 | `/compte-refuse` | connecté, statut REJECTED | Demande refusée et motif |
 | `/mot-de-passe-obligatoire` | connecté, `mustChangePassword` | Changement de mot de passe obligatoire |
-| `/ecole`, `/intervenant`, `/fondation`, `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
+| `/fondation` | connecté, validé, rôle FOUNDATION | Redirige vers `/fondation/comptes` |
+| `/fondation/comptes` | connecté, validé, rôle FOUNDATION | Comptes à valider (`?onglet=`, `type=`, `decision=`, `page=`, `compte=`) |
+| `/ecole`, `/intervenant`, `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
 
 ## Règles de session
 

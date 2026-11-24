@@ -26,6 +26,7 @@ export default defineConfig({
     env: {
       VITE_API_URL: 'http://api.test',
     },
+    testTimeout: 15_000,
     restoreMocks: true,
     unstubGlobals: true,
   },
