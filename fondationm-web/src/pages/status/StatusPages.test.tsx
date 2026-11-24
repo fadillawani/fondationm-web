@@ -25,20 +25,61 @@ describe('Page « Compte en attente »', () => {
       await screen.findByRole('heading', { name: 'Merci Lycée des Tisserands, votre demande est bien arrivée' }),
     ).toBeInTheDocument()
 
-    const steps = within(screen.getByRole('list', { name: 'Avancement de votre demande' })).getAllByRole('listitem')
+    expect(screen.getByText('Compte en attente')).toBeInTheDocument()
+    const steps = within(screen.getByRole('list', { name: 'Étapes de validation du compte' })).getAllByRole('listitem')
     expect(steps).toHaveLength(4)
-    expect(steps[0]).toHaveTextContent(/Demande envoyée\s*Terminé\s*20 novembre 2026/)
-    expect(steps[1]).toHaveTextContent(/Vérification\s*En cours\s*En cours par la Fondation M/)
-    expect(steps[2]).toHaveTextContent(/Compte validé\s*À venir/)
-    expect(steps[3]).toHaveTextContent(/Première rencontre\s*À venir/)
+    // createdAt 12:00 UTC, fuseau des tests UTC+1.
+    expect(steps[0]).toHaveTextContent('Demande envoyéeTerminé · 20 nov, 13h00')
+    expect(steps[1]).toHaveTextContent('VérificationEn cours par la Fondation M')
+    expect(steps[1]).toHaveAttribute('aria-current', 'step')
+    expect(steps[2]).toHaveTextContent('Compte validéÀ venir')
+    expect(steps[3]).toHaveTextContent('Première rencontreÀ venir · choisissez un intervenant')
 
     const summary = screen.getByRole('region', { name: 'Votre demande' })
-    expect(summary).toHaveTextContent('Lycée des Tisserands · Lycée')
-    expect(summary).toHaveTextContent('Dakar, Sénégal')
+    expect(summary).toHaveTextContent('Lycée des Tisserands (lycée)')
+    expect(summary).toHaveTextContent('Sénégal · Dakar')
     expect(summary).toHaveTextContent('Proviseure')
     expect(summary).toHaveTextContent('referent@ecole.test · +221 77 000 00 00')
-    expect(screen.getByRole('region', { name: 'En attendant' })).toBeInTheDocument()
-    expect(screen.queryByText(/e-mail vous|nous vous écrirons/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'En attendant' })).toHaveTextContent('Demandez à vos élèves quels métiers les font rêver')
+    // Aucune promesse d'e-mail (le backend n'en envoie pas).
+    expect(screen.queryByText(/nous vous écrirons|e-mail de bienvenue|recevrez un e-mail/i)).not.toBeInTheDocument()
+  })
+
+  it('adapte les textes pour un intervenant (maquette W2-E7)', async () => {
+    mockApi({
+      'GET /api/me': () =>
+        jsonResponse(
+          200,
+          makeMe({
+            role: 'SPEAKER',
+            status: 'PENDING',
+            createdAt: '2026-11-13T10:52:00Z',
+            profile: {
+              type: 'SPEAKER',
+              fullName: 'Awa Diallo',
+              jobTitle: 'Ingénieure réseaux',
+              organization: 'Sonatel',
+              city: 'Dakar',
+              country: 'Sénégal',
+              skills: ['Réseaux', 'Fibre optique'],
+            },
+          }),
+        ),
+    })
+    renderApp('/compte-en-attente', { token: true })
+
+    expect(await screen.findByRole('heading', { name: 'Merci Awa, les jeunes vont avoir de la chance' })).toBeInTheDocument()
+    expect(screen.getByText('Compte en attente de validation')).toBeInTheDocument()
+    expect(screen.getByText('Awa Diallo · intervenant')).toBeInTheDocument()
+    const steps = within(screen.getByRole('list', { name: 'Étapes de validation du compte' })).getAllByRole('listitem')
+    expect(steps[0]).toHaveTextContent('Terminé · 13 nov, 11h52')
+    expect(steps[3]).toHaveTextContent('Vos créneauxÀ venir · publiez vos disponibilités')
+    const profile = screen.getByRole('region', { name: 'Votre profil' })
+    expect(profile).toHaveTextContent('Awa Diallo, ingénieure réseaux')
+    expect(profile).toHaveTextContent('Sonatel')
+    expect(profile).toHaveTextContent('Sénégal · Dakar')
+    expect(within(profile).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['Réseaux', 'Fibre optique'])
+    expect(screen.getByRole('region', { name: 'En attendant' })).toHaveTextContent('Repensez à vos 17 ans')
   })
 
   it('reste sur la page si le statut n’a pas changé', async () => {

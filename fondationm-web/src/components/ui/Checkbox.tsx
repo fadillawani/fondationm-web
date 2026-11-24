@@ -11,13 +11,13 @@ export function Checkbox({ label, error, ...props }: CheckboxProps) {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="flex min-h-touch cursor-pointer items-start gap-3 py-1 text-sm font-semibold text-ink">
+      <label htmlFor={id} className="flex min-h-touch cursor-pointer items-start gap-3 py-1 text-sm font-semibold text-muted">
         <input
           id={id}
           type="checkbox"
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
-          className="mt-0.5 size-6 shrink-0 cursor-pointer rounded-md accent-terra"
+          className="mt-0.5 size-5 shrink-0 cursor-pointer rounded-md accent-terra"
           {...props}
         />
         <span>{label}</span>

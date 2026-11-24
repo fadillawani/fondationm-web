@@ -9,13 +9,17 @@ export interface FieldControlProps {
 
 interface FormFieldProps {
   label: string
+  /** Complément du libellé en poids 600 gris (maquette : « (facultatif) »). */
+  labelNote?: string
   hint?: string
+  /** Couleur de l'aide : vert (mot de passe, par défaut), vert foncé, ou gris (aide descriptive). */
+  hintTone?: 'green' | 'darkGreen' | 'muted'
   error?: string
   required?: boolean
   children: (control: FieldControlProps) => ReactNode
 }
 
-export function FormField({ label, hint, error, required, children }: FormFieldProps) {
+export function FormField({ label, labelNote, hint, hintTone = 'green', error, required, children }: FormFieldProps) {
   const id = useId()
   const hintId = `${id}-aide`
   const errorId = `${id}-erreur`
@@ -25,6 +29,12 @@ export function FormField({ label, hint, error, required, children }: FormFieldP
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-[13px] font-extrabold text-ink">
         {label}
+        {labelNote && (
+          <>
+            {' '}
+            <span className="font-semibold text-muted">{labelNote}</span>
+          </>
+        )}
         {required && (
           <span aria-hidden="true" className="text-red">
             {' '}
@@ -39,7 +49,12 @@ export function FormField({ label, hint, error, required, children }: FormFieldP
         'aria-required': required || undefined,
       })}
       {hint && (
-        <p id={hintId} className="text-xs font-bold text-green">
+        <p
+          id={hintId}
+          className={
+            hintTone === 'muted' ? 'text-xs font-bold text-muted' : hintTone === 'darkGreen' ? 'text-xs font-bold text-[#3B5221]' : 'text-xs font-bold text-green'
+          }
+        >
           {hint}
         </p>
       )}

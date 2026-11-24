@@ -14,10 +14,12 @@ interface TabsProps<T extends string> {
   onChange: (value: T) => void
   /** Préfixe des identifiants : onglet `${idPrefix}-onglet-${value}`, panneau `${idPrefix}-panneau`. */
   idPrefix: string
+  /** 'md' : 44 px, 14 px (comptes) ; 'sm' : 40 px, 13 px (demandes). */
+  size?: 'md' | 'sm'
 }
 
 /** Onglets ARIA (activation automatique, flèches, Début / Fin), en pastilles défilantes. */
-export function Tabs<T extends string>({ label, items, value, onChange, idPrefix }: TabsProps<T>) {
+export function Tabs<T extends string>({ label, items, value, onChange, idPrefix, size = 'md' }: TabsProps<T>) {
   const refs = useRef<Record<string, HTMLButtonElement | null>>({})
 
   function move(event: KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -53,7 +55,8 @@ export function Tabs<T extends string>({ label, items, value, onChange, idPrefix
             onClick={() => onChange(item.value)}
             onKeyDown={(event) => move(event, index)}
             className={cn(
-              'inline-flex min-h-touch shrink-0 items-center whitespace-nowrap rounded-pill border-2 px-5 text-[15px] font-extrabold transition-colors',
+              'inline-flex shrink-0 items-center whitespace-nowrap rounded-pill border-2 font-black transition-colors',
+              size === 'md' ? 'min-h-touch px-4 text-sm' : 'min-h-10 px-3.5 text-[13px]',
               selected ? 'border-ink bg-ink text-white' : 'border-line bg-surface text-ink hover:border-muted',
             )}
           >

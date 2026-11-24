@@ -5,38 +5,14 @@ import { PATHS } from '../../auth/roles'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
-import { cn } from '../../lib/cn'
-import { formatSlot } from '../../lib/dateTime'
-import { STATE_CLASS, STATE_LABEL, type AgendaItem } from './agendaModel'
+import { formatSlot, formatTimeRange } from '../../lib/dateTime'
+import { STATE_LABEL, type AgendaItem } from './agendaModel'
 import { useDeleteSlot, type Meeting } from './speakerData'
 import { MEETING_FORMAT_LABEL, SLOT_FORMAT_DETAIL, classLine, closedByText, myAnswerLabel } from './speakerText'
 
 const DELETE_CONFLICT: Partial<Record<string, string>> = {
   SLOT_HAS_PENDING_MEETINGS: 'Ce créneau a reçu une demande en attente : il ne peut plus être retiré.',
   SLOT_NOT_AVAILABLE: "Ce créneau n'est plus libre : il ne peut plus être retiré.",
-}
-
-function StateTag({ item }: { item: AgendaItem }) {
-  return (
-    <span className={cn('inline-flex rounded-pill border-2 px-3 py-0.5 text-[13px] font-black', STATE_CLASS[item.state])}>
-      {STATE_LABEL[item.state]}
-    </span>
-  )
-}
-
-function Facts({ facts }: { facts: { label: string; value: string | null }[] }) {
-  return (
-    <dl className="grid gap-3">
-      {facts
-        .filter((fact): fact is { label: string; value: string } => Boolean(fact.value))
-        .map((fact) => (
-          <div key={fact.label} className="flex flex-col">
-            <dt className="text-xs font-black uppercase tracking-[0.08em] text-muted">{fact.label}</dt>
-            <dd className="font-bold text-ink">{fact.value}</dd>
-          </div>
-        ))}
-    </dl>
-  )
 }
 
 function requestLink(meeting: Meeting): string {
@@ -68,12 +44,19 @@ function FreeSlot({ item, onRemoved }: { item: AgendaItem; onRemoved: () => void
 
   return (
     <>
-      <h3 className="text-xl">Créneau libre · {formatSlot(item.start, item.end)}</h3>
-      <Facts facts={[{ label: 'Format accepté', value: slot ? SLOT_FORMAT_DETAIL[slot.formats] : null }]} />
-      <p className="font-semibold text-muted">Aucune demande pour l'instant. Les écoles de votre zone le voient en premier.</p>
+      <div className="flex flex-col gap-1">
+        <h3 className="text-[21px] lg:text-[23px]">Créneau libre · {formatTimeRange(item.start, item.end)}</h3>
+        {slot && <p className="text-[13px] font-bold text-muted lg:text-sm">{SLOT_FORMAT_DETAIL[slot.formats]}</p>}
+      </div>
+      <p className="text-sm font-semibold">Aucune demande pour l'instant. Les écoles de votre zone le voient en premier.</p>
       {error && <Alert tone="error">{error}</Alert>}
       {slot !== null && (
-        <Button variant="outline" size="md" className="self-start" onClick={() => setConfirming(true)}>
+        <Button
+          variant="outline"
+          size="md"
+          className="min-h-[46px] rounded-[14px] font-black"
+          onClick={() => setConfirming(true)}
+        >
           Retirer ce créneau
         </Button>
       )}
@@ -102,19 +85,45 @@ function FreeSlot({ item, onRemoved }: { item: AgendaItem; onRemoved: () => void
 
 function RequestedSlot({ item }: { item: AgendaItem }) {
   const pending = item.meetings.filter((meeting) => meeting.status === 'PENDING')
+  const toAnswer = pending.filter((meeting) => meeting.myDecision === 'PENDING').length
+  // Maquette : « 2 écoles demandent ce créneau », « Une école demande ce créneau », sinon accord donné.
+  const headline =
+    toAnswer > 1
+      ? `${toAnswer} écoles demandent ce créneau`
+      : toAnswer === 1
+        ? 'Une école demande ce créneau'
+        : 'Vous avez accepté, la Fondation M doit valider'
+  const format = item.slot ? SLOT_FORMAT_DETAIL[item.slot.formats] : null
   return (
     <>
-      <h3 className="text-xl">Créneau demandé · {formatSlot(item.start, item.end)}</h3>
-      <Facts facts={[{ label: 'Format accepté', value: item.slot ? SLOT_FORMAT_DETAIL[item.slot.formats] : null }]} />
+      <div className="flex flex-col gap-1">
+        <h3 className="text-[21px] lg:text-[23px]">{headline}</h3>
+        <p className="text-[13px] font-bold text-muted lg:text-sm">
+          {[formatTimeRange(item.start, item.end), format].filter(Boolean).join(' · ')}
+        </p>
+      </div>
       <ul aria-label="Demandes sur ce créneau" className="flex flex-col gap-2">
         {pending.map((meeting) => (
-          <li key={meeting.id} className="flex flex-col gap-1 rounded-block border-2 border-line p-3">
-            <span className="font-extrabold text-ink">{meeting.schoolName}</span>
-            {classLine(meeting) && <span className="text-sm font-semibold text-muted">{classLine(meeting)}</span>}
-            <span className="text-sm font-bold text-terra-dark">{myAnswerLabel(meeting)}</span>
+          <li key={meeting.id} className="flex flex-col gap-1 rounded-[14px] bg-canvas px-3.5 py-3">
+            <span className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[15px] font-black text-ink">{meeting.schoolName}</span>
+              <span
+                className={
+                  meeting.myDecision === 'PENDING'
+                    ? 'rounded-pill bg-yellow px-2 py-[3px] text-[11px] font-black text-ink'
+                    : 'rounded-pill bg-green px-2 py-[3px] text-[11px] font-black text-white'
+                }
+              >
+                {meeting.myDecision === 'PENDING' ? 'À traiter' : 'Acceptée'}
+              </span>
+            </span>
+            <span className="text-xs font-bold text-muted lg:text-[13px]">
+              {[meeting.schoolCity, meeting.classTitle].filter(Boolean).join(' · ')}
+            </span>
+            <span className="sr-only">{myAnswerLabel(meeting)}</span>
             <Link
               to={requestLink(meeting)}
-              className="inline-flex min-h-touch items-center self-start font-extrabold text-indigo underline"
+              className="inline-flex min-h-touch items-center self-start text-[13px] font-black text-indigo underline"
             >
               Répondre{' '}
               <span className="sr-only">à {meeting.schoolName}</span>
@@ -123,7 +132,7 @@ function RequestedSlot({ item }: { item: AgendaItem }) {
         ))}
       </ul>
       {pending.length > 1 && (
-        <p className="text-sm font-semibold text-muted">
+        <p className="text-[13px] font-bold text-[#7A4100]">
           Dès qu'une rencontre est confirmée sur ce créneau, l'autre demande est refusée automatiquement (« créneau
           pris »).
         </p>
@@ -136,23 +145,28 @@ function MeetingDetail({ item, meeting }: { item: AgendaItem; meeting: Meeting }
   const closed = item.state === 'CLOSED'
   return (
     <>
-      <h3 className="text-xl">{meeting.schoolName}</h3>
-      <Facts
-        facts={[
-          { label: 'Classe', value: meeting.classTitle || null },
-          { label: 'Horaire', value: formatSlot(item.start, item.end) },
-          { label: 'Format', value: meeting.format ? MEETING_FORMAT_LABEL[meeting.format] : null },
-          { label: 'Lieu', value: meeting.place },
-          { label: 'Clôture', value: closed ? closedByText(meeting) : null },
-          { label: 'Motif', value: closed ? meeting.reason : null },
-        ]}
-      />
+      <div className="flex flex-col gap-1">
+        <h3 className="text-[21px] lg:text-[23px]">{meeting.schoolName}</h3>
+        {classLine(meeting) && <p className="text-[13px] font-bold text-muted lg:text-sm">{classLine(meeting)}</p>}
+      </div>
+      <dl className="grid grid-cols-[64px_1fr] gap-x-3 gap-y-1.5 text-sm">
+        <dt className="font-bold text-muted">Heure</dt>
+        <dd className="font-black">{formatTimeRange(item.start, item.end)}</dd>
+        <dt className="font-bold text-muted">Lieu</dt>
+        <dd className="font-black">
+          {[meeting.format ? MEETING_FORMAT_LABEL[meeting.format] : null, meeting.place].filter(Boolean).join(' · ') || '—'}
+        </dd>
+      </dl>
+      {closed && (
+        <div className="flex flex-col gap-1 rounded-[14px] bg-canvas px-3.5 py-3 text-sm font-semibold">
+          {closedByText(meeting) && <span className="font-black">{closedByText(meeting)}</span>}
+          {meeting.reason && <span>{meeting.reason}</span>}
+        </div>
+      )}
       {meeting.message && (
-        <section aria-label="Le mot de l'école" className="flex flex-col gap-2">
-          <h4 className="text-lg">Le mot de l'école</h4>
-          <blockquote className="whitespace-pre-line rounded-block border-l-[6px] border-orange bg-canvas px-4 py-3 font-semibold italic text-ink">
-            {meeting.message}
-          </blockquote>
+        <section aria-label="Le mot de l'école" className="flex flex-col gap-1 rounded-[14px] bg-canvas px-3.5 py-3">
+          <h4 className="font-sans text-[13px] font-black">Le mot de l'école</h4>
+          <blockquote className="whitespace-pre-line text-sm font-semibold text-ink">« {meeting.message} »</blockquote>
         </section>
       )}
     </>
@@ -167,7 +181,6 @@ interface AgendaItemDetailProps {
 export function AgendaItemDetail({ item, onRemoved }: AgendaItemDetailProps) {
   return (
     <article aria-label={`${STATE_LABEL[item.state]}, ${formatSlot(item.start, item.end)}`} className="flex flex-col gap-4">
-      <StateTag item={item} />
       {item.state === 'FREE' && <FreeSlot item={item} onRemoved={onRemoved} />}
       {item.state === 'REQUESTED' && <RequestedSlot item={item} />}
       {item.main !== null && <MeetingDetail item={item} meeting={item.main} />}

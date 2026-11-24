@@ -66,13 +66,19 @@ export function MeetingDetail({ meeting, jobTitle, feedback, upcoming }: Meeting
         </div>
       </div>
 
-      <dl className="grid grid-cols-[64px_1fr] gap-x-3 gap-y-1.5 text-sm">
-        <dt className="font-bold text-muted">Date</dt>
-        <dd className="font-black">{start ? detailDate(start) : '—'}</dd>
-        <dt className="font-bold text-muted">Classe</dt>
-        <dd className="font-black">{meeting.classTitle || '—'}</dd>
-        <dt className="font-bold text-muted">Lieu</dt>
-        <dd className="font-black">{place ?? '—'}</dd>
+      {/* Mobile (maquette) : date en gras, puis « classe · lieu » en gris, sans libellés visibles. */}
+      <dl className="flex flex-wrap gap-x-1 text-sm lg:grid lg:grid-cols-[64px_1fr] lg:gap-x-3 lg:gap-y-1.5">
+        <dt className="sr-only font-bold text-muted lg:not-sr-only">Date</dt>
+        <dd className="basis-full font-black lg:basis-auto">{start ? detailDate(start) : '—'}</dd>
+        <dt className="sr-only font-bold text-muted lg:not-sr-only">Classe</dt>
+        <dd className="font-bold text-muted lg:font-black lg:text-ink">{meeting.classTitle || '—'}</dd>
+        <dt className="sr-only font-bold text-muted lg:not-sr-only">Lieu</dt>
+        <dd className="font-bold text-muted lg:font-black lg:text-ink">
+          <span aria-hidden="true" className="lg:hidden">
+            ·{' '}
+          </span>
+          {place ?? '—'}
+        </dd>
       </dl>
 
       <div className="grid grid-cols-2 gap-2">
@@ -80,15 +86,19 @@ export function MeetingDetail({ meeting, jobTitle, feedback, upcoming }: Meeting
         <DecisionBox who="Fondation M" value={decision.foundation} />
       </div>
 
-      <div className="flex flex-col gap-1 rounded-[14px] bg-canvas px-3.5 py-3">
-        <span className="text-[13px] font-black">{note.title}</span>
+      {/* Mobile (maquette) : « Titre. texte » en ligne, sans bloc ; PC : bloc #F7F3EA. */}
+      <div className="text-[13px] leading-[1.45] lg:flex lg:flex-col lg:gap-1 lg:rounded-[14px] lg:bg-canvas lg:px-3.5 lg:py-3">
+        <span className="font-black">
+          {note.title}
+          <span className="lg:hidden">.</span>
+        </span>{' '}
         {note.mobileText ? (
           <>
-            <span className="hidden text-sm font-semibold leading-[1.45] lg:block">{note.text}</span>
-            <span className="text-[13px] font-semibold leading-[1.45] lg:hidden">{note.mobileText}</span>
+            <span className="hidden text-sm font-semibold lg:block">{note.text}</span>
+            <span className="font-semibold lg:hidden">{note.mobileText}</span>
           </>
         ) : (
-          <span className="text-[13px] font-semibold leading-[1.45] lg:text-sm">{note.text}</span>
+          <span className="font-semibold lg:text-sm">{note.text}</span>
         )}
       </div>
 

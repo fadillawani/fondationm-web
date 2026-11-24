@@ -4,11 +4,12 @@ import { Alert } from '../../components/ui/Alert'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Initials } from '../../components/ui/Initials'
+import { parseIso } from '../../lib/dateTime'
 import { formatDate } from '../../lib/formatDate'
 import { SCHOOL_TYPE_LABELS, SECTOR_LABELS } from '../../lib/referenceData'
 import { applyServerFieldErrors } from '../../lib/serverFieldErrors'
 import { isAlreadyProcessed, useRejectAccount, useValidateAccount, type Account } from './accounts'
-import { STATUS_BADGE, contextLine, kindLabel } from './accountText'
+import { STATUS_BADGE, detailLine, kindLabel } from './accountText'
 import { RejectForm, type RejectValues } from './RejectForm'
 import { ResultBlock } from './ResultBlock'
 
@@ -17,15 +18,34 @@ interface Fact {
   value: string | null
 }
 
+const DAY_MS = 86_400_000
+
+/** « Validé le » / « Refusé le » et « Délai » (maquette, comptes traités) : calculés depuis createdAt et decidedAt. */
+function decisionFacts(account: Account): Fact[] {
+  if (account.status === 'PENDING') return []
+  const decided = parseIso(account.decidedAt)
+  const created = parseIso(account.createdAt)
+  const days = decided && created ? Math.max(0, Math.round((decided.getTime() - created.getTime()) / DAY_MS)) : null
+  return [
+    { label: account.status === 'VALIDATED' ? 'Validé le' : 'Refusé le', value: formatDate(account.decidedAt) },
+    { label: 'Délai', value: days === null ? null : `${days} jour${days > 1 ? 's' : ''}` },
+  ]
+}
+
+/**
+ * Faits de la maquette en tête (école : Ville, Type, Fonction ; intervenant : Zone, Secteur, Structure),
+ * puis les données utiles à la vérification (pays, coordonnées, charte), absentes de la maquette.
+ */
 function factsOf(account: Account): Fact[] {
   const details = account.details
   const charter = { label: 'Charte acceptée le', value: formatDate(details?.charterAcceptedAt ?? null) }
   if (details?.kind === 'school') {
     return [
       { label: 'Ville', value: details.city },
+      { label: 'Type', value: details.schoolType ? SCHOOL_TYPE_LABELS[details.schoolType] : null },
+      { label: 'Fonction', value: details.referentRole },
+      ...decisionFacts(account),
       { label: 'Pays', value: details.country },
-      { label: "Type d'établissement", value: details.schoolType ? SCHOOL_TYPE_LABELS[details.schoolType] : null },
-      { label: 'Fonction du référent', value: details.referentRole },
       { label: 'E-mail', value: account.email },
       { label: 'Téléphone', value: details.phone },
       charter,
@@ -33,11 +53,12 @@ function factsOf(account: Account): Fact[] {
   }
   if (details?.kind === 'speaker') {
     return [
-      { label: 'Ville', value: details.city },
-      { label: 'Pays', value: details.country },
+      { label: 'Zone', value: details.city },
       { label: 'Secteur', value: details.sector ? SECTOR_LABELS[details.sector].name : null },
-      { label: 'Métier', value: details.jobTitle },
       { label: 'Structure', value: details.organization },
+      ...decisionFacts(account),
+      { label: 'Pays', value: details.country },
+      { label: 'Métier', value: details.jobTitle },
       { label: 'E-mail', value: account.email },
       { label: 'Téléphone', value: details.phone },
       charter,
@@ -61,7 +82,7 @@ export function AccountDetail({ account, onProcessed, onConflict }: AccountDetai
   const [actionError, setActionError] = useState<string | null>(null)
   const status = STATUS_BADGE[account.status]
   const sent = formatDate(account.createdAt)
-  const context = contextLine(account)
+  const context = detailLine(account)
   const facts = factsOf(account).filter((fact): fact is { label: string; value: string } => Boolean(fact.value))
   const details = account.details
   const busy = validate.isPending || reject.isPending
@@ -103,42 +124,50 @@ export function AccountDetail({ account, onProcessed, onConflict }: AccountDetai
   }
 
   return (
-    <article aria-labelledby={`compte-${account.id}`} className="flex flex-col gap-5 rounded-card bg-surface p-5 shadow-card lg:p-7">
+    <article
+      aria-labelledby={`compte-${account.id}`}
+      className="flex flex-col gap-4 rounded-[22px] bg-surface p-[18px] lg:gap-5 lg:rounded-[24px] lg:p-6"
+    >
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-extrabold text-muted">
-          {kindLabel(account)}
-          {sent && ` · demande envoyée le ${sent}`}
+        <p className="text-xs font-bold text-muted lg:text-[13px]">
+          <span className="hidden lg:inline">
+            {kindLabel(account)}
+            {sent && ` · demande envoyée le ${sent}`}
+          </span>
+          <span className="lg:hidden">{sent ? `Envoyée le ${sent}` : kindLabel(account)}</span>
         </p>
-        <Badge tone={status.tone}>{status.label}</Badge>
+        <Badge tone={status.tone} size="md">
+          {status.label}
+        </Badge>
       </header>
 
-      <div className="flex items-center gap-4">
-        <Initials name={account.name} tone={account.role === 'SCHOOL' ? 'school' : 'speaker'} size="lg" />
+      <div className="flex items-center gap-3.5">
+        <Initials name={account.name} tone={account.role === 'SCHOOL' ? 'school' : 'speaker'} size="detail" />
         <div className="min-w-0">
-          <h2 id={`compte-${account.id}`} className="text-2xl leading-tight text-ink md:text-[28px]">
+          <h2 id={`compte-${account.id}`} className="text-[23px] leading-tight text-ink lg:text-[28px]">
             {account.name}
           </h2>
-          {context && <p className="font-semibold text-muted">{context}</p>}
+          {context && <p className="text-[13px] font-extrabold text-muted lg:text-[15px]">{context}</p>}
         </div>
       </div>
 
-      <dl className="grid gap-3 sm:grid-cols-2">
+      <dl className="grid grid-cols-2 gap-2 lg:gap-2.5">
         {facts.map((fact) => (
-          <div key={fact.label} className="flex flex-col">
-            <dt className="text-xs font-black uppercase tracking-[0.08em] text-muted">{fact.label}</dt>
-            <dd className="break-words font-bold text-ink">{fact.value}</dd>
+          <div key={fact.label} className="flex min-w-0 flex-col rounded-[12px] bg-canvas p-2.5 lg:rounded-[14px] lg:px-3.5 lg:py-3">
+            <dt className="text-[10px] font-black uppercase text-muted lg:text-[11px]">{fact.label}</dt>
+            <dd className="break-words text-sm font-black text-ink lg:text-[15px]">{fact.value}</dd>
           </div>
         ))}
       </dl>
 
       {details?.kind === 'speaker' && details.skills.length > 0 && (
         <section aria-labelledby={`competences-${account.id}`} className="flex flex-col gap-2">
-          <h3 id={`competences-${account.id}`} className="text-lg">
+          <h3 id={`competences-${account.id}`} className="font-sans text-[13px] font-black">
             Compétences déclarées
           </h3>
           <ul className="flex flex-wrap gap-2">
             {details.skills.map((skill) => (
-              <li key={skill} className="rounded-pill bg-cream px-3 py-1 text-sm font-extrabold text-ink">
+              <li key={skill} className="rounded-pill bg-ink px-2.5 py-1 text-xs font-extrabold text-cream lg:px-3 lg:py-[5px] lg:text-[13px]">
                 {skill}
               </li>
             ))}
@@ -147,13 +176,14 @@ export function AccountDetail({ account, onProcessed, onConflict }: AccountDetai
       )}
 
       {details?.kind === 'speaker' && details.motivation && (
-        <section aria-labelledby={`motivation-${account.id}`} className="flex flex-col gap-2">
-          <h3 id={`motivation-${account.id}`} className="text-lg">
+        <section aria-labelledby={`motivation-${account.id}`} className="flex flex-col gap-1.5">
+          <blockquote className="whitespace-pre-line rounded-[12px] bg-cream p-3 text-sm font-semibold text-ink lg:rounded-[14px] lg:px-4 lg:py-3.5 lg:text-[15px]">
+            « {details.motivation} »
+          </blockquote>
+          {/* Maquette : « Pourquoi il / elle veut transmettre » ; le genre n'est pas connu. */}
+          <h3 id={`motivation-${account.id}`} className="font-sans text-xs font-black">
             Pourquoi il ou elle veut transmettre
           </h3>
-          <blockquote className="whitespace-pre-line rounded-block border-l-[6px] border-orange bg-canvas px-4 py-3 font-semibold italic text-ink">
-            {details.motivation}
-          </blockquote>
         </section>
       )}
 
@@ -163,11 +193,22 @@ export function AccountDetail({ account, onProcessed, onConflict }: AccountDetai
         rejecting ? (
           <RejectForm submitting={reject.isPending} onSubmit={handleReject} onCancel={() => setRejecting(false)} />
         ) : (
-          <div className="flex flex-wrap gap-2">
-            <Button variant="success" size="md" loading={validate.isPending} disabled={busy} onClick={handleValidate}>
+          <div className="flex flex-col gap-2.5 sm:flex-row">
+            <Button
+              variant="success"
+              loading={validate.isPending}
+              disabled={busy}
+              onClick={handleValidate}
+              className="min-h-[54px] flex-1 text-[19px]"
+            >
               Valider le compte
             </Button>
-            <Button variant="outline" size="md" disabled={busy} onClick={() => setRejecting(true)}>
+            <Button
+              variant="outlineInk"
+              disabled={busy}
+              onClick={() => setRejecting(true)}
+              className="min-h-[50px] font-sans text-[15px] font-black lg:min-h-[54px]"
+            >
               Refuser
             </Button>
           </div>

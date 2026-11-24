@@ -152,6 +152,7 @@ export function AccountsPage() {
 
       <div className={cn(detailOpen && 'hidden lg:block')}>
         <Tabs
+          size="md"
           label="Catégories de comptes"
           idPrefix={TAB_IDS}
           value={tab}
@@ -172,9 +173,17 @@ export function AccountsPage() {
 
       <div role="tabpanel" id={panelId(TAB_IDS)} aria-labelledby={tabId(TAB_IDS, tab)} className="flex flex-col gap-4">
         {tab === 'intervenants' && (
-          <p className={cn('rounded-block bg-cream-soft px-4 py-3 text-sm font-semibold text-ink', detailOpen && 'hidden lg:block')}>
-            Pour les intervenants, la validation n'est pas une sélection : vérifiez simplement l'identité et la
-            cohérence du profil, sans critère de qualité.
+          <p
+            className={cn(
+              'rounded-[12px] bg-[#DCE3EF] px-3 py-2.5 text-[13px] font-bold text-ink lg:rounded-[14px] lg:px-4 lg:py-3 lg:text-sm',
+              detailOpen && 'hidden lg:block',
+            )}
+          >
+            <span className="hidden lg:inline">
+              Pour les intervenants, la validation n'est pas une sélection : vérifiez simplement l'identité et la
+              cohérence du profil, sans critère de qualité.
+            </span>
+            <span className="lg:hidden">Ce n'est pas une sélection : vérifiez l'identité, sans critère de qualité.</span>
           </p>
         )}
 
@@ -235,14 +244,19 @@ export function AccountsPage() {
             </div>
 
             <div className={cn('flex flex-col gap-4', !detailOpen && 'hidden lg:flex')}>
-              <button
-                type="button"
-                onClick={back}
-                className="inline-flex min-h-touch items-center gap-2 self-start rounded-button px-2 font-extrabold text-indigo lg:hidden"
-              >
-                <BackIcon className="size-5" />
-                Retour
-              </button>
+              <div className="flex items-center gap-1 lg:hidden">
+                <button
+                  type="button"
+                  onClick={back}
+                  aria-label="Retour à la liste"
+                  className="inline-flex size-11 items-center justify-center rounded-[14px] text-ink"
+                >
+                  <BackIcon className="size-6" />
+                </button>
+                {detail !== undefined && (
+                  <span className="text-sm font-black">{detail.role === 'SCHOOL' ? 'Établissement' : 'Intervenant'}</span>
+                )}
+              </div>
               {lastResult !== null && <ResultBlock account={lastResult} live />}
               {detail !== undefined && (
                 <AccountDetail

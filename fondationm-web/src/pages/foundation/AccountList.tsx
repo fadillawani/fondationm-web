@@ -34,7 +34,9 @@ export function AccountList({ label, accounts, selectedId, onSelect }: AccountLi
                 <span className="truncate font-display text-lg leading-tight text-ink">{account.name}</span>
                 {context && <span className="truncate text-[13px] font-bold text-muted">{context}</span>}
               </span>
-              <Badge tone={status.tone}>{status.label}</Badge>
+              <Badge tone={status.tone} size="sm">
+                {status.label}
+              </Badge>
             </button>
           </li>
         )

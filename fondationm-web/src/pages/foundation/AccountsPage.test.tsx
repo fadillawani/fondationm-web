@@ -138,7 +138,8 @@ describe('Comptes à valider — listes et détail', () => {
     const rows = within(schools).getAllByRole('button')
     expect(rows).toHaveLength(2)
     expect(rows[0]).toHaveTextContent('Lycée des Tisserands')
-    expect(rows[0]).toHaveTextContent('Lycée · Dakar')
+    // Maquette : « ville · type ».
+    expect(rows[0]).toHaveTextContent('Dakar · Lycée')
     expect(rows[0]).toHaveTextContent('En attente')
     expect(screen.getByRole('tab', { name: 'Écoles · 2' })).toHaveAttribute('aria-selected', 'true')
 
@@ -150,7 +151,7 @@ describe('Comptes à valider — listes et détail', () => {
     await user.click(screen.getByRole('tab', { name: 'Intervenants · 1' }))
 
     const speakers = await screen.findByRole('list', { name: 'Intervenants en attente' })
-    expect(within(speakers).getByRole('button')).toHaveTextContent('Ingénieure réseaux · Numérique · Thiès')
+    expect(within(speakers).getByRole('button')).toHaveTextContent('Thiès · Réseaux, Cybersécurité')
     expect(screen.getByText(/la validation n'est pas une sélection/)).toBeInTheDocument()
     expect(router.state.location.search).toBe('?onglet=intervenants')
   })
@@ -164,8 +165,9 @@ describe('Comptes à valider — listes et détail', () => {
     expect(card.getByRole('heading', { name: 'Lycée des Tisserands' })).toBeInTheDocument()
     expect(factValue(card, 'Ville')).toBe('Dakar')
     expect(factValue(card, 'Pays')).toBe('Sénégal')
-    expect(factValue(card, "Type d'établissement")).toBe('Lycée')
-    expect(factValue(card, 'Fonction du référent')).toBe('Proviseure')
+    expect(card.getByText('Lycée · Dakar, Sénégal')).toBeInTheDocument()
+    expect(factValue(card, 'Type')).toBe('Lycée')
+    expect(factValue(card, 'Fonction')).toBe('Proviseure')
     expect(factValue(card, 'E-mail')).toBe('referent@ecole.test')
     expect(factValue(card, 'Téléphone')).toBe('+221 70 000 00 01')
     expect(factValue(card, 'Charte acceptée le')).toBe('20 novembre 2026')
@@ -179,6 +181,8 @@ describe('Comptes à valider — listes et détail', () => {
 
     const card = await detail()
     expect(card.getByText('Intervenant · demande envoyée le 21 novembre 2026')).toBeInTheDocument()
+    expect(card.getByText('Ingénieure réseaux · Numérique')).toBeInTheDocument()
+    expect(factValue(card, 'Zone')).toBe('Thiès')
     expect(factValue(card, 'Secteur')).toBe('Numérique')
     expect(factValue(card, 'Métier')).toBe('Ingénieure réseaux')
     expect(card.queryByText('Structure', { selector: 'dt' })).not.toBeInTheDocument()
@@ -268,8 +272,9 @@ describe('Comptes à valider — actions', () => {
     await user.click(card.getByRole('button', { name: 'Valider le compte' }))
 
     const result = await screen.findByRole('status', { name: 'Compte validé' })
-    expect(result).toHaveTextContent('Lycée des Tisserands peut maintenant se connecter et utiliser la plateforme.')
-    expect(result).toHaveTextContent('Décision du 24 novembre 2026')
+    expect(result).toHaveTextContent(
+      'L’établissement accède maintenant à son tableau de bord et peut demander des rencontres.',
+    )
     expect(result).not.toHaveTextContent(/e-mail/i)
     expect(validated).toEqual([`/api/foundation/accounts/${schoolAccount().id}/validate`])
 
@@ -374,7 +379,9 @@ describe('Comptes à valider — actions', () => {
     const card = await detail()
     const result = card.getByRole('region', { name: 'Compte refusé' })
     expect(result).toHaveTextContent('Motif transmis : « Profil incomplet : métier non précisé. »')
-    expect(result).toHaveTextContent('Décision du 22 novembre 2026')
+    // Maquette : date et délai de la décision dans les faits.
+    expect(factValue(card, 'Refusé le')).toBe('22 novembre 2026')
+    expect(factValue(card, 'Délai')).toBe('1 jour')
     expect(card.queryByRole('button', { name: 'Valider le compte' })).not.toBeInTheDocument()
 
     const queries = fetchMock.mock.calls.map(([call]) => new URL(call.url).search)

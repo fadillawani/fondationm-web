@@ -13,7 +13,8 @@ export function RejectForm(props: RejectFormProps) {
     <ReasonForm
       {...props}
       formLabel="Refuser le compte"
-      fieldLabel="Motif du refus (transmis à la personne)"
+      fieldLabel="Motif du refus"
+      fieldNote="(transmis à la personne)"
       placeholder="Ex. : nous n'avons pas pu vérifier l'établissement. Pouvez-vous nous envoyer un justificatif ?"
       maxLength={1000}
       requiredMessage="Indiquez le motif du refus : il est transmis à la personne."

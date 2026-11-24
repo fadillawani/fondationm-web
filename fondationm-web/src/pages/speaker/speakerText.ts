@@ -1,10 +1,10 @@
-import { parseIso, formatShortDay, formatSlot, formatTime } from '../../lib/dateTime'
+import { formatCompactDay, formatSlot, formatTime, parseIso } from '../../lib/dateTime'
 import type { Meeting, MeetingFormat, MeetingStatus, SlotFormats } from './speakerData'
 
 export const SLOT_FORMAT_LABEL: Record<SlotFormats, string> = {
   IN_PERSON: 'En classe',
   ONLINE: 'En ligne',
-  BOTH: 'Les deux',
+  BOTH: 'En classe ou en ligne',
 }
 
 export const SLOT_FORMAT_DETAIL: Record<SlotFormats, string> = {
@@ -59,7 +59,7 @@ export function slotText(meeting: Meeting): string {
 
 export function shortSlotText(meeting: Meeting): string {
   const start = parseIso(meeting.slot?.startAt ?? null)
-  return start ? `${formatShortDay(start)}, ${formatTime(start)}` : 'Créneau inconnu'
+  return start ? `${formatCompactDay(start)} · ${formatTime(start)}` : 'Créneau inconnu'
 }
 
 /** « Terminale S2 · 32 élèves · Dakar ». */

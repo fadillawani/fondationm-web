@@ -7,6 +7,7 @@ import {
   STATE_LABEL,
   STATE_SHORT,
   canPublishOn,
+  chipText,
   itemLabel,
   type AgendaItem,
 } from './agendaModel'
@@ -40,16 +41,18 @@ export function MonthGrid({
         month={month}
         now={now}
         caption={`Calendrier de ${monthLabel}`}
-        className="border-spacing-1"
-        headerClassName="pb-1 text-xs font-black uppercase tracking-[0.08em] text-muted"
-        cellClassName={(_day, { key, inMonth }) =>
+        className="border-spacing-1.5"
+        headerClassName="text-xs font-black uppercase text-muted"
+        cellClassName={(_day, { key, inMonth, isToday, isPast }) =>
           cn(
-            'h-28 rounded-field border-2 p-1 align-top',
-            selectedDay === key ? 'border-ink' : 'border-line',
-            inMonth ? 'bg-surface' : 'bg-canvas',
+            'h-[108px] rounded-[12px] p-1.5 align-top',
+            !inMonth ? 'border-0 bg-transparent' : isToday ? 'border-2 border-terra' : 'border border-[#EDE6D6]',
+            inMonth && (isPast ? 'bg-[#F1EBDD]' : 'bg-surface'),
+            selectedDay === key && 'outline-[3px] outline-offset-1 outline-ink outline',
           )
         }
-        renderDay={(day, { key, inMonth, isToday }) => {
+        renderDay={(day, { key, inMonth, isToday, isPast }) => {
+          if (!inMonth) return null
           const items = byDay.get(key) ?? []
           return (
             <div className="flex h-full flex-col gap-1">
@@ -62,8 +65,8 @@ export function MonthGrid({
                   items.length === 0 ? 'rien de prévu' : `${items.length} élément${items.length > 1 ? 's' : ''}`
                 }`}
                 className={cn(
-                  'inline-flex min-h-8 min-w-8 items-center justify-center self-start rounded-pill text-sm font-black',
-                  isToday ? 'bg-terra text-white' : inMonth ? 'text-ink' : 'text-muted',
+                  'inline-flex h-[26px] min-w-[26px] items-center justify-center self-start rounded-pill px-1 text-[13px] font-black',
+                  isToday ? 'bg-terra text-white' : isPast ? 'text-muted' : 'text-ink',
                 )}
               >
                 {day.getDate()}
@@ -76,13 +79,16 @@ export function MonthGrid({
                   aria-pressed={selectedItem === item.key}
                   aria-label={itemLabel(item)}
                   className={cn(
-                    'flex flex-col rounded-[8px] px-1 py-0.5 text-left text-[11px] leading-tight font-extrabold',
+                    'flex min-h-[38px] w-full flex-col justify-center overflow-hidden rounded-[8px] px-1.5 py-[3px] text-left text-xs font-extrabold leading-tight',
                     STATE_CLASS[item.state],
-                    selectedItem === item.key && 'ring-2 ring-ink ring-offset-1',
+                    selectedItem === item.key && 'outline-[3px] outline-offset-1 outline-ink outline',
                   )}
                 >
-                  <span>{formatTime(item.start)}</span>
-                  <span className="font-bold">{STATE_SHORT[item.state]}</span>
+                  <span>{chipText(item, formatTime(item.start))}</span>
+                  {/* Confirmé / Réalisé : la maquette n'affiche que la ville ; l'état reste écrit (jamais la couleur seule). */}
+                  {(item.state === 'CONFIRMED' || item.state === 'COMPLETED') && (
+                    <span className="font-bold no-underline">{STATE_SHORT[item.state]}</span>
+                  )}
                 </button>
               ))}
               {canPublishOn(day, now) && (
@@ -90,7 +96,10 @@ export function MonthGrid({
                   type="button"
                   onClick={() => onNewSlot(day)}
                   aria-label={`Publier un créneau le ${formatDayWithYear(day)}`}
-                  className="mt-auto rounded-[8px] border border-dashed border-muted px-1 text-[11px] font-extrabold text-muted hover:border-ink hover:text-ink"
+                  className={cn(
+                    'mt-auto min-h-[30px] rounded-[8px] border-2 border-dashed px-1 text-xs font-black text-[#3B5221]',
+                    selectedDay === key ? 'border-green bg-[#E8EEDF]' : 'border-[#C9BFA8] bg-transparent',
+                  )}
                 >
                   + Créneau
                 </button>
@@ -100,9 +109,9 @@ export function MonthGrid({
         }}
       />
 
-      <ul aria-label="Légende" className="flex flex-wrap gap-x-4 gap-y-2">
+      <ul aria-label="Légende" className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-extrabold text-muted">
         {AGENDA_STATES.map((state) => (
-          <li key={state} className="flex items-center gap-2 text-sm font-bold text-ink">
+          <li key={state} className="flex items-center gap-1.5">
             <span aria-hidden="true" className={cn('size-3.5 rounded-[4px]', STATE_CLASS[state])} />
             {STATE_LABEL[state]}
             {state === 'FREE' && ' (disponible)'}

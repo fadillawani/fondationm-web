@@ -1,6 +1,6 @@
 # État du frontend — Fondation M
 
-Dernière mise à jour : 24 novembre 2026 — lot F5 (« Mes rencontres » de l'école, socle commun conforme à la maquette).
+Dernière mise à jour : 24 novembre 2026 — lot F5.1 (conformité à la maquette de F1 à F5).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 
@@ -15,11 +15,11 @@ Dernière mise à jour : 24 novembre 2026 — lot F5 (« Mes rencontres » de l'
 | F3  | Espace intervenant : navigation, « Mon agenda » (calendrier, créneaux), « Demandes reçues » (accepter, refuser) | Terminé |
 | F4  | Espace établissement : « Intervenants disponibles » (annuaire, carte du réseau), « Demander une rencontre » ; thèmes de barre latérale par persona | Terminé |
 | F5  | « Mes rencontres » de l'école (calendrier, détail, listes) ; socle commun aligné sur la maquette (barres latérales, navigation basse blanche, en-têtes de page, carte utilisateur) ; corrections D1, E2, E5, B2, C2, F2 | Terminé |
-| F5.1 | Conformité à la maquette : écarts restants B, C, D, E, F, G (section « Écarts de design restants ») + agenda mobile en calendrier compact | À faire |
+| F5.1 | Conformité à la maquette de F1 à F5 (valeur par valeur), agenda mobile en calendrier compact | Terminé |
 | F6+ | Autres écrans métier (mon établissement, retours d'expérience, tableau de bord Fondation, donateurs…) | À faire  |
 
-Vérifications au moment de la livraison de F5 : `npm run build`, `npm run lint` et `npm test`
-(152 tests) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F5.1 : `npm run build`, `npm run lint` et `npm test`
+(153 tests) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -46,6 +46,132 @@ Vérifications au moment de la livraison de F5 : `npm run build`, `npm run lint`
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F5.1 livre
+
+Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddings, hauteurs, textes, ordre,
+états) entre `docs/maquette/` et le code, écran par écran.
+
+- **F1 — inscription, attente, connexion** (W1-E1, W2-E1, W2-E7 ; valeurs communes de W3/W4/W5-connexion) :
+  1. accroche mobile de l'école « Des professionnels bénévoles rencontrent vos classes. La Fondation M accompagne chaque rencontre. » ;
+  2. onglets d'accès en contrôle segmenté (`#F7F3EA`, rayon 16, padding 6 ; onglets rayon 12, 15 px) ;
+  3. onglet actif école `#2B337A`/`#FDE7A6` (au lieu de terracotta) ;
+  4. onglet intervenant « Devenir intervenant » ;
+  5. titre du formulaire Lilita 30 (26 sur mobile) ;
+  6. libellé « Type » (au lieu de « Type d'établissement ») ;
+  7. libellé « Fonction » (au lieu de « Votre fonction »), placeholder retiré ;
+  8. « Zone (ville) » bordure 2 px `#B8492A`, poids 700 ;
+  9. case à cocher 20 px, libellé 14 px / 600 `#4A4A57` ;
+  10. lien « Lire la charte » retiré des formulaires (absent de la maquette) ;
+  11. phrases de bas de formulaire en 13 px / 700 ;
+  12. étapes de la colonne en poids 800 ;
+  13. ligne « Une question ? contact@fondationm.sn · +221 33 800 00 00 » (13 px / 700, téléphone de la maquette) ;
+  14. carte du formulaire rayon 24 sur mobile ;
+  15. « Votre métier », « Votre secteur » + aide « Le secteur principal de votre métier. Il aide les écoles à vous trouver. » (12 px / 700 gris) ;
+  16. « Structure » et « Pourquoi voulez-vous transmettre ? » avec mention « (facultatif…) » en poids 600 gris ;
+  17. aide du mot de passe intervenant en `#3B5221` ;
+  18. légendes de groupe interlettrage 0,1em ;
+  19. attente : en-tête blanc (logo Lilita 28 terracotta, « {établissement} » / « {nom} · intervenant » 14 px / 700, « Se déconnecter ») ;
+  20. pastille « Compte en attente » (intervenant « Compte en attente de validation »), 13 px / 900 ;
+  21. titre intervenant « Merci {Prénom}, les jeunes vont avoir de la chance » ;
+  22. textes d'introduction PC et mobile de la maquette (sans promesse d'e-mail) ;
+  23. frise : ronds 32 px (28 mobile), terminé vert coché, en cours crème bordure 4 px jaune point terracotta, à venir bordure 3 px `#C9BFA8`, traits 4 px ; horizontale PC, verticale mobile ; `aria-current="step"` ;
+  24. détails « Terminé · 12 nov, 16h42 » (`#3B5221`), « En cours par la Fondation M » (`#8A5F00`), « À venir · choisissez un intervenant » / « À venir · publiez vos disponibilités » ;
+  25. étape 4 intervenant « Vos créneaux » ;
+  26. bloc « Votre demande » / « Votre profil » (rayon 24, padding 28, titre Lilita 22 majuscules ; « Établissement (lycée) », « Pays · zone », « Référent », « Contact » ; profil intervenant avec compétences en pastilles) ;
+  27. bloc « En attendant » `#2B337A` (école) / `#1B1F3B` (intervenant), textes PC et mobile de la maquette, « Lire la charte des rencontres » (inactif) ;
+  28. page « refusé » dans la même carte (rayon 28, pastille rouge) ;
+  29. connexion : phrase de bas 13 px / 700.
+  Le champ « Votre secteur » était déjà une liste déroulante obligatoire (valeurs exactes de l'énumération,
+  libellés français centralisés dans `lib/referenceData.ts`, réutilisés par l'annuaire) : vérifié, inchangé.
+- **F2 — comptes à valider** (W3-comptes) :
+  1. texte d'aide sur `#DCE3EF` rayon 14, version mobile « Ce n'est pas une sélection : vérifiez l'identité, sans critère de qualité. » ;
+  2. ligne de liste « ville · type » / « zone · 2 compétences » ;
+  3. pastille de liste 11 px ;
+  4. onglets 44 px, 14 px / 900 ;
+  5. carte de détail rayon 24, padding 24 (22 / 18 mobile), sans ombre ;
+  6. en-tête « {type} · demande envoyée le … » 13 px / 700 ; mobile « Envoyée le … » ;
+  7. avatar 64 px rayon 20 (54 / 16 mobile) ;
+  8. nom Lilita 28 (23 mobile) ;
+  9. sous-titre « Lycée · Ville, Pays » / « Métier · Structure » 15 px / 800 ;
+  10. faits dans des cases `#F7F3EA` rayon 14 (libellé 11 px / 900, valeur 15 px / 900) ;
+  11. libellés « Type », « Fonction », « Zone » ;
+  12. « Validé le / Refusé le » et « Délai » pour les comptes traités (calculés depuis `createdAt` et `decidedAt`) ;
+  13. compétences `#1B1F3B`/`#FDE7A6` ;
+  14. citation sur `#FDE7A6` entre « », puis « Pourquoi il ou elle veut transmettre » 12 px / 900 ;
+  15. « Valider le compte » 54 px Lilita 19 ; « Refuser » bordure 2 px encre ;
+  16. formulaire de refus dans un bloc `#F7F3EA` rayon 14, « Motif du refus » + « (transmis à la personne) », boutons 48 px ;
+  17. résultat validé `#E8EEDF`/`#3B5221` : école « L'établissement accède maintenant à son tableau de bord et peut demander des rencontres. », intervenant « {Prénom} peut maintenant publier ses créneaux. » ;
+  18. résultat refusé `#FBE3E3`/`#8E1518`, « Aucun motif transmis. » ;
+  19. retour mobile en icône (« Retour à la liste ») + type du compte.
+- **F3 — mon agenda** (W2-E8) :
+  1. cellules 108 px rayon 12, bordure 1 px `#EDE6D6`, jour passé `#F1EBDD`, hors mois transparent ;
+  2. aujourd'hui bordure 2 px et rond 26 px `#B8492A` ;
+  3. pastilles « 10h00 · Libre », « 10h00 · 2 demandes », « 10h00 · Attente FM », « 10h00 · {ville} », « {ville} · annulée / refusée » (38 px, rayon 8, 12 px / 800, contour 3 px de sélection) ;
+  4. « + Créneau » pointillé `#C9BFA8`, texte `#3B5221` 12 px / 900 (sélectionné `#E8EEDF`) ;
+  5. légende 12 px / 800 gris, pastilles 14 px ;
+  6. calendrier dans une carte blanche rayon 24, padding 20 ;
+  7. mois précédent / suivant en boutons icône 44 px rayon 12 bordure `#E6DECB` ;
+  8. bandeau des demandes : carte `#1B1F3B`, chiffre Lilita 30 `#FDE7A6`, « demandes d'écoles attendent votre réponse », « Répondre » (mobile « demandes à traiter ») ;
+  9. heures affichées « 8h00 » ;
+  10. format « En classe ou en ligne » (au lieu de « Les deux ») ;
+  11. titre « Publier un créneau ce jour-là » Lilita 23, date dans l'en-tête du panneau ;
+  12. message de succès sur `#E8EEDF`/`#3B5221` 14 px / 800 ;
+  13. panneau blanc rayon 24, bordure 2 px de l'état, en-tête date + pastille (« Jour libre » pointillé vert) ;
+  14. « Créneau libre · 10h00 – 11h30 » + format 14 px / 700 ; « Retirer ce créneau » 46 px rayon 14 ;
+  15. créneau demandé : « 2 écoles demandent ce créneau » / « Une école demande ce créneau » / « Vous avez accepté, la Fondation M doit valider », demandes en cases `#F7F3EA` (pastille À traiter / Acceptée), note `#7A4100` ;
+  16. rencontre : titre Lilita 23, « classe · élèves », Heure / Lieu, clôture et motif en bloc `#F7F3EA`, mot de l'école entre « » ;
+  17. mobile : calendrier compact (jours 48 px, pastilles 9 px, jour libre à venir → publication), légende et « Touchez un jour libre pour publier un créneau. » ;
+  18. mobile : panneau sous le calendrier (plus de liste des jours ni de vue plein écran).
+- **F3 — demandes reçues** (W2-E9) :
+  1. onglets tous comptés (40 px, 13 px / 900) ;
+  2. cartes de liste rayon 18, bordure 2 px (sélection encre) ;
+  3. créneau « Mar 24 nov · 10h00 » 12 px / 900 majuscules terracotta ;
+  4. école Lilita 19, ligne 13 px / 700 ;
+  5. « 2 demandes sur ce créneau » 12 px / 900 `#7A4100` ;
+  6. pastille 11 px ;
+  7. « Demande envoyée le 12 novembre » (sans l'année), mobile « Envoyée le … » ;
+  8. école Lilita 28 (25 mobile), ville seule 14 px / 800 ;
+  9. « Dans votre zone » `#DCE3EF`/`#2B337A` ;
+  10. faits en cases `#F7F3EA` rayon 14, « Élèves » « 32 élèves » ;
+  11. mot de l'école sur `#FDE7A6` entre « » ;
+  12. créneau partagé : bordure 2 px `#EF7A0A` sur `#FDEBD3` (textes PC et mobile) ;
+  13. « Accepter » 54 px Lilita 19, « Refuser » 54 px bordure encre ;
+  14. refus : « Un mot pour expliquer ? » + « (transmis par la Fondation M) », placeholder de la maquette ;
+  15. résultats « Merci, votre accord est enregistré », « Rencontre confirmée », « Vous avez refusé cette demande » + « Votre mot : « … » », « Refusée automatiquement · créneau pris », lien « Voir dans mon agenda » ;
+  16. mobile : retour en icône (« Retour à la liste ») + « Demande de {école} ».
+- **F4 — intervenants disponibles** (W1-E3) :
+  1. recherche en boîte 48 px, rayon 14, bordure `#E6DECB`, loupe, à droite de l'en-tête (largeur 320) ; bouton « Rechercher » masqué (Entrée) ;
+  2. filtres dans une carte blanche rayon 20, padding 18 ; libellés 12 px / 900 majuscules gris ;
+  3. select Zone bordure 2 px `#2B337A` poids 800, Format poids 700, 44 px ;
+  4. pastilles de secteur 40 px, 13 px ; active `#1B1F3B`/blanc poids 900 ;
+  5. section carte rayon 24 ; partie carte sur `#DCE3EF`, padding 22 ;
+  6. titre « Le réseau près de chez vous » Lilita 24 majuscules (mobile « Le réseau » 19) ;
+  7. « {n} bénévoles au Sénégal » 14 px / 800 `#2B337A` ;
+  8. libellé de la carte « Carte du Sénégal : 23 intervenants à Dakar, 7 à Thiès, … » ;
+  9. panneau de ville : ville Lilita 28, ligne 14 px / 700, singulier « 1 bénévole prêt… », avatars 40 px rayon 12, « Choisir une ville » 12 px / 900, pastilles 36 px ;
+  10. titres de section Lilita 24 majuscules + « · {n} intervenants » 15 px / 800 gris ;
+  11. cartes rayon 22, padding 18 ; avatar 52 px rayon 16 ;
+  12. secteur 11 px / 900 majuscules, nom Lilita 20, métier 13 px / 700, compétences 12 px / 800 ;
+  13. « Prochain créneau » 12 px / 900 + créneau en pastille `#FDE7A6` rayon 10 ;
+  14. bouton Lilita 17, 46 px, rayon 14 (« Demander » sur mobile) ;
+  15. mobile : pastilles-filtres 40 px (zone `#2B337A`/`#FDE7A6`) ;
+  16. mobile : bloc « Le réseau » `#DCE3EF` rayon 20 avec 4 avatars 32 px et « {n} bénévoles près de vous, à {ville} » ;
+  17. mobile : « Autres zones » en lignes compactes avec bouton icône « Demander une rencontre avec {nom} ».
+- **F4 — demander une rencontre** (W1-E4) :
+  1. « Vous invitez » sur carte `#4E6A2C` rayon 24, avatar 72 px rayon 22 `#FDE7A6`/`#4E6A2C` ;
+  2. « {Nom}, {métier} à {ville} » Lilita 26 (mobile : nom Lilita 21 + « Métier · Ville ») ;
+  3. citation entre « », lien « Changer d'intervenant » crème ;
+  4. étapes en cartes blanches rayon 22, padding 22 (sans carte sur mobile), légende Lilita 21 ;
+  5. créneaux : radio visible 20 px, jour 12 px / 900 majuscules, date Lilita 22, heure 14 px / 800, bordure 3 px ;
+  6. classes : ligne 56 px rayon 14, radio visible ;
+  7. étape 4 sur `#FDE7A6` bordure 2 px `#E5A60A` ;
+  8. récapitulatif « Intervenant : {Nom} · {métier} », « Lieu : En classe · {lieu} » ;
+  9. « Un mot pour {Prénom} » + « (facultatif) », placeholder de la maquette ;
+  10. pied : texte gris 14 px / 600, « Envoyer la demande » 60 px rayon 18 Lilita 22, « Annuler » en simple lien.
+- **F5 — mes rencontres** (W1-E5, revérifié) :
+  1. détail mobile : date en gras puis « classe · lieu » en gris, sans libellés visibles ;
+  2. message mobile en ligne « **Titre.** texte ».
 
 ## Ce que F5 livre
 
@@ -393,7 +519,17 @@ Vérifications au moment de la livraison de F5 : `npm run build`, `npm run lint`
     programme » (avatar « F ») ; intervenant inchangé (nom + « métier · ville »).
 56. **Corrections de conformité appliquées dans F5** : D1 (couleurs des états de l'agenda), E2 (pastilles des
     demandes), E5 (« Accepter » terracotta, « Refuser » bordure encre), B2 (bandeau de refus), C2 (numéros
-    d'étape carrés indigo), F2 (liste des comptes). Le reste est listé dans « Écarts de design restants ».
+    d'étape carrés indigo), F2 (liste des comptes).
+57. **F5.1 — composants partagés** : `components/calendar/MonthNav.tsx` (mois précédent / suivant en icônes,
+    agenda et « Mes rencontres ») ; `Badge` (tailles `sm` 11 px / `md` 12 px), `Tabs` (`md` 44 px / `sm` 40 px),
+    `ChoiceGroup` (`look="filter"`), `FormField` (`labelNote` « (facultatif) », `hintTone`), `Initials`
+    (`list` 46 px, `detail` 64 px), `SpeakerAvatar` (carrés arrondis), `AccountStatusLayout` (en-tête de la maquette).
+58. **Agenda mobile** : calendrier compact (`pages/speaker/AgendaCompact.tsx`) ; un jour avec un élément sélectionne
+    le premier, un jour libre à venir ouvre la publication ; le panneau de détail est sous le calendrier.
+59. **Pastilles de l'agenda Confirmé / Réalisé** : la maquette n'affiche que « heure · ville » ; l'état reste écrit
+    sur une seconde ligne (jamais la couleur seule, accessibilité inchangée).
+60. **Comptes traités** : « Validé le / Refusé le » et « Délai » (jours entre `createdAt` et `decidedAt`) dans les
+    faits, comme la maquette ; la date ne figure plus dans le bloc de résultat.
 
 ## Écarts
 
@@ -406,7 +542,7 @@ Vérifications au moment de la livraison de F5 : `npm run build`, `npm run lint`
 | Élément de la maquette | Situation dans le contrat | Choix frontend |
 | --- | --- | --- |
 | « Prénom et nom » du référent d'établissement | Absent de `RegisterSchoolRequest` et de `SchoolProfileResponse` | Champ non affiché ; « Merci {nom de l'établissement} » sur la page d'attente. **À ajouter côté backend plus tard.** |
-| Lien « Lire la charte » | Aucun texte de charte n'existe | Lien inactif (`aria-disabled`) |
+| Lien « Lire la charte » | Aucun texte de charte n'existe ; la maquette ne le montre que sur la page d'attente (« Lire la charte des rencontres ») | Affiché inactif sur la page d'attente de l'école, retiré des formulaires d'inscription |
 | Lien « Modifier » de la page d'attente | Aucun point d'accès de modification pour un compte en attente | Non affiché |
 | Case « Rester connecté », lien « Mot de passe oublié » (connexion) | Pas de point d'accès | Non affichés |
 | Motif de refus « facultatif » (maquette) | `RejectAccountRequest.reason` : ni obligatoire ni de longueur minimale (`minLength: 0`, `maxLength: 1000`) | Obligatoire côté client (1 à 1000 caractères). **Le backend devrait l'exiger ou le documenter.** |
@@ -494,78 +630,48 @@ Vérifications au moment de la livraison de F5 : `npm run build`, `npm run lint`
     exact de `CLASS_FULL` est supposé (« la classe ne peut plus recevoir de demande »).
 16. **Contrastes en échec, couleurs conservées comme demandé** : avatar de la carte Fondation
     (terracotta sur crème, 4,26:1) et libellé décoratif « SÉNÉGAL » de la carte (1,99:1).
-17. **Conformité à la maquette** : la passe de F5 a relevé les écarts listés dans « Écarts de design
-    restants » ; ils sont traités dans le lot F5.1.
+17. **Conformité à la maquette** : F5.1 a corrigé les écarts relevés ; ceux qui restent (backend, contraste,
+    comportement) sont dans « Écarts de design restants ».
 18. **Décisions par partie d'une rencontre** (intervenant / Fondation) absentes des réponses de l'école :
     un champ du type `speakerDecision` / `foundationDecision` permettrait « Presque confirmée ».
 19. **Retours d'expérience de l'école** : deux listes complètes chargées pour connaître l'état de chaque
     rencontre ; un champ `feedbackStatus` dans `SchoolMeetingResponse` éviterait ces requêtes.
 
-## Écarts de design restants (lot F5.1)
+## Écarts de design restants
 
-Relevés lors de la passe de conformité de F5 (maquette `docs/maquette/`). Non corrigés : à traiter dans F5.1.
-Les écarts assumés (backend, accessibilité, décisions validées) sont dans « Écarts maquette / backend ».
+Après F5.1, seuls restent les écarts qui ne peuvent pas être corrigés. Chacun indique le fichier, la valeur
+attendue (maquette) et la raison.
 
-### F4 — Intervenants disponibles (`pages/school/SpeakersPage.tsx`, `SpeakerCard.tsx`, `NetworkSection.tsx`, `NetworkMap.tsx`) — W1-E3
-
-| # | Attendu |
-| --- | --- |
-| B1 | Recherche : boîte 48 px, largeur 320, rayon 14, bordure 2 px `#E6DECB`, loupe, à droite de l'en-tête ; pas de bouton « Rechercher » visible |
-| B3 | Filtres dans une carte blanche rayon 20, padding 18 ; libellés 12 px / 900 majuscules `#4A4A57` ; select Zone bordure 2 px `#2B337A` poids 800, Format bordure `#E6DECB` ; pastilles 40 px 13 px, active `#1B1F3B`/blanc poids 900 sans bordure, inactives bordure 2 px `#E6DECB` |
-| B4 | Section carte blanche rayon 24 ; partie carte fond `#DCE3EF` padding 22 ; h2 « Le réseau près de chez vous » Lilita 24 majuscules ; « {n} bénévoles au Sénégal » 14 px / 800 `#2B337A` ; libellé SVG « Carte du Sénégal : 23 intervenants à Dakar, 7 à Thiès, … » |
-| B5 | Panneau de ville : surtitre 12 px / 900 `#B8492A` ; ville Lilita 28 ; avatars 40 px rayon 12 Lilita 15 ; « 1 bénévole prêt à rencontrer vos élèves » au singulier ; pastilles de ville 36 px, active `#B8492A`/blanc ; « Choisir une ville » 12 px / 900 majuscules |
-| B6 | Titres de section Lilita 24 majuscules : « À Saint-Louis » + « · 4 intervenants » (15 px / 800 `#4A4A57`, sans majuscules) ; « Autres zones » + « · disponibles en ligne » |
-| B7 | Cartes rayon 22, padding 18 ; avatar 52 px rayon 16 ; secteur 11 px / 900 majuscules, interlettrage 0,08em ; nom Lilita 20 ; compétences 12 px / 800 sur `#F7F3EA` ; bouton « Demander une rencontre » Lilita 17, 46 px, rayon 14 |
-| B8 | Mobile : filtres en pastilles 40 px (ville active `#2B337A`/`#FDE7A6`) ; bloc « Le réseau » fond `#DCE3EF` rayon 20 avec carte et 4 avatars 32 px ; cartes « Demander » (Lilita 16, 44 px) ; « Autres zones · en ligne » en lignes compactes avec bouton icône « Demander une rencontre avec {nom} » |
-
-### F4 — Demander une rencontre (`pages/school/MeetingRequestPage.tsx`) — W1-E4
-
-| # | Attendu |
-| --- | --- |
-| C1 | « Vous invitez » : carte `#4E6A2C`, blanc, rayon 24, padding 22 ; avatar 72 px rayon 22 `#FDE7A6`/`#4E6A2C` ; surtitre crème ; « {Nom}, {métier} à {ville} » Lilita 26 ; citation 15 px entre « » ; lien crème |
-| C3 | Créneau : radio visible 20 px, jour 12 px / 900 majuscules, date Lilita 22, heure 14 px / 800 ; bordure 3 px `#E6DECB`, sélection 3 px `#B8492A` sur `#FDE7A6` ; classe : ligne 56 px rayon 14 avec radio visible ; étapes en `fieldset` blancs rayon 22, padding 22, légende Lilita 21 |
-| C4 | Étape 4 fond `#FDE7A6`, bordure 2 px `#E5A60A` ; libellés « Intervenante / Intervenant » (PC), « Avec » (mobile) ; lieu « En classe · {lieu} » |
-| C5 | Placeholder du message « Ce qui intéresse vos élèves, les questions qu'ils se posent… » ; libellé « Un mot pour {Prénom} » + « (facultatif) » poids 600 `#4A4A57` |
-| C6 | « Envoyer la demande » 60 px, rayon 18, Lilita 22 (mobile 58 / 21) ; « Annuler » simple lien 15 px / 800 |
-
-### F3 — Mon agenda (`pages/speaker/MonthGrid.tsx`, `AgendaPage.tsx`, `SlotForm.tsx`, `AgendaItemDetail.tsx`) — W2-E8
-
-| # | Attendu |
-| --- | --- |
-| D2 | Cellules min. 108 px rayon 12 ; jour passé `#F1EBDD` ; aujourd'hui bordure 2 px et rond `#B8492A` ; « + Créneau » pointillé `#C9BFA8`, texte `#3B5221` 12 px / 900 |
-| D3 | Mois précédent / suivant : boutons icône 44×44 rayon 12 bordure 2 px `#E6DECB`, `aria-label` |
-| D4 | Bandeau des demandes : carte `#1B1F3B` rayon 18, chiffre Lilita 30 `#FDE7A6`, « demandes d'écoles attendent votre réponse », « Répondre » 14 px / 900 `#FDE7A6` |
-| D5 | Heures « 8h00 » (au lieu de « 08:00 ») ; formats « En classe · En ligne · En classe ou en ligne » (au lieu de « Les deux ») ; pastille active `#1B1F3B`/`#FDE7A6` |
-| D6 | Panneau blanc rayon 24, bordure 2 px de l'état ; pastille « Jour libre » / « Libre » (blanc, pointillé `#4E6A2C`) ; titres Lilita 23 ; succès `#E8EEDF`/`#3B5221` 14 px / 800 ; « Retirer ce créneau » 46 px bordure `#E6DECB` |
-| D7 | Mobile : calendrier compact (même composant que « Mes rencontres » mobile, pastilles 9 px, jours 48 px) et « Touchez un jour libre pour publier un créneau. », au lieu de la liste des jours |
-
-### F3 — Demandes reçues (`pages/speaker/RequestsPage.tsx`, `RequestDetail.tsx`, `RequestResult.tsx`) — W2-E9
-
-| # | Attendu |
-| --- | --- |
-| E1 | Onglets tous comptés (« Acceptées · n », « Toutes · n ») ; « Refusées ou annulées » conservé (décision validée) |
-| E3 | Cartes de liste rayon 18, bordure 2 px (sélection `#1B1F3B`) ; créneau 12 px / 900 majuscules `#B8492A` ; école Lilita 19 ; « 2 demandes sur ce créneau » 12 px / 900 `#7A4100` |
-| E4 | Faits dans des cases `#F7F3EA` rayon 14 ; « Dans votre zone » `#DCE3EF`/`#2B337A` ; mot de l'école sur `#FDE7A6` entre « » ; créneau partagé bordure 2 px `#EF7A0A` sur `#FDEBD3` |
-| E6 | Résultats : « Merci, votre accord est enregistré » / « Rencontre confirmée » sur `#E8EEDF`/`#3B5221` ; « Vous avez refusé cette demande » + « Votre mot : « … » » sur `#FBE3E3`/`#8E1518` ; « Refusée automatiquement · créneau pris » sur `#F1EBDD` ; lien « Voir dans mon agenda » |
-| E7 | Mobile : en-tête « Demande de {école} » avec retour en icône (`aria-label` « Retour à la liste »), « Envoyée le … » |
-
-### F2 — Comptes à valider (`pages/foundation/AccountsPage.tsx`, `AccountDetail.tsx`, `ResultBlock.tsx`) — W3-comptes
-
-| # | Attendu |
-| --- | --- |
-| F1 | Texte d'aide sur `#DCE3EF` rayon 14 ; version mobile « Ce n'est pas une sélection : vérifiez l'identité, sans critère de qualité. » |
-| F3 | Détail : avatar 64 px rayon 20 ; nom Lilita 28 ; faits en cases `#F7F3EA` ; compétences `#1B1F3B`/`#FDE7A6` ; citation sur `#FDE7A6` ; « Refuser » bordure 2 px `#1B1F3B` |
-| F4 | Résultat validé : école « L'établissement accède maintenant à son tableau de bord et peut demander des rencontres. » ; intervenant « {Prénom} peut maintenant publier ses … » (texte tronqué dans l'export, à confirmer) |
-
-### F1 — Inscription et attente (`components/layout/AuthSplitLayout.tsx`, `AuthTabs.tsx`, `pages/register/*`, `pages/PendingAccountPage.tsx`, `pages/status/*`) — W1-E1, W2-E1, W2-E7
-
-| # | Attendu |
-| --- | --- |
-| G1 | Colonne PC padding 48, logo 32, h1 Lilita 52 (école crème sur terracotta, intervenant encre sur orange) ; étapes en carrés 36 px rayon 12 ; ligne « Une question ? contact@fondationm.sn · +221 33 800 00 00 » 13 px / 700 |
-| G2 | Onglets d'accès en contrôle segmenté fond `#F7F3EA` rayon 16 padding 6 ; actif `#2B337A`/`#FDE7A6` (école) ou `#1B1F3B`/`#FDE7A6` (intervenant) ; onglet « Devenir intervenant » |
-| G3 | Libellés : « E-mail professionnel » (école) ; « Votre métier », « Votre secteur » + aide « Le secteur principal de votre métier. Il aide les écoles à vous trouver. » ; « Ce que vous transmettez » ; « Pourquoi voulez-vous transmettre ? (facultatif, visible par les écoles) » ; textes de charte de la maquette ; « Zone (ville) » bordure `#B8492A` |
-| G5 | Attente : en-tête blanc « {Établissement} · {référent} » / « {nom} · intervenant » ; pastille « Compte en attente » (intervenant « Compte en attente de validation ») ; h1 intervenant « Merci {Prénom}, les jeunes vont avoir de la chance » ; frise (terminé `#4E6A2C`, en cours `#FDE7A6` bordure 4 px `#E5A60A` point `#B8492A`, à venir bordure 3 px `#C9BFA8`) ; étape 4 intervenant « Vos créneaux · publiez vos disponibilités » ; bloc « En attendant » `#2B337A` (école) / `#1B1F3B` (intervenant) |
-
-Conservés volontairement (non à corriger) : G4 aide « 8 caractères minimum » (décision 14), G6 aucun texte
-promettant un e-mail, E1 nom « Refusées ou annulées », motifs de refus obligatoires (décisions 21 et 30),
-surtitres « E11 · E12 » remplacés par « Comptes ».
+| Écran | Fichier | Attendu (maquette) | Raison |
+| --- | --- | --- | --- |
+| Connexion (W3/W4/W5-connexion) | `pages/LoginPage.tsx` | Colonne et textes propres à chaque persona (« Espace équipe », « Chaque validation rapproche… », « Content de te voir ! », « Identifiant », bouton « Entrer »…) | Une seule page `/connexion` pour toutes les personas : la persona n'est connue qu'après connexion. Les valeurs communes (champs 50 px, bouton 56 px Lilita 20, titre 32) sont appliquées. |
+| Connexion | `pages/LoginPage.tsx` | Encadré « Ce trimestre · 1 240 jeunes » | Aucune donnée publique d'impact avant connexion. |
+| Connexion | `pages/LoginPage.tsx` | « Rester connecté(e) », « Mot de passe oublié ? » | Pas de point d'accès backend (déjà noté). |
+| Inscription (W1-E1, W2-E1) | `components/layout/AuthSplitLayout.tsx` | Logo, titre et sous-titre `#FDE7A6` sur terracotta | Contraste 4,26:1 : `#FFF0C4` conservé (décision 10). |
+| Inscription | `pages/register/RegisterSchoolPage.tsx`, `RegisterSpeakerPage.tsx` | « Pays » et « Zone (ville) » en listes fermées | Le backend accepte toute ville / tout pays : champs libres avec suggestions conservés (aucun changement de comportement). Le style de la maquette est appliqué. |
+| Inscription école | `pages/register/RegisterSchoolPage.tsx` | Champ « Prénom et nom » du référent | Absent du contrat (déjà noté). |
+| Inscription | idem | Aide « 8 caractères minimum, dont un chiffre » | Décision validée G4 : « 8 caractères minimum ». |
+| Attente (W1-E1-attente, W2-E7) | `pages/PendingAccountPage.tsx` | Lien « Modifier » ; référent « Moussa Ndiaye, … » | Pas de point d'accès de modification ; nom du référent absent. |
+| Attente | idem | « nous vous écrirons à … », « À venir · e-mail de bienvenue », « Vous recevrez un e-mail … » | Décision G6 : aucun texte ne promet d'e-mail. |
+| Attente | idem | Pas de bouton « Actualiser mon statut » (seulement un bouton de prototype) | Fonction conservée (relit `/api/me`). |
+| Comptes (W3-comptes) | `pages/foundation/AccountDetail.tsx` | Fait « Formats » (intervenant), « Référent » (école) | Absents d'`AccountResponse`. |
+| Comptes | idem | « Pourquoi il / elle veut transmettre » | Genre inconnu : « Pourquoi il ou elle veut transmettre ». |
+| Comptes | idem | Seulement 4 faits | Pays, e-mail, téléphone et charte conservés en plus (utiles à la vérification). |
+| Comptes | `pages/foundation/RejectForm.tsx` | Motif « (facultatif, …) » | Motif obligatoire (décision 21). |
+| Comptes | `pages/foundation/AccountsPage.tsx` | Surtitre « E11 · E12 » | Code d'écran : « Comptes » (décision validée). |
+| Agenda (W2-E8) | `pages/speaker/SlotForm.tsx` | Format par défaut « En classe » ; heures proposées de 8h00 à 17h30 | Format par défaut « En classe ou en ligne » (BOTH, cahier des charges F3) et pas de 15 min de 0h00 à 23h45 (décision 28) : comportement inchangé. |
+| Agenda | `pages/speaker/AgendaItemDetail.tsx` | Ligne « Retour d'expérience » et bouton « Partager mon retour » d'une rencontre réalisée ; invite du bandeau | Demanderait `/api/speaker/feedbacks*` (décision 33) ; écran des retours non livré. |
+| Agenda | `pages/speaker/MonthGrid.tsx` | Pastille Confirmé / Réalisé « 10h00 · Thiès » seule | Seconde ligne d'état conservée (décision 59, accessibilité). |
+| Agenda | `pages/speaker/MonthGrid.tsx` | « + Créneau » seulement sur les jours à venir sans élément (hors aujourd'hui) | Publication possible aujourd'hui et sur un jour occupé (décision 28) : comportement inchangé. |
+| Demandes (W2-E9) | `pages/speaker/RequestDetail.tsx` | « Filière · élèves » | Filière absente de `ClassInfo` : « Élèves ». |
+| Demandes | idem | Motif « (facultatif, transmis par la Fondation M) » | Motif obligatoire (décision 30). |
+| Demandes | `pages/speaker/RequestsPage.tsx` | Onglet « Refusées · n » | « Refusées ou annulées · n » (décision E1 validée). |
+| Demandes | `pages/speaker/RequestDetail.tsx` | Pas de fait « Lieu » | Conservé : lieu choisi par l'école, utile à l'intervenant. |
+| Annuaire (W1-E3) | `pages/school/SpeakerCard.tsx` | « Prochains créneaux · {format} » (2 créneaux) | L'annuaire ne renvoie que `nextSlotStartAt` (décision 39). |
+| Annuaire | `pages/school/NetworkSection.tsx` | Surtitre « Disponibles surtout en ligne » ; pastilles de ville sur mobile | Aucune donnée de format ; sur mobile le choix de ville passe par le filtre « Zone ». |
+| Annuaire | `pages/school/SpeakersPage.tsx` | Bouton-filtre « Date » (mobile) | Aucun filtre par date côté backend. |
+| Annuaire | `pages/school/NetworkMap.tsx` | Libellé « SÉNÉGAL » `#B8AE98` | Contraste 1,99:1, couleur conservée (décoratif, point ouvert 16). |
+| Demande (W1-E4) | `pages/school/MeetingRequestPage.tsx` | Libellé « Intervenante » | Genre inconnu : « Intervenant ». |
+| Mes rencontres (W1-E5) | voir « Écarts maquette / backend » | Opacité des rencontres passées, « Presque confirmée », retours « Bientôt », liste « Passées » sur PC, heure dans les listes mobiles | Contraste, données absentes, décisions validées. |
+| Toutes | `components/layout/AppLayout.tsx`, `UserMenu.tsx` | Pas de déconnexion ; entrées actives avec pastilles | Déconnexion conservée (lien PC, menu avatar mobile) ; entrées sans écran « Bientôt ». |
+| Toutes | `components/layout/roleTheme.ts` | Avatar Fondation `#B8492A` sur `#FDE7A6` | Contraste 4,26:1, couleur conservée (point ouvert 16). |

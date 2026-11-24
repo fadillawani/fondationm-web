@@ -30,7 +30,7 @@ import {
   type SchoolClass,
   type SpeakerDetail,
 } from './schoolData'
-import { SpeakerAvatar } from './SpeakerCard'
+import { initialsOf } from '../../lib/initials'
 
 const FORMAT_LABEL: Record<MeetingFormat, string> = { IN_PERSON: 'En classe', ONLINE: 'En ligne' }
 
@@ -60,6 +60,12 @@ const SERVER_FIELDS: Partial<Record<string, keyof RequestValues>> = {
   message: 'message',
 }
 
+/** « Mame Diarra Sow, agronome à Ross Béthio » (maquette). */
+function inviteTitle(speaker: SpeakerDetail): string {
+  const job = speaker.jobTitle ? speaker.jobTitle.charAt(0).toLocaleLowerCase('fr-FR') + speaker.jobTitle.slice(1) : ''
+  return [speaker.fullName, [job, speaker.city ? `à ${speaker.city}` : ''].filter(Boolean).join(' ')].filter(Boolean).join(', ')
+}
+
 function firstName(fullName: string): string {
   return fullName.split(/\s+/)[0] ?? fullName
 }
@@ -79,8 +85,14 @@ function slotLabel(slot: AvailableSlot | undefined): string | null {
 function Step({ number, title, children }: { number: number; title: string; children: ReactNode }) {
   const id = `etape-${number}`
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-4 rounded-[22px] bg-surface p-5 shadow-card">
-      <h2 id={id} className="flex items-center gap-3 text-xl text-ink lg:text-[21px]">
+    <section
+      aria-labelledby={id}
+      className={cn(
+        'flex flex-col gap-3 lg:gap-4 lg:rounded-[22px] lg:p-[22px]',
+        number === 4 ? 'rounded-[20px] border-2 border-yellow bg-cream p-[18px] lg:p-[22px]' : 'lg:bg-surface',
+      )}
+    >
+      <h2 id={id} className="flex items-center gap-2.5 text-xl text-ink lg:gap-3 lg:text-[21px]">
         <span
           aria-hidden="true"
           className={cn(
@@ -97,10 +109,12 @@ function Step({ number, title, children }: { number: number; title: string; chil
   )
 }
 
-function radioCard(checked: boolean): string {
+/** Carte radio (maquette W1-E4) : bordure 3 px `#E6DECB`, choisie 3 px `#B8492A` sur `#FDE7A6`. */
+function radioCard(checked: boolean, extra?: string): string {
   return cn(
-    'flex min-h-touch cursor-pointer flex-col gap-0.5 rounded-block p-4 transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink',
-    checked ? 'border-[3px] border-terra bg-cream' : 'border-2 border-line bg-surface hover:border-muted',
+    'flex cursor-pointer border-[3px] transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ink',
+    checked ? 'border-terra bg-cream' : 'border-line bg-surface hover:border-muted',
+    extra,
   )
 }
 
@@ -235,12 +249,13 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
 
   if (sent !== null) return <RequestSent sent={sent} />
 
+  // Maquette : « Intervenant(e) · {Nom} · {métier} », Lieu « En classe · {lieu} » (le format y figure).
+  const job = speaker.jobTitle ? speaker.jobTitle.charAt(0).toLocaleLowerCase('fr-FR') + speaker.jobTitle.slice(1) : ''
   const summary = [
-    { label: 'Intervenant', value: speaker.fullName },
+    { label: 'Intervenant', value: [speaker.fullName, job].filter(Boolean).join(' · ') },
     { label: 'Date', value: slotLabel(slot) },
     { label: 'Classe', value: chosenClass ? chosenClass.title : null },
-    { label: 'Format', value: format ? FORMAT_LABEL[format] : null },
-    { label: 'Lieu', value: values.place?.trim() || null },
+    { label: 'Lieu', value: [format ? FORMAT_LABEL[format] : null, values.place?.trim() || null].filter(Boolean).join(' · ') || null },
   ]
 
   return (
@@ -258,18 +273,28 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
                 if (start === null || end === null) return null
                 const checked = values.slotId === entry.id
                 return (
-                  <label key={entry.id} className={radioCard(checked)}>
-                    <input
-                      type="radio"
-                      value={entry.id}
-                      {...register('slotId', { onChange: () => clearErrors('format') })}
-                      className="sr-only"
-                    />
-                    <span className="font-extrabold text-terra">{formatWeekday(start)}</span>
-                    <span className="font-display text-xl text-ink">{formatDayMonth(start)}</span>
-                    <span className="font-bold text-ink">{formatTimeRange(start, end)}</span>
-                    <span className="text-sm font-semibold text-muted">
-                      {entry.formats === 'BOTH' ? 'En classe ou en ligne' : FORMAT_LABEL[entry.formats]}
+                  <label
+                    key={entry.id}
+                    className={radioCard(
+                      checked,
+                      'min-h-16 items-center gap-3 rounded-2xl px-3.5 py-2.5 lg:flex-col lg:items-stretch lg:gap-1 lg:p-3.5',
+                    )}
+                  >
+                    <span className="flex items-center justify-between gap-2 lg:order-none">
+                      <span className="hidden text-xs font-black uppercase lg:inline">{formatWeekday(start)}</span>
+                      <input
+                        type="radio"
+                        value={entry.id}
+                        {...register('slotId', { onChange: () => clearErrors('format') })}
+                        className="size-5 shrink-0 accent-terra"
+                      />
+                    </span>
+                    <span className="flex flex-col">
+                      <span className="text-[15px] font-black lg:hidden">
+                        {formatWeekday(start)} {formatDayMonth(start)}
+                      </span>
+                      <span className="hidden font-display text-[22px] leading-tight text-ink lg:inline">{formatDayMonth(start)}</span>
+                      <span className="text-[13px] font-bold lg:text-sm lg:font-extrabold">{formatTimeRange(start, end)}</span>
                     </span>
                   </label>
                 )
@@ -304,12 +329,17 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
                   <legend className="sr-only">Classe</legend>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {classList.map((entry) => (
-                      <label key={entry.id} className={radioCard(values.classId === entry.id)}>
-                        <input type="radio" value={entry.id} {...register('classId')} className="sr-only" />
-                        <span className="font-extrabold text-ink">{entry.title}</span>
-                        {entry.studentCount !== null && (
-                          <span className="text-sm font-semibold text-muted">{entry.studentCount} élèves</span>
-                        )}
+                      <label
+                        key={entry.id}
+                        className={radioCard(values.classId === entry.id, 'min-h-[60px] items-center gap-3 rounded-[14px] px-3 py-2 lg:min-h-14 lg:px-4')}
+                      >
+                        <input type="radio" value={entry.id} {...register('classId')} className="size-[18px] shrink-0 accent-terra lg:size-5" />
+                        <span className="flex min-w-0 flex-col">
+                          <span className="text-sm font-black text-ink lg:text-base">{entry.title}</span>
+                          {entry.studentCount !== null && (
+                            <span className="text-xs font-bold text-muted lg:text-[13px]">{entry.studentCount} élèves</span>
+                          )}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -357,17 +387,24 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
         <FormField label="Où aura lieu la rencontre ?" required={format === 'IN_PERSON'} error={errors.place?.message}>
           {(field) => <Input {...field} {...register('place')} maxLength={150} placeholder="Ex. : salle 12, bâtiment B" />}
         </FormField>
-        <FormField label={`Un mot pour ${prenom} (facultatif)`} error={errors.message?.message}>
-          {(field) => <Textarea {...field} {...register('message')} maxLength={1000} />}
+        <FormField label={`Un mot pour ${prenom}`} labelNote="(facultatif)" error={errors.message?.message}>
+          {(field) => (
+            <Textarea
+              {...field}
+              {...register('message')}
+              maxLength={1000}
+              placeholder="Ce qui intéresse vos élèves, les questions qu'ils se posent…"
+            />
+          )}
         </FormField>
       </Step>
 
       <Step number={4} title="Vérifiez votre demande">
-        <dl aria-live="polite" className="grid gap-3 sm:grid-cols-2">
+        <dl aria-live="polite" className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm lg:text-[15px]">
           {summary.map((fact) => (
-            <div key={fact.label} className="flex flex-col">
-              <dt className="text-xs font-black uppercase tracking-[0.08em] text-muted">{fact.label}</dt>
-              <dd className="font-bold text-ink">{fact.value ?? '—'}</dd>
+            <div key={fact.label} className="contents">
+              <dt className="font-bold">{fact.label}</dt>
+              <dd className="font-black text-ink">{fact.value ?? '—'}</dd>
             </div>
           ))}
         </dl>
@@ -375,16 +412,23 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
 
       {formError && <Alert tone="error">{formError}</Alert>}
 
-      <div className="flex flex-col gap-3 rounded-[22px] bg-cream-soft p-5">
-        <p className="font-semibold text-ink">
+      <div className="flex flex-col gap-3">
+        <p className="text-[13px] font-semibold text-muted lg:text-sm">
           {prenom} et la Fondation M vont chacune répondre à votre demande. Vous suivrez leurs réponses dans « Mes
           rencontres ».
         </p>
-        <div className="flex flex-wrap gap-2">
-          <Button type="submit" loading={create.isPending}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Button
+            type="submit"
+            loading={create.isPending}
+            className="min-h-[58px] rounded-[18px] px-8 text-[21px] lg:min-h-[60px] lg:text-[22px]"
+          >
             Envoyer la demande
           </Button>
-          <Link to={PATHS.schoolSpeakers} className={buttonClass('outline', { size: 'lg' })}>
+          <Link
+            to={PATHS.schoolSpeakers}
+            className="inline-flex min-h-12 items-center justify-center px-6 text-sm font-extrabold text-indigo underline lg:min-h-[60px] lg:text-[15px]"
+          >
             Annuler
           </Link>
         </div>
@@ -441,27 +485,32 @@ export function MeetingRequestPage() {
         )
       ) : (
         <>
-          <section aria-labelledby="vous-invitez" className="flex flex-col gap-3 rounded-[22px] bg-surface p-5 shadow-card">
-            <p id="vous-invitez" className="text-xs font-black uppercase tracking-[0.12em] text-terra">
-              Vous invitez
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <SpeakerAvatar speaker={speaker.data} size="lg" />
-              <div className="min-w-0 flex-1">
-                <p className="font-display text-2xl text-ink">{speaker.data.fullName}</p>
-                <p className="font-semibold text-muted">
-                  {[speaker.data.jobTitle, speaker.data.organization, speaker.data.city].filter(Boolean).join(' · ')}
-                </p>
-              </div>
-              <Link to={PATHS.schoolSpeakers} className="inline-flex min-h-touch items-center font-extrabold text-indigo underline">
+          <section
+            aria-labelledby="vous-invitez"
+            className="flex items-start gap-3.5 rounded-[22px] bg-green p-[18px] text-white lg:gap-[18px] lg:rounded-[24px] lg:p-[22px]"
+          >
+            <span
+              aria-hidden="true"
+              className="inline-flex size-14 shrink-0 items-center justify-center rounded-[18px] bg-cream font-display text-[22px] text-green lg:size-[72px] lg:rounded-[22px] lg:text-[28px]"
+            >
+              {initialsOf(speaker.data.fullName)}
+            </span>
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <p id="vous-invitez" className="text-[11px] font-black uppercase tracking-[0.1em] text-cream lg:text-xs">
+                Vous invitez
+              </p>
+              <p className="hidden font-display text-[26px] leading-tight lg:block">{inviteTitle(speaker.data)}</p>
+              <p className="font-display text-[21px] leading-tight lg:hidden">{speaker.data.fullName}</p>
+              <p className="text-[13px] font-bold lg:hidden">
+                {[speaker.data.jobTitle, speaker.data.city].filter(Boolean).join(' · ')}
+              </p>
+              {speaker.data.motivation && (
+                <p className="whitespace-pre-line text-sm font-semibold lg:text-[15px]">« {speaker.data.motivation} »</p>
+              )}
+              <Link to={PATHS.schoolSpeakers} className="inline-flex min-h-touch items-center self-start text-sm font-black text-cream underline">
                 Changer d'intervenant
               </Link>
             </div>
-            {speaker.data.motivation && (
-              <blockquote className="whitespace-pre-line rounded-block border-l-[6px] border-orange bg-canvas px-4 py-3 font-semibold italic text-ink">
-                {speaker.data.motivation}
-              </blockquote>
-            )}
           </section>
           <RequestForm speaker={speaker.data} />
         </>

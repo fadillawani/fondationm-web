@@ -14,7 +14,7 @@ interface InitialsProps {
   name: string
   tone: InitialsTone
   /** 'list' : avatar de liste de la maquette (46 px, rayon 14). */
-  size?: 'md' | 'lg' | 'list'
+  size?: 'md' | 'lg' | 'list' | 'detail'
   max?: number
 }
 
@@ -28,6 +28,8 @@ export function Initials({ name, tone, size = 'md', max = 2 }: InitialsProps) {
           ? 'size-16 rounded-pill text-2xl'
           : size === 'list'
             ? 'size-[46px] rounded-[14px] text-[17px]'
+            : size === 'detail'
+              ? 'size-[54px] rounded-2xl text-xl lg:size-16 lg:rounded-[20px] lg:text-2xl'
             : 'size-11 rounded-pill text-lg',
         TONES[tone],
       )}

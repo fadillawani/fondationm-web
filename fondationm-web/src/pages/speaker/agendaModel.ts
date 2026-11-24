@@ -103,3 +103,40 @@ export function itemLabel(item: AgendaItem): string {
   const who = item.main?.schoolName
   return `${STATE_LABEL[item.state]}, ${formatSlot(item.start, item.end)}${who ? `, ${who}` : ''}`
 }
+
+/**
+ * Texte de la pastille d'agenda (maquette W2-E8) : « 10h00 · Libre », « 10h00 · 2 demandes »,
+ * « 10h00 · Attente FM » (demandes déjà acceptées), « 10h00 · Thiès » (rencontre : ville de l'école),
+ * « Kolda · annulée / refusée » (rencontre clôturée).
+ */
+export function chipText(item: AgendaItem, time: string): string {
+  if (item.state === 'FREE') return `${time} · Libre`
+  if (item.state === 'REQUESTED') {
+    const toAnswer = item.meetings.filter((meeting) => meeting.status === 'PENDING' && meeting.myDecision === 'PENDING').length
+    return toAnswer > 0 ? `${time} · ${toAnswer} demande${toAnswer > 1 ? 's' : ''}` : `${time} · Attente FM`
+  }
+  const where = item.main?.schoolCity || item.main?.schoolName || ''
+  if (item.state === 'CLOSED') {
+    const what = item.main?.status === 'CANCELLED' ? 'annulée' : 'refusée'
+    return where ? `${where} · ${what}` : `${time} · ${what}`
+  }
+  return where ? `${time} · ${where}` : time
+}
+
+/** Bordure du panneau de détail selon l'état (maquette). */
+export const STATE_ACCENT: Record<AgendaState, string> = {
+  FREE: 'border-green',
+  REQUESTED: 'border-yellow',
+  CONFIRMED: 'border-green',
+  COMPLETED: 'border-indigo',
+  CLOSED: 'border-[#B8AE98]',
+}
+
+/** Pastille du calendrier compact (maquette mobile) : Libre en pointillé, Annulé `#C9BFA8`. */
+export const STATE_DOT: Record<AgendaState, string> = {
+  FREE: 'border-2 border-dashed border-green',
+  REQUESTED: 'bg-yellow',
+  CONFIRMED: 'bg-green',
+  COMPLETED: 'bg-indigo',
+  CLOSED: 'bg-[#C9BFA8]',
+}

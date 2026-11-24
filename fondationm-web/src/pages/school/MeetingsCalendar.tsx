@@ -1,3 +1,4 @@
+import { MonthNav } from '../../components/calendar/MonthNav'
 import { MonthTable } from '../../components/calendar/MonthTable'
 import { cn } from '../../lib/cn'
 import { formatMonth, parseIso } from '../../lib/dateTime'
@@ -12,33 +13,6 @@ interface CalendarProps {
   selectedId: string | null
   onSelect: (meeting: SchoolMeeting) => void
   onMonth: (delta: number) => void
-}
-
-function Chevron({ direction }: { direction: 'left' | 'right' }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="size-[18px]">
-      <path d={direction === 'left' ? 'm15 6-6 6 6 6' : 'm9 6 6 6-6 6'} />
-    </svg>
-  )
-}
-
-function MonthNav({ month, onMonth, compact }: { month: Date; onMonth: (delta: number) => void; compact: boolean }) {
-  const button = compact
-    ? 'inline-flex size-11 items-center justify-center rounded-[12px] bg-canvas text-ink'
-    : 'inline-flex size-11 items-center justify-center rounded-[12px] border-2 border-line bg-surface text-ink'
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <button type="button" aria-label="Mois précédent" onClick={() => onMonth(-1)} className={button}>
-        <Chevron direction="left" />
-      </button>
-      <h2 aria-live="polite" className={compact ? 'text-[21px] text-ink' : 'text-[26px] text-ink'}>
-        {formatMonth(month)}
-      </h2>
-      <button type="button" aria-label="Mois suivant" onClick={() => onMonth(1)} className={button}>
-        <Chevron direction="right" />
-      </button>
-    </div>
-  )
 }
 
 /** « Awa, 10h00, Confirmée » (+ « , passée »). */

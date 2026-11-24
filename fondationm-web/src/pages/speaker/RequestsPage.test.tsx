@@ -44,20 +44,20 @@ describe('Demandes reçues — onglets et détail', () => {
       expect.stringContaining('Lycée des Tisserands'),
       expect.stringContaining('Collège Les Baobabs'),
     ])
-    expect(requests().getAllByRole('button')[0]).toHaveTextContent('Ven. 27 nov., 14h00')
+    expect(requests().getAllByRole('button')[0]).toHaveTextContent('Ven 27 nov · 14h00')
     expect(requests().getAllByRole('button')[0]).toHaveTextContent('Terminale S2 · 32 élèves · dakar')
 
-    await user.click(screen.getByRole('tab', { name: 'Acceptées' }))
+    await user.click(screen.getByRole('tab', { name: 'Acceptées · 2' }))
     expect(requests().getAllByRole('button').map((row) => row.textContent)).toEqual([
       expect.stringContaining('Centre de formation Saint-Louis'),
       expect.stringContaining('Lycée Blaise Diagne'),
     ])
     expect(router.state.location.search).toBe('?onglet=acceptees')
 
-    await user.click(screen.getByRole('tab', { name: 'Refusées ou annulées' }))
+    await user.click(screen.getByRole('tab', { name: 'Refusées ou annulées · 2' }))
     expect(requests().getAllByRole('button')).toHaveLength(2)
 
-    await user.click(screen.getByRole('tab', { name: 'Toutes' }))
+    await user.click(screen.getByRole('tab', { name: 'Toutes · 6' }))
     expect(requests().getAllByRole('button')).toHaveLength(6)
   })
 
@@ -66,13 +66,13 @@ describe('Demandes reçues — onglets et détail', () => {
     const { user } = renderApp('/intervenant/demandes', { token: true })
 
     const card = await detail()
-    expect(card.getByText('Demande envoyée le 22 novembre 2026')).toBeInTheDocument()
+    expect(card.getByText('Demande envoyée le 22 novembre')).toBeInTheDocument()
     expect(card.getByRole('heading', { name: 'Lycée des Tisserands' })).toBeInTheDocument()
     expect(card.getByText('Dans votre zone')).toBeInTheDocument()
     expect(factValue(card, 'Créneau demandé')).toBe('Vendredi 27 novembre, 14h00 – 15h00')
     expect(factValue(card, 'Format souhaité')).toBe('En classe')
     expect(factValue(card, 'Classe')).toBe('Terminale S2')
-    expect(factValue(card, "Nombre d'élèves")).toBe('32')
+    expect(factValue(card, 'Élèves')).toBe('32 élèves')
     expect(card.getByRole('region', { name: "Le mot de l'école" })).toHaveTextContent(
       'Nos élèves rêvent de comprendre comment fonctionne internet.',
     )
@@ -82,7 +82,7 @@ describe('Demandes reçues — onglets et détail', () => {
     await user.click(requests().getByRole('button', { name: /Collège Les Baobabs/ }))
     const other = await detail()
     expect(other.queryByText('Dans votre zone')).not.toBeInTheDocument()
-    expect(other.queryByText("Nombre d'élèves", { selector: 'dt' })).not.toBeInTheDocument()
+    expect(other.queryByText('Élèves', { selector: 'dt' })).not.toBeInTheDocument()
   })
 
   it('n’affiche ni noms d’élèves ni coordonnées, même si le serveur en envoyait', async () => {
@@ -109,8 +109,8 @@ describe('Demandes reçues — onglets et détail', () => {
 
     await user.click(await screen.findByRole('button', { name: /Collège de Rufisque/ }))
     const card = await detail()
-    expect(card.getByRole('region', { name: 'Créneau pris' })).toHaveTextContent(
-      'Ce créneau a été attribué à une autre demande.',
+    expect(card.getByRole('region', { name: 'Refusée automatiquement · créneau pris' })).toHaveTextContent(
+      'Une rencontre a été confirmée avec une autre école sur ce créneau.',
     )
     expect(card.queryByRole('button', { name: 'Accepter' })).not.toBeInTheDocument()
   })
@@ -158,8 +158,8 @@ describe('Demandes reçues — actions', () => {
 
     await user.click((await detail()).getByRole('button', { name: 'Accepter' }))
 
-    expect(await screen.findByRole('status', { name: 'Demande acceptée' })).toHaveTextContent(
-      'Vous avez accepté. La Fondation M donne son avis, et la rencontre sera confirmée dès sa validation.',
+    expect(await screen.findByRole('status', { name: 'Merci, votre accord est enregistré' })).toHaveTextContent(
+      'La Fondation M donne aussi son avis. Dès que vous êtes tous les deux d’accord, la rencontre est confirmée',
     )
     expect(calls('POST', `/api/speaker/meetings/${REQUEST_A.id}/accept`)).toHaveLength(1)
     await waitFor(() => expect(requests().getAllByRole('button')).toHaveLength(1))
@@ -190,8 +190,8 @@ describe('Demandes reçues — actions', () => {
     await user.type(field, ' Je suis en déplacement cette semaine. ')
     await user.click(card.getByRole('button', { name: 'Confirmer le refus' }))
 
-    expect(await screen.findByRole('status', { name: 'Demande refusée' })).toHaveTextContent(
-      'Vous avez refusé cette demande.',
+    expect(await screen.findByRole('status', { name: 'Vous avez refusé cette demande' })).toHaveTextContent(
+      'Aucun motif donné. L’école peut choisir un autre intervenant.',
     )
     expect(bodies).toEqual([{ reason: 'Je suis en déplacement cette semaine.' }])
   })

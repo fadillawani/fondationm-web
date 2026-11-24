@@ -17,7 +17,6 @@ import { Suggestions } from '../../components/ui/Suggestions'
 import { Textarea } from '../../components/ui/Textarea'
 import { SECTORS, SUGGESTED_CITIES, SUGGESTED_COUNTRIES, sectorOptionLabel } from '../../lib/referenceData'
 import { applyServerFieldErrors } from '../../lib/serverFieldErrors'
-import { CharterNote } from './CharterNote'
 import { speakerSchema, type SpeakerFormInput, type SpeakerFormValues } from './schemas'
 import { SkillPicker } from './SkillPicker'
 
@@ -93,10 +92,10 @@ export function RegisterSpeakerPage() {
       mobileIntro="Une heure de votre temps, c'est parfois le déclic d'une classe entière."
       steps={STEPS}
     >
-      <AuthTabs activeLabel="Créer un compte" activeTone="ink" />
+      <AuthTabs activeLabel="Devenir intervenant" activeTone="ink" />
 
       <div>
-        <h1 className="text-[32px] leading-tight">Créer mon compte intervenant</h1>
+        <h1 className="text-[26px] leading-tight md:text-[30px]">Créer mon compte intervenant</h1>
         <p className="mt-1 text-sm font-semibold text-muted">
           Votre ville permet aux écoles proches de vous trouver en premier.
         </p>
@@ -108,14 +107,20 @@ export function RegisterSpeakerPage() {
             {(fieldProps) => <Input {...fieldProps} {...register('fullName')} autoComplete="name" />}
           </FormField>
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Métier" error={errors.jobTitle?.message} required>
+            <FormField label="Votre métier" error={errors.jobTitle?.message} required>
               {(fieldProps) => <Input {...fieldProps} {...register('jobTitle')} autoComplete="organization-title" />}
             </FormField>
-            <FormField label="Structure (facultatif)" error={errors.organization?.message}>
+            <FormField label="Structure" labelNote="(facultatif)" error={errors.organization?.message}>
               {(fieldProps) => <Input {...fieldProps} {...register('organization')} autoComplete="organization" />}
             </FormField>
           </div>
-          <FormField label="Secteur" error={errors.sector?.message} required>
+          <FormField
+            label="Votre secteur"
+            hint="Le secteur principal de votre métier. Il aide les écoles à vous trouver."
+            hintTone="muted"
+            error={errors.sector?.message}
+            required
+          >
             {(fieldProps) => (
               <Select {...fieldProps} {...register('sector')}>
                 <option value="">Choisir…</option>
@@ -135,7 +140,13 @@ export function RegisterSpeakerPage() {
             </FormField>
             <FormField label="Zone (ville)" error={errors.city?.message} required>
               {(fieldProps) => (
-                <Input {...fieldProps} {...register('city')} list="villes-suggerees" autoComplete="address-level2" />
+                <Input
+                  {...fieldProps}
+                  {...register('city')}
+                  list="villes-suggerees"
+                  autoComplete="address-level2"
+                  className={errors.city ? undefined : 'border-terra font-bold'}
+                />
               )}
             </FormField>
           </div>
@@ -151,7 +162,8 @@ export function RegisterSpeakerPage() {
             inputRef={skillsField.ref}
           />
           <FormField
-            label="Pourquoi voulez-vous transmettre ? (facultatif, visible par les écoles)"
+            label="Pourquoi voulez-vous transmettre ?"
+            labelNote="(facultatif, visible par les écoles)"
             error={errors.motivation?.message}
           >
             {(fieldProps) => <Textarea {...fieldProps} {...register('motivation')} />}
@@ -171,19 +183,22 @@ export function RegisterSpeakerPage() {
               )}
             </FormField>
           </div>
-          <FormField label="Mot de passe" hint="8 caractères minimum" error={errors.password?.message} required>
+          <FormField
+            label="Mot de passe"
+            hint="8 caractères minimum"
+            hintTone="darkGreen"
+            error={errors.password?.message}
+            required
+          >
             {(fieldProps) => <PasswordInput {...fieldProps} {...register('password')} autoComplete="new-password" />}
           </FormField>
         </Fieldset>
 
-        <div className="flex flex-col gap-1">
-          <Checkbox
-            {...register('charterAccepted')}
-            error={errors.charterAccepted?.message}
-            label="J'accepte la charte des intervenants. Je comprends que mes coordonnées ne sont jamais transmises aux écoles."
-          />
-          <CharterNote />
-        </div>
+        <Checkbox
+          {...register('charterAccepted')}
+          error={errors.charterAccepted?.message}
+          label="J'accepte la charte des intervenants. Je comprends que mes coordonnées ne sont jamais transmises aux écoles."
+        />
 
         {formError !== null && <Alert tone="error">{errorMessage(formError)}</Alert>}
 
@@ -191,7 +206,7 @@ export function RegisterSpeakerPage() {
           <Button type="submit" fullWidth loading={registration.isPending}>
             Envoyer ma demande
           </Button>
-          <p className="text-center text-[13px] font-semibold text-muted">
+          <p className="text-center text-[13px] font-bold text-muted">
             La Fondation M valide chaque intervenant avant l'ouverture du compte.
           </p>
         </div>
