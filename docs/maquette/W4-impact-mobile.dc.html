@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>W4 Rapport d'impact donateur mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+</style>
+</helmet>
+<div style="width: 390px; height: 2100px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+  <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+    <header style="background: #4E6A2C; color: #FFFFFF; padding: 20px 16px 22px 16px; border-radius: 0 0 28px 28px; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <span style="font-family: 'Lilita One', sans-serif; font-size: 24px; color: #FDE7A6">FondationM</span>
+        <a href="W4-connexion-mobile.dc.html" style="min-height: 44px; padding: 0 12px; border-radius: 12px; border: 2px solid #FDE7A6; color: #FDE7A6; text-decoration: none; display: flex; align-items: center; font-weight: 900; font-size: 13px">Se déconnecter</a>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 30px; line-height: 1.05; color: #FDE7A6">Bonjour M. Diaw</h1>
+        <span style="font-size: 14px; font-weight: 700">Voici ce que votre soutien a fait naître dans les classes du Sénégal.</span>
+      </div>
+      <div role="tablist" aria-label="Période" style="display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: #3B5221">
+        <sc-for list="{{ periods }}" as="p" hint-placeholder-count="2">
+          <button role="tab" aria-selected="{{ p.selected }}" onClick="{{ p.pick }}" style="flex: 1; min-height: 44px; border: 0; border-radius: 10px; background: {{ p.bg }}; color: {{ p.fg }}; font-family: inherit; font-weight: 900; font-size: 14px; cursor: pointer">{{ p.label }}</button>
+        </sc-for>
+      </div>
+    </header>
+
+    <div style="padding: 16px; display: flex; flex-direction: column; gap: 16px">
+      <section aria-label="Chiffres clés" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+        <div style="grid-column: span 2; border-radius: 20px; background: #2B337A; color: #FFFFFF; padding: 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px">
+          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #FDE7A6">Jeunes touchés</span><span style="font-family: 'Lilita One', sans-serif; font-size: 44px; line-height: 0.95; color: #FDE7A6">{{ k.jeunes }}</span></div>
+          <span style="font-size: 12px; font-weight: 700; text-align: right; max-width: 130px">{{ k.periode }}</span>
+        </div>
+        <div style="border-radius: 18px; background: #FFFFFF; padding: 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Lilita One', sans-serif; font-size: 32px; line-height: 1; color: #2B337A">{{ k.rencontres }}</span><span style="font-size: 13px; font-weight: 800">rencontres réalisées</span></div>
+        <div style="border-radius: 18px; background: #FDE7A6; padding: 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Lilita One', sans-serif; font-size: 32px; line-height: 1; color: #B8492A">{{ k.note }}<span style="font-size: 16px; color: #1B1F3B"> / 5</span></span><span style="font-size: 13px; font-weight: 800">note moyenne</span></div>
+        <div style="border-radius: 18px; background: #FFFFFF; padding: 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Lilita One', sans-serif; font-size: 32px; line-height: 1; color: #4E6A2C">{{ k.ecoles }}</span><span style="font-size: 13px; font-weight: 800">écoles engagées</span></div>
+        <div style="border-radius: 18px; background: #FFFFFF; padding: 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Lilita One', sans-serif; font-size: 32px; line-height: 1; color: #EF7A0A">{{ k.intervenants }}</span><span style="font-size: 13px; font-weight: 800">intervenants bénévoles</span></div>
+      </section>
+
+      <section style="background: #FFFFFF; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+        <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 18px; text-transform: uppercase">Rencontres par mois</h2>
+        <div role="img" aria-label="{{ chartAria }}" style="height: 150px; display: flex; align-items: flex-end; gap: 4px; border-bottom: 2px solid #E6DECB">
+          <sc-for list="{{ months }}" as="m" hint-placeholder-count="3">
+            <div style="flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px">
+              <span style="font-size: 12px; font-weight: 900">{{ m.n }}</span>
+              <div style="width: 100%; max-width: 56px; height: {{ m.hm }}; border-radius: 8px 8px 0 0; background: {{ m.color }}"></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 4px"><sc-for list="{{ months }}" as="m" hint-placeholder-count="3"><span style="flex: 1; min-width: 0; text-align: center; font-size: 10px; font-weight: 800; color: #4A4A57; overflow: hidden">{{ m.short }}</span></sc-for></div>
+        <span style="font-size: 12px; font-weight: 700; color: #4A4A57">{{ chartNote }}</span>
+      </section>
+
+      <section aria-labelledby="ret" style="display: flex; flex-direction: column; gap: 10px">
+        <h2 id="ret" style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 20px; text-transform: uppercase">Retours d'expérience validés</h2>
+        <span style="font-size: 13px; font-weight: 700; color: #4A4A57">Validés par la Fondation. Les noms des élèves ne sont jamais affichés.</span>
+        <div role="group" aria-label="Filtrer par secteur" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px">
+          <sc-for list="{{ sectors }}" as="s" hint-placeholder-count="7">
+            <button aria-pressed="{{ s.selected }}" onClick="{{ s.pick }}" style="flex-shrink: 0; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 2px solid {{ s.border }}; background: {{ s.bg }}; color: {{ s.fg }}; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer">{{ s.label }}</button>
+          </sc-for>
+        </div>
+        <sc-for list="{{ items }}" as="r" hint-placeholder-count="5">
+          <button onClick="{{ r.open }}" style="text-align: left; border-radius: 18px; border: 0; background: #FFFFFF; padding: 14px; font-family: inherit; color: #1B1F3B; cursor: pointer; display: flex; flex-direction: column; gap: 6px">
+            <span style="display: flex; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 800; color: #4A4A57"><span>{{ r.date }}</span><span style="padding: 2px 10px; border-radius: 999px; background: {{ r.secBg }}; color: #FFFFFF; font-weight: 900">{{ r.secteur }}</span></span>
+            <span style="font-family: 'Lilita One', sans-serif; font-size: 17px; line-height: 1.15">{{ r.title }}</span>
+            <span style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; color: #4A4A57"><span>{{ r.sub }}</span><span style="color: #4E6A2C; font-weight: 900">Lire ›</span></span>
+          </button>
+        </sc-for>
+      </section>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+    <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 14px">
+      <button onClick="{{ back }}" style="align-self: flex-start; min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px; background: #FFFFFF; font-family: inherit; font-weight: 900; font-size: 14px; color: #1B1F3B; cursor: pointer">‹ Rapport d'impact</button>
+      <header style="display: flex; flex-direction: column; gap: 6px">
+        <span style="align-self: flex-start; padding: 3px 12px; border-radius: 999px; background: #4E6A2C; color: #FFFFFF; font-size: 12px; font-weight: 900">Validé par la Fondation M</span>
+        <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 26px; line-height: 1.05">{{ d.title }}</h1>
+        <span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ d.date }} · {{ d.classe }}</span>
+      </header>
+      <sc-for list="{{ d.cards }}" as="c" hint-placeholder-count="2">
+        <section style="border-radius: 20px; background: #FFFFFF; border-left: 8px solid {{ c.accent }}; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 11px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: {{ c.accent }}">{{ c.role }}</span>
+            <span style="font-weight: 900; font-size: 15px">{{ c.author }}</span>
+          </div>
+          <sc-if value="{{ c.ok }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <sc-if value="{{ c.hasStats }}" hint-placeholder-val="{{ true }}"><div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; text-align: center"><sc-for list="{{ c.stats }}" as="s" hint-placeholder-count="4"><div style="border-radius: 12px; background: #F7F3EA; padding: 8px 2px; display: flex; flex-direction: column"><span style="font-family: 'Lilita One', sans-serif; font-size: 19px; color: #2B337A">{{ s.v }}</span><span style="font-size: 11px; font-weight: 800; color: #4A4A57">{{ s.k }}</span></div></sc-for></div></sc-if>
+              <sc-if value="{{ c.hasRating }}" hint-placeholder-val="{{ false }}"><span style="font-size: 14px; font-weight: 800">Ressenti : <span style="padding: 2px 10px; border-radius: 999px; background: #FDE7A6">{{ c.rating }}</span></span></sc-if>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{ c.emotions }}" as="e" hint-placeholder-count="3"><span style="padding: 4px 10px; border-radius: 999px; background: #F7F3EA; border: 2px solid #E6DECB; font-size: 12px; font-weight: 800">{{ e }}</span></sc-for></div>
+              <div style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; font-weight: 900; color: #4A4A57">Le moment fort</span><p style="margin: 0; font-size: 15px; font-weight: 700; line-height: 1.5">« {{ c.moment }} »</p></div>
+              <div style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; font-weight: 900; color: #4A4A57">Un échange marquant</span><p style="margin: 0; font-size: 14px; font-weight: 600; line-height: 1.5">{{ c.echange }}</p></div>
+              <div style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; font-weight: 900; color: #4A4A57">Ce que cette rencontre a changé</span><p style="margin: 0; font-size: 14px; font-weight: 600; line-height: 1.5">{{ c.apport }}</p></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ c.pending }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 14px; font-weight: 700; color: #4A4A57">Cet avis apparaîtra ici dès qu'il aura été validé par la Fondation.</p></sc-if>
+        </section>
+      </sc-for>
+      <a href="W4-requetes-mobile.dc.html" style="min-height: 52px; border-radius: 16px; background: #1B1F3B; color: #FDE7A6; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px">Une question ? Écrire à la Fondation</a>
+    </div>
+  </sc-if>
+
+  <nav aria-label="Navigation principale" style="margin-top: auto; background: #FFFFFF; border-top: 1px solid #E6DECB; padding: 8px 4px 22px 4px; display: grid; grid-template-columns: 1fr 1fr">
+    <a href="#" aria-current="page" style="min-height: 52px; text-decoration: none; color: #4E6A2C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 900">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Rapport d'impact</a>
+    <a href="W4-requetes-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>Mes requêtes</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2100}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const per = st.per || 'tri';
+const K = {
+tri: { jeunes: '1 240', periode: 'ce trimestre (sept. à nov.)', rencontres: '38', ecoles: '27', intervenants: '31', note: '4,6' },
+an: { jeunes: '3 870', periode: 'depuis janvier 2026', rencontres: '121', ecoles: '52', intervenants: '74', note: '4,7' }
+}[per];
+const data = per === 'tri'
+? [['Sept.', 9], ['Oct.', 14], ['Nov.', 15]]
+: [['J', 8], ['F', 10], ['M', 10], ['A', 12], ['M', 13], ['J', 9], ['J', 14], ['A', 7], ['S', 9], ['O', 14], ['N', 15]];
+const max = Math.max(...data.map((d) => d[1]));
+const months = data.map(([short, n], i) => ({ short, n: String(n), hm: Math.round(n / max * 110) + 'px', color: i === data.length - 1 ? '#9DAA3C' : '#2B337A' }));
+const periods = [['tri', 'Ce trimestre'], ['an', 'Cette année']].map(([id, label]) => ({ label, selected: per === id ? 'true' : 'false', bg: per === id ? '#FDE7A6' : 'transparent', fg: per === id ? '#1B1F3B' : '#FFFFFF', pick: () => this.setState({ per: id }) }));
+const SEC = { 'Numérique': '#2B337A', 'Agriculture': '#4E6A2C', 'Finance': '#E5A60A', 'Santé': '#B81C1F', 'Droit': '#1B1F3B', 'Artisanat': '#EF7A0A' };
+const V = [
+{ id: 'V1', date: 'Mardi 20 octobre', secteur: 'Numérique', title: 'Lycée de Pikine × Amadou Baila', classe: 'Terminale S2 · Pikine', who: 'ingénieur réseaux',
+e: { author: 'Ibrahima Diouf, proviseur adjoint', stats: [['34', 'présents'], ['17', 'filles'], ['17', 'garçons'], ['17 ans', 'âge moyen']], emotions: ['Fierté', 'Gratitude'], moment: 'La démonstration de la fibre optique : toute la classe debout autour de la table.', echange: 'Une élève a annoncé devant toute la classe qu’elle voulait devenir ingénieure.', apport: 'Nos élèves en parlent encore. Plusieurs ont demandé des informations sur les écoles d’ingénieurs.' },
+i: { author: 'Amadou Baila, ingénieur réseaux', rating: 'Inoubliable', emotions: ['Fierté', 'Joie', 'Nostalgie'], moment: 'Une élève m’a dit qu’elle voulait devenir la première ingénieure de sa famille.', echange: 'Un garçon m’a demandé combien je gagnais. On a fini par parler des bourses d’études.', apport: 'Je me suis revu à leur âge, sans personne pour m’expliquer.' } },
+{ id: 'V2', date: 'Jeudi 22 octobre', secteur: 'Santé', title: 'Lycée Malick Sy × Fatou Ndoye', classe: 'Première S1 · Thiès', who: 'sage-femme',
+e: { author: 'Coumba Sène, conseillère d’orientation', stats: [['32', 'présents'], ['20', 'filles'], ['12', 'garçons'], ['16 ans', 'âge moyen']], emotions: ['Émotion', 'Respect'], moment: 'Quand Fatou a raconté sa première naissance en poste de santé, à Mbour. Personne ne parlait.', echange: 'Un garçon a demandé si les hommes pouvaient faire ce métier. Fatou lui a répondu avec le sourire.', apport: 'Les élèves voient enfin les métiers de la santé au-delà de « médecin ».' },
+i: { author: 'Fatou Ndoye, sage-femme', rating: 'Très bien', emotions: ['Joie', 'Espoir'], moment: 'Les questions ont continué dans la cour, pendant la récréation.', echange: 'Une élève m’a confié qu’elle avait peur du sang. On a parlé des autres métiers de la santé.', apport: 'J’ai envie de revenir avec une collègue infirmière.' } },
+{ id: 'V3', date: 'Jeudi 15 octobre', secteur: 'Finance', title: 'Lycée Limamoulaye × Cheikh Sarr', classe: 'Terminale G · Guédiawaye', who: 'expert-comptable',
+e: { author: 'Abdou Gaye, professeur d’économie', stats: [['36', 'présents'], ['15', 'filles'], ['21', 'garçons'], ['18 ans', 'âge moyen']], emotions: ['Curiosité', 'Surprise'], moment: 'Le jeu du budget familial : chaque groupe gérait un mois de dépenses.', echange: 'La classe a débattu des tontines et de l’épargne avec beaucoup de sérieux.', apport: 'Mes élèves ont compris à quoi servent les cours de comptabilité.' },
+i: { author: 'Cheikh Sarr, expert-comptable', rating: 'Très bien', emotions: ['Joie', 'Gratitude'], moment: 'Voir des jeunes de Guédiawaye se projeter dans un cabinet comptable.', echange: 'Un élève m’a demandé comment créer une entreprise sans argent de départ.', apport: 'Je me suis rendu compte que je pouvais transmettre en deux heures ce que j’ai appris seul.' } },
+{ id: 'V4', date: 'Jeudi 29 octobre', secteur: 'Artisanat', title: 'Lycée Alpha Molo Baldé × Ibou Mané', classe: 'Seconde L · Kolda', who: 'menuisier',
+e: { author: 'Mariétou Diallo, référente orientation', stats: [['38', 'présents'], ['19', 'filles'], ['19', 'garçons'], ['16 ans', 'âge moyen']], emotions: ['Fierté', 'Joie'], moment: 'Chaque élève est reparti avec un petit objet en bois assemblé en classe.', echange: 'Une élève a demandé si l’on pouvait vivre de la menuiserie en Casamance. Ibou a parlé de son atelier et de ses apprentis.', apport: 'Les métiers manuels ont enfin été présentés comme un vrai choix.' },
+i: { author: 'Ibou Mané, menuisier', rating: 'Inoubliable', emotions: ['Fierté', 'Émotion'], moment: 'Le silence quand j’ai sorti le rabot de mon père.', echange: 'Des élèves voulaient savoir comment devenir apprenti. On a parlé des centres de formation de Kolda.', apport: 'Je n’ai pas eu la chance qu’on vienne me parler de métiers à leur âge.' } },
+{ id: 'V6', date: 'Mardi 13 octobre', secteur: 'Droit', title: 'Lycée de Kédougou × Awa Ba', classe: 'Terminale L1 · Kédougou', who: 'avocate',
+e: { author: 'Samba Cissé, proviseur', stats: [['31', 'présents'], ['16', 'filles'], ['15', 'garçons'], ['18 ans', 'âge moyen']], emotions: ['Curiosité', 'Respect'], moment: 'Le procès simulé : la classe jouait le tribunal, Awa jouait la juge.', echange: 'Les élèves ont posé beaucoup de questions sur les droits des travailleurs des mines d’or.', apport: 'Le droit n’est plus un métier lointain réservé à Dakar.' },
+i: { author: 'Awa Ba, avocate', rating: 'Très bien', emotions: ['Espoir', 'Gratitude'], moment: 'Une élève a plaidé avec une assurance incroyable pendant le procès simulé.', echange: 'On a parlé du concours d’entrée à la faculté de droit et des bourses.', apport: 'Je reviendrai à Kédougou, c’est promis.' } },
+{ id: 'V5', date: 'Jeudi 8 octobre', secteur: 'Agriculture', title: 'Lycée de Sor × Mame Diarra Sow', classe: 'Terminale S2 · Saint-Louis', who: 'agronome',
+e: { author: 'Moussa Ndiaye, référent orientation', pending: true },
+i: { author: 'Mame Diarra Sow, agronome', rating: 'Inoubliable', emotions: ['Fierté', 'Espoir'], moment: 'Un élève m’a dit qu’il voulait revenir travailler dans la vallée après ses études.', echange: 'On a parlé de son grand-père, riziculteur. Il ne savait pas que c’était un métier d’avenir.', apport: 'Je me suis sentie utile pour ma région.' } }
+];
+const sec = st.sec || 'Tous';
+const sectors = ['Tous', 'Santé', 'Numérique', 'Finance', 'Agriculture', 'Artisanat', 'Droit'].map((s) => ({ label: s, selected: sec === s ? 'true' : 'false', bg: sec === s ? '#1B1F3B' : '#FFFFFF', fg: sec === s ? '#FFFFFF' : '#1B1F3B', border: sec === s ? '#1B1F3B' : '#E6DECB', pick: () => this.setState({ sec: s }) }));
+const visible = V.filter((v) => sec === 'Tous' || v.secteur === sec);
+const items = visible.map((v) => ({ date: v.date, secteur: v.secteur, secBg: SEC[v.secteur], title: v.title, sub: v.classe.split(' · ')[1] + ' · ' + v.who, open: () => this.setState({ sel: v.id }) }));
+const r = V.find((v) => v.id === st.sel);
+const card = (c, role, accent) => ({ role, accent, author: c.author, ok: !c.pending, pending: !!c.pending, hasStats: !!c.stats, stats: (c.stats || []).map(([v, k]) => ({ v, k })), hasRating: !!c.rating, rating: c.rating || '', emotions: c.emotions || [], moment: c.moment || '', echange: c.echange || '', apport: c.apport || '' });
+const d = r ? { title: r.title, date: r.date, classe: r.classe, cards: [card(r.e, 'Avis de l’école', '#2B337A'), card(r.i, 'Avis de l’intervenant', '#EF7A0A')] } : { title: '', date: '', classe: '', cards: [] };
+return { k: K, months, periods, sectors, items, d, isList: !r, isDetail: !!r, back: () => this.setState({ sel: null }),
+chartNote: per === 'tri' ? 'Novembre en cours.' : 'Année 2026, novembre en cours.',
+chartAria: 'Rencontres réalisées par mois : ' + data.map((x) => x[0] + ' ' + x[1]).join(', ') };
+}
+}
+</script>
+</body>
+</html>

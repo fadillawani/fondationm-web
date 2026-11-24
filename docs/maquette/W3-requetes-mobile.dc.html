@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>W3 Requêtes donateurs — mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+textarea{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 1600px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+  <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+    <header style="display: flex; align-items: center; gap: 8px; padding: 14px 12px 6px 8px">
+      <a href="W3-pilotage-mobile.dc.html" aria-label="Retour à l'accueil" style="width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #1B1F3B"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></a>
+      <div style="display: flex; flex-direction: column"><span style="font-size: 12px; font-weight: 800; color: #4A4A57">E16</span><h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 26px; line-height: 1.05">Requêtes donateurs</h1></div>
+    </header>
+    <section style="padding: 10px 16px 0 16px; display: flex; flex-direction: column; gap: 10px">
+      <sc-for list="{{ items }}" as="r" hint-placeholder-count="3">
+        <button onClick="{{ r.open }}" style="text-align: left; border: 0; background: #FFFFFF; border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 6px; font-family: inherit; color: #1B1F3B">
+          <span style="display: flex; justify-content: space-between; gap: 8px; width: 100%"><span style="font-size: 12px; font-weight: 900; color: #4A4A57">{{ r.from }} · {{ r.date }}</span><span style="font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 999px; background: {{ r.bg }}; color: {{ r.fg }}">{{ r.status }}</span></span>
+          <span style="font-family: 'Lilita One', sans-serif; font-size: 17px">{{ r.subject }}</span>
+        </button>
+      </sc-for>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+    <header style="display: flex; align-items: center; gap: 8px; padding: 14px 12px 6px 8px">
+      <button onClick="{{ back }}" aria-label="Retour à la liste" style="width: 44px; height: 44px; border: 0; border-radius: 14px; background: transparent; color: #1B1F3B; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+      <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 14px; font-weight: 900">{{ d.subject }}</span><span style="font-size: 12px; font-weight: 700; color: #4A4A57">{{ d.from }} · {{ d.status }}</span></div>
+    </header>
+    <section aria-live="polite" style="padding: 8px 16px 0 16px; display: flex; flex-direction: column; gap: 10px">
+      <sc-for list="{{ d.thread }}" as="m" hint-placeholder-count="2">
+        <div style="align-self: {{ m.align }}; max-width: 88%; border-radius: 18px; background: {{ m.bg }}; color: {{ m.fg }}; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+          <span style="font-size: 11px; font-weight: 900; opacity: 0.85">{{ m.who }} · {{ m.date }}</span>
+          <span style="font-size: 14px; font-weight: 600; line-height: 1.5; white-space: pre-line">{{ m.text }}</span>
+        </div>
+      </sc-for>
+      <sc-if value="{{ d.canReply }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top: 6px; background: #FFFFFF; border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+          <label for="m-rep" style="font-size: 14px; font-weight: 900">Votre réponse</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{ helpers }}" as="h" hint-placeholder-count="2"><button onClick="{{ h.insert }}" style="min-height: 38px; padding: 0 10px; border-radius: 999px; border: 2px dashed #2B337A; background: #FFFFFF; color: #2B337A; font-family: inherit; font-weight: 800; font-size: 12px">+ {{ h.label }}</button></sc-for></div>
+          <textarea id="m-rep" rows="5" value="{{ draft }}" onChange="{{ setDraft }}" placeholder="Bonjour, merci pour votre message…" style="border-radius: 12px; border: 2px solid #E6DECB; padding: 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; line-height: 1.5"></textarea>
+          <div role="radiogroup" aria-label="Statut après envoi" style="display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{ statusChoices }}" as="s" hint-placeholder-count="2"><button role="radio" aria-checked="{{ s.checked }}" onClick="{{ s.pick }}" style="min-height: 38px; padding: 0 10px; border-radius: 999px; border: 2px solid {{ s.border }}; background: {{ s.bg }}; color: {{ s.fg }}; font-family: inherit; font-weight: 800; font-size: 12px">{{ s.label }}</button></sc-for></div>
+          <button onClick="{{ send }}" disabled="{{ cannotSend }}" style="min-height: 52px; border: 0; border-radius: 16px; background: {{ sendBg }}; color: #FFFFFF; font-family: 'Lilita One', sans-serif; font-size: 18px">Envoyer la réponse</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ d.isDone }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 12px; border-radius: 12px; background: #E8EEDF; color: #3B5221; font-size: 13px; font-weight: 800">Requête traitée. La réponse est visible dans l'espace du donateur.</p></sc-if>
+    </section>
+  </sc-if>
+
+  <nav aria-label="Navigation principale" style="margin-top: auto; background: #FFFFFF; border-top: 1px solid #E6DECB; padding: 8px 4px 22px 4px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr))">
+    <a href="W3-pilotage-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #B8492A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 900">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg>Accueil</a>
+    <a href="W3-comptes-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="m16 11 2 2 4-4"/></svg>Comptes</a>
+    <a href="W3-demandes-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1Z"/></svg>Demandes</a>
+    <a href="W3-rencontres-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M3 10h18"/></svg>Rencontres</a>
+    <a href="W3-retours-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>Retours</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1600}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const DATA = [
+{ id: 'q1', from: 'M. Diaw', date: '12 nov', subject: 'Bilan des rencontres à Saint-Louis', status: 'new', thread: [['d', 'M. Diaw', '12 nov', 'Bonjour Samirath,\nPouvez-vous me partager le bilan des rencontres à Saint-Louis pour ce trimestre ?']] },
+{ id: 'q2', from: 'Groupe Sahel Invest', date: '10 nov', subject: 'Financer plus de rencontres agricoles', status: 'progress', thread: [['d', 'Aïda Mbaye', '10 nov', 'Nous aimerions financer davantage de rencontres agricoles dans la vallée du fleuve.'], ['f', 'Samirath', '11 nov', 'Merci ! Nous préparons une proposition avec nos agronomes.']] },
+{ id: 'q3', from: 'M. Diaw', date: '25 oct', subject: 'Liste des établissements accompagnés', status: 'done', thread: [['d', 'M. Diaw', '25 oct', 'Pourriez-vous m’envoyer la liste des établissements accompagnés ?'], ['f', 'Samirath', '28 oct', 'Elle est dans votre rapport d’impact : 6 établissements. Merci pour votre soutien !']] }
+];
+const over = st.over || {};
+const all = DATA.map((x) => ({ ...x, ...(over[x.id] || {}) }));
+const S = { new: ['Nouvelle', '#B81C1F', '#FFFFFF'], progress: ['En cours', '#EF7A0A', '#1B1F3B'], done: ['Traitée', '#4E6A2C', '#FFFFFF'] };
+const items = all.map((x) => ({ from: x.from, date: x.date, subject: x.subject, status: S[x.status][0], bg: S[x.status][1], fg: S[x.status][2], open: () => this.setState({ sel: x.id, view: 'detail', draft: '' }) }));
+const x = all.find((y) => y.id === (st.sel || 'q1'));
+const d = { subject: x.subject, from: x.from, status: S[x.status][0], thread: x.thread.map(([w, name, date, text]) => ({ who: w === 'f' ? name + ' (Fondation M)' : name, date, text, align: w === 'f' ? 'flex-end' : 'flex-start', bg: w === 'f' ? '#2B337A' : '#FFFFFF', fg: w === 'f' ? '#FFFFFF' : '#1B1F3B' })), canReply: x.status !== 'done', isDone: x.status === 'done' };
+const draft = st.draft || '';
+const after = st.after || 'done';
+const statusChoices = [['done', 'Marquer « Traitée »'], ['progress', 'Laisser « En cours »']].map(([k, label]) => ({ label, checked: after === k ? 'true' : 'false', bg: after === k ? '#1B1F3B' : '#FFFFFF', fg: after === k ? '#FDE7A6' : '#1B1F3B', border: after === k ? '#1B1F3B' : '#E6DECB', pick: () => this.setState({ after: k }) }));
+const add = (t) => () => this.setState({ draft: (draft ? draft + '\n\n' : '') + t });
+const helpers = [['Chiffres Saint-Louis', 'Ce trimestre à Saint-Louis : 6 rencontres, 208 élèves touchés, dont 109 filles.'], ['Un moment marquant', 'Au Lycée de Sor, une élève a dit : « Je veux faire comme vous. »']].map(([label, t]) => ({ label, insert: add(t) }));
+const view = st.view || 'list';
+return {
+isList: view === 'list', isDetail: view === 'detail', items, d, draft, statusChoices, helpers,
+cannotSend: !draft.trim(), sendBg: draft.trim() ? '#B8492A' : '#C9BFA8',
+setDraft: (e) => this.setState({ draft: e.target.value }),
+back: () => this.setState({ view: 'list' }),
+send: () => { if (!draft.trim()) return; this.setState({ over: { ...over, [x.id]: { ...(over[x.id] || {}), thread: x.thread.concat([['f', 'Samirath', '16 nov', draft.trim()]]), status: after } }, draft: '' }); }
+};
+}
+}
+</script>
+</body>
+</html>

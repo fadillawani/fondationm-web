@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { UserMenu } from '../../components/layout/UserMenu'
 import { useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Link, useParams } from 'react-router'
@@ -79,8 +80,14 @@ function Step({ number, title, children }: { number: number; title: string; chil
   const id = `etape-${number}`
   return (
     <section aria-labelledby={id} className="flex flex-col gap-4 rounded-[22px] bg-surface p-5 shadow-card">
-      <h2 id={id} className="flex items-center gap-3 text-xl text-ink">
-        <span aria-hidden="true" className="inline-flex size-9 items-center justify-center rounded-pill bg-terra font-display text-white">
+      <h2 id={id} className="flex items-center gap-3 text-xl text-ink lg:text-[21px]">
+        <span
+          aria-hidden="true"
+          className={cn(
+            'inline-flex size-[26px] items-center justify-center rounded-[8px] font-sans text-sm font-black text-cream lg:size-[30px] lg:rounded-[10px] lg:text-base',
+            number === 4 ? 'bg-ink' : 'bg-indigo',
+          )}
+        >
           {number}
         </span>
         {title}
@@ -403,14 +410,17 @@ export function MeetingRequestPage() {
           <li aria-current="page">Demande de rencontre</li>
         </ol>
       </nav>
-      <Link
-        to={PATHS.schoolSpeakers}
-        className="inline-flex min-h-touch items-center gap-2 self-start font-extrabold text-indigo md:hidden"
-      >
-        <BackIcon className="size-5" />
-        Retour aux intervenants
-      </Link>
-      <h1 className="text-[32px] leading-tight text-ink md:text-[40px]">Demander une rencontre</h1>
+      <div className="flex items-center gap-2">
+        <Link
+          to={PATHS.schoolSpeakers}
+          aria-label="Retour aux intervenants"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] text-ink lg:hidden"
+        >
+          <BackIcon className="size-6" />
+        </Link>
+        <h1 className="flex-1 text-2xl leading-tight text-ink lg:text-[40px] lg:leading-none">Demander une rencontre</h1>
+        <UserMenu className="lg:hidden" />
+      </div>
 
       {speaker.isPending ? (
         <div className="flex justify-center py-10 text-terra">

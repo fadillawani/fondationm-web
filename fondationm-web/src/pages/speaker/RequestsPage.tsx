@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageTitle } from '../../components/layout/PageTitle'
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { errorMessage } from '../../api/errors'
 import { useCurrentUser } from '../../auth/currentUserContext'
@@ -127,13 +128,12 @@ export function RequestsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className={cn('flex flex-col gap-1', detailOpen && 'hidden lg:flex')}>
-        <p className="text-xs font-black uppercase tracking-[0.12em] text-terra">Des classes vous attendent</p>
-        <h1 className="text-[32px] leading-tight text-ink md:text-[40px]">Demandes reçues</h1>
-        <p className="text-[15px] font-semibold text-muted">
-          Répondez selon votre disponibilité. La Fondation M donne aussi son avis, de son côté.
-        </p>
-      </header>
+      <PageTitle
+        className={cn(detailOpen && 'hidden lg:flex')}
+        kicker="Des classes vous attendent"
+        title="Demandes reçues"
+        subtitle="Répondez selon votre disponibilité. La Fondation M donne aussi son avis, de son côté."
+      />
 
       <div className={cn(detailOpen && 'hidden lg:block')}>
         <Tabs

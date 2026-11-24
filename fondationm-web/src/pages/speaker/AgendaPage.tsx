@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageTitle } from '../../components/layout/PageTitle'
 import { Link, useSearchParams } from 'react-router'
 import { errorMessage } from '../../api/errors'
 import { greetingName } from '../../auth/currentUser'
@@ -144,13 +145,12 @@ export function AgendaPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className={cn('flex flex-col gap-1', panelOpen && 'hidden md:flex')}>
-        <p className="text-xs font-black uppercase tracking-[0.12em] text-terra">Bonjour {greetingName(user)}</p>
-        <h1 className="text-[32px] leading-tight text-ink md:text-[40px]">Mon agenda</h1>
-        <p className="text-[15px] font-semibold text-muted">
-          Vos disponibilités, les demandes des écoles et vos rencontres, au même endroit.
-        </p>
-      </header>
+      <PageTitle
+        className={cn(panelOpen && 'hidden md:flex')}
+        kicker={`Bonjour ${greetingName(user)}`}
+        title="Mon agenda"
+        subtitle="Vos disponibilités, les demandes des écoles et vos rencontres, au même endroit."
+      />
 
       {toAnswer > 0 && (
         <section

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>W3 Rencontres — mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+textarea{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 1800px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="padding: 18px 16px 6px 16px; display: flex; flex-direction: column">
+    <span style="font-size: 12px; font-weight: 800; color: #4A4A57">E15 · suivi du programme</span>
+    <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 30px; line-height: 1.05">Rencontres</h1>
+  </header>
+
+  <sc-if value="{{ hasToMark }}" hint-placeholder-val="{{ true }}">
+    <section style="margin: 10px 16px 0 16px; border-radius: 18px; background: #FDE7A6; border: 2px solid #E5A60A; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 14px; font-weight: 700"><strong style="font-weight: 900">{{ toMarkCount }} rencontre(s) passée(s)</strong> à marquer.</span>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px">
+        <sc-for list="{{ toMark }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.pick }}" style="min-height: 40px; padding: 0 12px; border-radius: 12px; border: 0; background: #1B1F3B; color: #FDE7A6; font-family: inherit; font-weight: 900; font-size: 12px">{{ t.label }}</button></sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <section aria-label="Calendrier" style="margin: 12px 16px 0 16px; background: #FFFFFF; border-radius: 22px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <button aria-label="Mois précédent" onClick="{{ prev }}" style="width: 44px; height: 44px; border-radius: 12px; border: 0; background: #F7F3EA; color: #1B1F3B; display: flex; align-items: center; justify-content: center; opacity: {{ prevOpacity }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+      <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 21px">{{ monthLabel }}</h2>
+      <button aria-label="Mois suivant" onClick="{{ next }}" style="width: 44px; height: 44px; border-radius: 12px; border: 0; background: #F7F3EA; color: #1B1F3B; display: flex; align-items: center; justify-content: center; opacity: {{ nextOpacity }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; text-align: center">
+      <span style="font-size: 11px; font-weight: 900; color: #4A4A57">L</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">M</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">M</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">J</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">V</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">S</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">D</span>
+      <sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+        <button onClick="{{ c.pick }}" disabled="{{ c.disabled }}" aria-label="{{ c.aria }}" style="height: 48px; border: {{ c.border }}; border-radius: 12px; background: {{ c.bg }}; color: {{ c.color }}; font-family: inherit; font-size: 14px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0">
+          <span>{{ c.label }}</span>
+          <span style="width: 9px; height: 9px; box-sizing: border-box; border-radius: 50%; background: {{ c.dot }}; border: {{ c.dotBorder }}"></span>
+        </button>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; font-weight: 800; color: #4A4A57">
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #EF7A0A"></span>En attente</span>
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #4E6A2C"></span>Confirmée</span>
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 50%; background: #4E6A2C; border: 2px solid #B81C1F"></span>À marquer</span>
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #2B337A"></span>Réalisée</span>
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #C9BFA8"></span>Annulée</span>
+    </div>
+  </section>
+
+  <section aria-live="polite" style="margin: 14px 16px 0 16px; background: #FFFFFF; border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 12px; border: 2px solid {{ p.accent }}">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+      <span style="font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #4A4A57">{{ p.date }}</span>
+      <span style="font-size: 11px; font-weight: 900; padding: 4px 9px; border-radius: 999px; background: {{ p.bg }}; color: {{ p.fg }}">{{ p.status }}</span>
+    </div>
+    <div style="display: flex; flex-direction: column"><span style="font-family: 'Lilita One', sans-serif; font-size: 20px; line-height: 1.1">{{ p.school }}</span><span style="font-size: 13px; font-weight: 800; color: #4A4A57">avec {{ p.inter }}</span></div>
+    <span style="font-size: 13px; font-weight: 800">{{ p.time }} · {{ p.classe }}</span>
+    <sc-if value="{{ p.hasNote }}" hint-placeholder-val="{{ false }}"><div style="border-radius: 12px; background: {{ p.noteBg }}; padding: 10px 12px; font-size: 13px; font-weight: 700; line-height: 1.45">{{ p.note }}</div></sc-if>
+    <sc-if value="{{ p.isRealisee }}" hint-placeholder-val="{{ false }}">
+      <a href="W3-retours-mobile.dc.html" style="min-height: 46px; border-radius: 14px; background: #1B1F3B; color: #FDE7A6; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px">Voir les retours (école : {{ p.re }} · intervenant : {{ p.ri }})</a>
+    </sc-if>
+    <sc-if value="{{ p.canMark }}" hint-placeholder-val="{{ false }}">
+      <sc-if value="{{ notCancelling }}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <sc-if value="{{ p.isPast }}" hint-placeholder-val="{{ true }}"><button onClick="{{ markDone }}" style="min-height: 54px; border: 0; border-radius: 16px; background: #2B337A; color: #FDE7A6; font-family: 'Lilita One', sans-serif; font-size: 18px">Marquer « Réalisée »</button></sc-if>
+          <button onClick="{{ startCancel }}" style="min-height: 48px; border-radius: 14px; border: 2px solid #1B1F3B; background: #FFFFFF; color: #1B1F3B; font-family: inherit; font-weight: 900; font-size: 14px">Marquer « Annulée »</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cancelling }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 14px; background: #F7F3EA">
+          <label for="m-motif" style="font-size: 14px; font-weight: 900">Pourquoi l'annuler ? <span style="font-weight: 600; color: #4A4A57">(facultatif)</span></label>
+          <textarea id="m-motif" rows="3" value="{{ motifDraft }}" onChange="{{ setMotif }}" style="border-radius: 12px; border: 2px solid #E6DECB; padding: 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; background: #FFFFFF"></textarea>
+          <button onClick="{{ confirmCancel }}" style="min-height: 48px; border: 0; border-radius: 14px; background: #B81C1F; color: #FFFFFF; font-family: inherit; font-weight: 900; font-size: 15px">Confirmer l'annulation</button>
+          <button onClick="{{ stopCancel }}" style="min-height: 44px; border: 0; background: transparent; color: #2B337A; font-family: inherit; font-weight: 800; font-size: 14px">Retour</button>
+        </div>
+      </sc-if>
+    </sc-if>
+    <sc-if value="{{ p.isPending }}" hint-placeholder-val="{{ false }}">
+      <a href="W3-demandes-mobile.dc.html" style="min-height: 46px; border-radius: 14px; background: #1B1F3B; color: #FDE7A6; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px">Donner mon avis sur la demande</a>
+    </sc-if>
+  </section>
+
+  <nav aria-label="Navigation principale" style="margin-top: auto; background: #FFFFFF; border-top: 1px solid #E6DECB; padding: 8px 4px 22px 4px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr))">
+    <a href="W3-pilotage-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg>Accueil</a>
+    <a href="W3-comptes-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="m16 11 2 2 4-4"/></svg>Comptes</a>
+    <a href="W3-demandes-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1Z"/></svg>Demandes</a>
+    <a href="#" aria-current="page" style="min-height: 52px; text-decoration: none; color: #B8492A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 900">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M3 10h18"/></svg>Rencontres</a>
+    <a href="W3-retours-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; font-weight: 800">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>Retours</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1800}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const month = st.month || 11;
+const MONTHS = { 10: ['Octobre 2026', 3, 31, 'octobre'], 11: ['Novembre 2026', 6, 30, 'novembre'], 12: ['Décembre 2026', 1, 31, 'décembre'] };
+const WD = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const BASE = [
+{ id: 'm1', m: 10, d: 8, time: '10h00', short: 'Sor × Mame Diarra', school: 'Lycée de Sor', inter: 'Mame Diarra Sow', classe: 'Tle S2 · 32 élèves', st: 'realisee', re: 'Soumis', ri: 'Validé' },
+{ id: 'm2', m: 10, d: 20, time: '10h00', short: 'Pikine × Amadou', school: 'Lycée de Pikine', inter: 'Amadou Baila', classe: 'Tle S2 · 34 élèves', st: 'realisee', re: 'Validé', ri: 'Validé' },
+{ id: 'm3', m: 10, d: 22, time: '11h00', short: 'Sor × Fatou', school: 'Lycée de Sor', inter: 'Fatou Ndiaye', classe: 'Tle S2 · 32 élèves', st: 'realisee', re: 'Validé', ri: 'Validé' },
+{ id: 'm4', m: 10, d: 30, time: '15h00', short: 'Kolda × Amadou', school: 'Lycée de Kolda', inter: 'Amadou Baila', classe: '1re S1 · 38 élèves', st: 'annulee', motif: 'Le lycée a dû fermer ce jour-là.' },
+{ id: 'm5', m: 11, d: 4, time: '14h00', short: 'Sor × Aïssatou', school: 'Lycée de Sor', inter: 'Aïssatou Diop', classe: 'Tle L2 · 38 élèves', st: 'realisee', re: 'Soumis', ri: 'Soumis' },
+{ id: 'm6', m: 11, d: 6, time: '14h00', short: 'Thiaroye × Amadou', school: 'Lycée de Thiaroye', inter: 'Amadou Baila', classe: 'Tle L1 · 34 élèves', st: 'realisee', re: 'Soumis', ri: 'À rédiger' },
+{ id: 'm7', m: 11, d: 10, time: '10h00', short: 'Bambey × Oumar', school: 'Lycée de Bambey', inter: 'Oumar Sy', classe: '1re S2 · 37 élèves', st: 'confirmee' },
+{ id: 'm8', m: 11, d: 12, time: '15h00', short: 'Kaffrine × Awa', school: 'Lycée de Kaffrine', inter: 'Awa Sarr', classe: 'Tle S1 · 30 élèves', st: 'confirmee' },
+{ id: 'm9', m: 11, d: 17, time: '10h00', short: 'Sor × Awa', school: 'Lycée de Sor', inter: 'Awa Sarr', classe: 'Tle S2 · 32 élèves', st: 'confirmee' },
+{ id: 'm10', m: 11, d: 18, time: '10h00', short: 'Louga × Amadou', school: 'Lycée de Louga', inter: 'Amadou Baila', classe: '1re S2 · 40 élèves', st: 'refusee', motif: 'Refusée par la Fondation M : classe déjà rencontrée ce mois-ci.' },
+{ id: 'm11', m: 11, d: 23, time: '9h30', short: 'Sor × Mame Diarra', school: 'Lycée de Sor', inter: 'Mame Diarra Sow', classe: 'Tle L2 · 38 élèves', st: 'attente' },
+{ id: 'm12', m: 11, d: 24, time: '10h00', short: '2 demandes', school: 'Lycée de Sor · Grand-Yoff', inter: 'Amadou Baila', classe: 'Tle S2 ou 1re S1', st: 'attente' },
+{ id: 'm13', m: 11, d: 25, time: '14h00', short: 'Thiès × Amadou', school: 'Lycée de Thiès', inter: 'Amadou Baila', classe: 'Tle S1 · 29 élèves', st: 'confirmee' },
+{ id: 'm14', m: 11, d: 26, time: '15h00', short: 'Parcelles × Amadou', school: 'CEM Parcelles Assainies', inter: 'Amadou Baila', classe: '3e B · 41 élèves', st: 'attente' },
+{ id: 'm15', m: 11, d: 27, time: '11h00', short: 'Sor × Cheikh T.', school: 'Lycée de Sor', inter: 'Cheikh Tidiane Gueye', classe: '1re L1 · 40 élèves', st: 'attente' },
+{ id: 'm16', m: 12, d: 1, time: '10h00', short: 'Mbour × Amadou', school: 'Lycée de Mbour', inter: 'Amadou Baila', classe: '1re S2 · 36 élèves', st: 'attente' }
+];
+const over = st.over || {};
+const items = BASE.map((x) => ({ ...x, ...(over[x.id] || {}) }));
+const isPast = (m, d) => m < 11 || (m === 11 && d < 16);
+const toMarkList = items.filter((x) => x.st === 'confirmee' && isPast(x.m, x.d));
+const sel = st.sel || (toMarkList[0] ? toMarkList[0].id : 'm9');
+const K = { attente: ['#EF7A0A', '#1B1F3B', 'En attente'], confirmee: ['#4E6A2C', '#FFFFFF', 'Confirmée'], realisee: ['#2B337A', '#FDE7A6', 'Réalisée'], annulee: ['#C9BFA8', '#1B1F3B', 'Annulée'], refusee: ['#C9BFA8', '#1B1F3B', 'Refusée'] };
+const [label, offset, days] = MONTHS[month];
+const total = Math.ceil((offset + days) / 7) * 7;
+const cells = [];
+for (let i = 0; i < total; i++) {
+const n = i - offset + 1;
+const inMonth = n >= 1 && n <= days;
+const past = inMonth && isPast(month, n);
+const today = month === 11 && n === 16;
+const it = inMonth ? items.find((x) => x.m === month && x.d === n) : null;
+const late = it && it.st === 'confirmee' && isPast(it.m, it.d);
+const selected = it && it.id === sel;
+cells.push({
+label: inMonth ? String(n) : '', disabled: !it,
+aria: it ? n + ' : ' + it.short + ', ' + (late ? 'à marquer' : K[it.st][2]) : (inMonth ? String(n) : 'vide'),
+bg: selected ? '#FDE7A6' : (!inMonth ? 'transparent' : (past ? '#F1EBDD' : '#FFFFFF')),
+color: today ? '#B8492A' : (past ? '#4A4A57' : '#1B1F3B'),
+border: today ? '2px solid #B8492A' : (selected ? '2px solid #1B1F3B' : '2px solid transparent'),
+dot: it ? K[it.st][0] : 'transparent', dotBorder: late ? '2px solid #B81C1F' : '0',
+pick: it ? () => this.setState({ sel: it.id, cancelling: false }) : () => {}
+});
+}
+const x = items.find((y) => y.id === sel) || items[0];
+const past = isPast(x.m, x.d);
+let note = '', noteBg = '#F7F3EA';
+if (x.st === 'confirmee' && past) { note = 'La date est passée : la rencontre a-t-elle eu lieu ? La marquer « Réalisée » ouvre les retours d’expérience.'; noteBg = '#FBE3E3'; }
+else if (x.st === 'confirmee') note = 'Les deux parties ont validé.';
+else if (x.st === 'attente') note = 'En attente d’une validation.';
+else if (x.st === 'annulee') note = 'Annulée par la Fondation M' + (x.motif ? ' : ' + x.motif : '.');
+else if (x.st === 'refusee') note = x.motif || 'Refusée.';
+else if (x.justDone) { note = 'C’est noté ! Les retours de l’école et de l’intervenant sont ouverts.'; noteBg = '#E8EEDF'; }
+const lateSel = x.st === 'confirmee' && past;
+const p = {
+date: WD[new Date(2026, x.m - 1, x.d).getDay()] + ' ' + x.d + ' ' + MONTHS[x.m][3],
+status: lateSel ? 'À marquer' : K[x.st][2], bg: lateSel ? '#B81C1F' : K[x.st][0], fg: lateSel ? '#FFFFFF' : K[x.st][1], accent: lateSel ? '#B81C1F' : K[x.st][0],
+school: x.school, inter: x.inter, time: x.time, classe: x.classe, hasNote: !!note, note, noteBg,
+isRealisee: x.st === 'realisee', re: x.re || 'À rédiger', ri: x.ri || 'À rédiger',
+canMark: x.st === 'confirmee', isPast: past, isPending: x.st === 'attente'
+};
+const setOver = (patch) => this.setState({ over: { ...over, [x.id]: { ...(over[x.id] || {}), ...patch } }, cancelling: false, motifDraft: '' });
+return {
+cells, p, monthLabel: label,
+toMarkCount: String(toMarkList.length), hasToMark: toMarkList.length > 0,
+toMark: toMarkList.map((t) => ({ label: t.d + ' nov · ' + t.short, pick: () => this.setState({ sel: t.id, month: t.m, cancelling: false }) })),
+cancelling: !!st.cancelling, notCancelling: !st.cancelling, motifDraft: st.motifDraft || '',
+markDone: () => setOver({ st: 'realisee', re: 'À rédiger', ri: 'À rédiger', justDone: true }),
+startCancel: () => this.setState({ cancelling: true }),
+stopCancel: () => this.setState({ cancelling: false, motifDraft: '' }),
+setMotif: (e) => this.setState({ motifDraft: e.target.value }),
+confirmCancel: () => setOver({ st: 'annulee', motif: (st.motifDraft || '').trim() }),
+prev: () => this.setState({ month: Math.max(10, month - 1) }),
+next: () => this.setState({ month: Math.min(12, month + 1) }),
+prevOpacity: month === 10 ? '0.4' : '1', nextOpacity: month === 12 ? '0.4' : '1'
+};
+}
+}
+</script>
+</body>
+</html>

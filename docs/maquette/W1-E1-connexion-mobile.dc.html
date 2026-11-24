@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>E1 Création de compte — mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+input,select{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 1440px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="background: #B8492A; color: #FFFFFF; padding: 28px 20px 28px 20px; display: flex; flex-direction: column; gap: 10px">
+    <span style="font-family: 'Lilita One', sans-serif; font-size: 24px; color: #FDE7A6">FondationM</span>
+    <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 32px; line-height: 1.02; color: #FDE7A6">Ouvrez les métiers à vos élèves</h1>
+    <p style="margin: 0; font-size: 14px; font-weight: 600; line-height: 1.45">Des professionnels bénévoles rencontrent vos classes. La Fondation M accompagne chaque rencontre.</p>
+  </header>
+
+  <div style="margin: -14px 16px 0 16px; background: #FFFFFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 18px">
+    <div role="tablist" aria-label="Accès" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #F7F3EA">
+      <a href="W1-E3-intervenants-mobile.dc.html" role="tab" aria-selected="false" style="min-height: 44px; border-radius: 10px; color: #4A4A57; font-weight: 800; font-size: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center">Se connecter</a>
+      <button role="tab" aria-selected="true" style="min-height: 44px; border: 0; border-radius: 10px; background: #2B337A; color: #FDE7A6; font-weight: 900; font-size: 14px; font-family: inherit">Créer un compte</button>
+    </div>
+
+    <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #B8492A">Établissement</span>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-etab" style="font-size: 13px; font-weight: 800">Nom de l'établissement</label>
+      <input id="m-etab" value="Lycée de Sor" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-type" style="font-size: 13px; font-weight: 800">Type</label>
+      <select id="m-type" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 10px; font-size: 15px; font-weight: 600; color: #1B1F3B; background: #FFFFFF"><option>Lycée</option><option>Collège (CEM)</option><option>Centre de formation</option></select>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="m-pays" style="font-size: 13px; font-weight: 800">Pays</label>
+        <select id="m-pays" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 10px; font-size: 15px; font-weight: 600; color: #1B1F3B; background: #FFFFFF"><option>Sénégal</option><option>Bénin</option><option>Côte d'Ivoire</option><option>Gambie</option><option>Mali</option><option>Mauritanie</option></select>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="m-zone" style="font-size: 13px; font-weight: 800">Zone (ville)</label>
+        <select id="m-zone" style="height: 48px; border-radius: 12px; border: 2px solid #B8492A; padding: 0 10px; font-size: 15px; font-weight: 700; color: #1B1F3B; background: #FFFFFF"><option>Saint-Louis</option><option>Dakar</option><option>Thiès</option></select>
+      </div>
+    </div>
+
+    <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #B8492A">Référent</span>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-nom" style="font-size: 13px; font-weight: 800">Prénom et nom</label>
+      <input id="m-nom" value="Moussa Ndiaye" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-fonction" style="font-size: 13px; font-weight: 800">Fonction</label>
+      <input id="m-fonction" value="Référent orientation" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-mail" style="font-size: 13px; font-weight: 800">E-mail professionnel</label>
+      <input id="m-mail" type="email" value="m.ndiaye@lyceedesor.sn" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-tel" style="font-size: 13px; font-weight: 800">Téléphone</label>
+      <input id="m-tel" type="tel" value="+221 77 412 58 30" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-mdp" style="font-size: 13px; font-weight: 800">Mot de passe</label>
+      <input id="m-mdp" type="password" value="motdepasse" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+      <span style="font-size: 12px; font-weight: 700; color: #4E6A2C">8 caractères minimum, dont un chiffre</span>
+    </div>
+    <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; font-weight: 600; color: #4A4A57; line-height: 1.4">
+      <input type="checkbox" checked="checked" style="width: 20px; height: 20px; margin: 0; accent-color: #2B337A; flex-shrink: 0">
+      J'accepte la charte des rencontres et je confirme représenter cet établissement.
+    </label>
+    <a href="W1-E1-attente-mobile.dc.html" style="min-height: 56px; border-radius: 16px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-size: 19px">Envoyer la demande de compte</a>
+    <p style="margin: 0; text-align: center; font-size: 12px; font-weight: 700; color: #4A4A57">La Fondation M vérifie chaque établissement avant d'ouvrir l'accès.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1440}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

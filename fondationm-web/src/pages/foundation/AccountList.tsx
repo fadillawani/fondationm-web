@@ -25,14 +25,14 @@ export function AccountList({ label, accounts, selectedId, onSelect }: AccountLi
               aria-current={selected || undefined}
               onClick={() => onSelect(account)}
               className={cn(
-                'flex min-h-touch w-full items-center gap-3 rounded-block border-2 bg-surface p-3 text-left transition-colors',
-                selected ? 'border-ink' : 'border-line hover:border-muted',
+                'flex min-h-touch w-full items-center gap-3 rounded-[18px] border-2 bg-surface px-4 py-3.5 text-left transition-colors',
+                selected ? 'border-ink' : 'border-transparent hover:border-line',
               )}
             >
-              <Initials name={account.name} tone={account.role === 'SCHOOL' ? 'school' : 'speaker'} />
+              <Initials name={account.name} tone={account.role === 'SCHOOL' ? 'school' : 'speaker'} size="list" />
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate font-extrabold text-ink">{account.name}</span>
-                {context && <span className="truncate text-sm font-semibold text-muted">{context}</span>}
+                <span className="truncate font-display text-lg leading-tight text-ink">{account.name}</span>
+                {context && <span className="truncate text-[13px] font-bold text-muted">{context}</span>}
               </span>
               <Badge tone={status.tone}>{status.label}</Badge>
             </button>

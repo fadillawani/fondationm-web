@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageTitle } from '../../components/layout/PageTitle'
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { errorMessage } from '../../api/errors'
 import type { AccountStatus } from '../../auth/currentUser'
@@ -142,11 +143,12 @@ export function AccountsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className={cn('flex flex-col gap-1', detailOpen && 'hidden lg:flex')}>
-        <p className="text-xs font-black uppercase tracking-[0.12em] text-terra">Comptes</p>
-        <h1 className="text-[32px] leading-tight text-ink md:text-[40px]">Comptes à valider</h1>
-        <p className="text-[15px] font-semibold text-muted">Des écoles et des bénévoles veulent rejoindre le programme.</p>
-      </header>
+      <PageTitle
+        className={cn(detailOpen && 'hidden lg:flex')}
+        kicker="Comptes"
+        title="Comptes à valider"
+        subtitle="Des écoles et des bénévoles veulent rejoindre le programme."
+      />
 
       <div className={cn(detailOpen && 'hidden lg:block')}>
         <Tabs

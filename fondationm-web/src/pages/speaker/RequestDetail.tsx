@@ -139,10 +139,10 @@ export function RequestDetail({ meeting, all, inMyZone, onProcessed, onConflict 
           />
         ) : (
           <div className="flex flex-wrap gap-2">
-            <Button variant="success" size="md" loading={accept.isPending} disabled={busy} onClick={handleAccept}>
+            <Button variant="primary" loading={accept.isPending} disabled={busy} onClick={handleAccept}>
               Accepter
             </Button>
-            <Button variant="outline" size="md" disabled={busy} onClick={() => setRefusing(true)}>
+            <Button variant="outlineInk" disabled={busy} onClick={() => setRefusing(true)} className="font-sans text-[15px] font-black">
               Refuser
             </Button>
           </div>

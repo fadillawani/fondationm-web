@@ -77,22 +77,47 @@ describe('Espace Fondation — navigation', () => {
       expect(nav.queryByRole('link', { name: new RegExp(label) })).not.toBeInTheDocument()
       expect(nav.getByText(label).closest('li')).toHaveTextContent('Bientôt')
     }
-    expect(screen.getByText('Pilotage du programme')).toBeInTheDocument()
-    expect(screen.getByText('Fondation M')).toBeInTheDocument()
-    expect(screen.getByText('equipe@fondation.test')).toBeInTheDocument()
+    const [aside] = screen.getAllByRole('complementary')
+    if (aside === undefined) throw new Error('Barre latérale absente')
+    expect(within(aside).getByText('Pilotage du programme')).toBeInTheDocument()
+    expect(within(aside).getByText('Fondation M')).toBeInTheDocument()
+    expect(within(aside).getByText('Équipe du programme')).toBeInTheDocument()
   })
 
-  it('regroupe les entrées désactivées sous « Plus » dans la navigation basse', async () => {
+  it('affiche 5 entrées courtes dans la navigation basse (maquette), sans « Plus »', async () => {
     setup([])
-    const { user } = renderApp('/fondation/comptes', { token: true })
+    renderApp('/fondation/comptes', { token: true })
 
-    const more = await screen.findByRole('button', { name: 'Plus' })
-    expect(more).toHaveAttribute('aria-expanded', 'false')
-    await user.click(more)
-    expect(more).toHaveAttribute('aria-expanded', 'true')
-    expect(within(screen.getByRole('list', { name: 'Autres rubriques' })).getAllByRole('listitem')).toHaveLength(5)
+    const [, bottom] = await screen.findAllByRole('navigation', { name: 'Navigation principale' })
+    if (bottom === undefined) throw new Error('Navigation basse absente')
+    expect(within(bottom).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'AccueilBientôt',
+      'Comptes',
+      'DemandesBientôt',
+      'RencontresBientôt',
+      'RetoursBientôt',
+    ])
+    expect(within(bottom).getByRole('link', { name: 'Comptes à valider' })).toHaveAttribute('href', '/fondation/comptes')
+    expect(screen.queryByRole('button', { name: 'Plus' })).not.toBeInTheDocument()
+  })
+
+  it('ouvre le menu du compte depuis l’avatar de l’en-tête mobile et déconnecte', async () => {
+    setup([])
+    const { router, user } = renderApp('/fondation/comptes', { token: true })
+
+    const avatar = await screen.findByRole('button', { name: 'Menu du compte : Fondation M' })
+    expect(avatar).toHaveAttribute('aria-expanded', 'false')
+    await user.click(avatar)
+    expect(avatar).toHaveAttribute('aria-expanded', 'true')
     await user.keyboard('{Escape}')
-    expect(more).toHaveAttribute('aria-expanded', 'false')
+    expect(avatar).toHaveAttribute('aria-expanded', 'false')
+
+    await user.click(avatar)
+    const menu = document.getElementById(avatar.getAttribute('aria-controls') ?? '')
+    if (menu === null) throw new Error('Menu absent')
+    await user.click(within(menu).getByRole('button', { name: 'Se déconnecter' }))
+    expect(await screen.findByRole('heading', { name: 'Bon retour parmi nous' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/connexion')
   })
 
   it('refuse l’accès à un utilisateur d’un autre rôle', async () => {

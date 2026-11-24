@@ -18,11 +18,12 @@ export const STATE_SHORT: Record<AgendaState, string> = { ...STATE_LABEL, CLOSED
 
 /** Classes Tailwind par état (contraste du texte ≥ 4,5:1). */
 export const STATE_CLASS: Record<AgendaState, string> = {
-  FREE: 'bg-green-tint text-green border-green',
-  REQUESTED: 'bg-orange text-ink border-orange',
-  CONFIRMED: 'bg-indigo text-cream border-indigo',
-  COMPLETED: 'bg-ink text-white border-ink',
-  CLOSED: 'bg-red-tint text-red border-red',
+  // Maquette W2-E8 : Libre blanc à bordure pointillée verte, Annulé barré.
+  FREE: 'border-2 border-dashed border-green bg-surface text-[#3B5221]',
+  REQUESTED: 'border-2 border-transparent bg-yellow text-ink',
+  CONFIRMED: 'border-2 border-transparent bg-green text-white',
+  COMPLETED: 'border-2 border-transparent bg-indigo text-cream',
+  CLOSED: 'border-2 border-transparent bg-line text-muted line-through',
 }
 
 /** Un élément de l'agenda : un créneau (chargé ou connu par ses rencontres) et ses rencontres. */
@@ -87,23 +88,6 @@ export function groupByDay(items: readonly AgendaItem[]): Map<string, AgendaItem
     days.set(key, [...(days.get(key) ?? []), item])
   }
   return days
-}
-
-/** Semaines du mois (lundi → dimanche), jours des mois voisins compris. */
-export function monthWeeks(month: Date): Date[][] {
-  const first = new Date(month.getFullYear(), month.getMonth(), 1)
-  const offset = (first.getDay() + 6) % 7
-  const cursor = new Date(first.getFullYear(), first.getMonth(), 1 - offset)
-  const weeks: Date[][] = []
-  do {
-    const week: Date[] = []
-    for (let index = 0; index < 7; index += 1) {
-      week.push(new Date(cursor))
-      cursor.setDate(cursor.getDate() + 1)
-    }
-    weeks.push(week)
-  } while (cursor.getMonth() === month.getMonth())
-  return weeks
 }
 
 /** Jour où l'on peut encore publier un créneau (aujourd'hui compris s'il reste un quart d'heure). */

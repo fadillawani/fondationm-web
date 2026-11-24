@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 
-type BadgeTone = 'neutral' | 'primary' | 'orange' | 'success' | 'warning' | 'danger'
+type BadgeTone = 'neutral' | 'primary' | 'orange' | 'success' | 'warning' | 'danger' | 'muted'
 
 const TONES: Record<BadgeTone, string> = {
   neutral: 'bg-indigo text-cream',
@@ -10,6 +10,7 @@ const TONES: Record<BadgeTone, string> = {
   success: 'bg-green text-white',
   warning: 'bg-yellow text-ink',
   danger: 'bg-red text-white',
+  muted: 'bg-line text-ink',
 }
 
 interface BadgeProps {

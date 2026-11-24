@@ -18,20 +18,21 @@ export const MEETING_FORMAT_LABEL: Record<MeetingFormat, string> = {
   ONLINE: 'En ligne',
 }
 
-export const MEETING_STATUS_BADGE: Record<MeetingStatus, { label: string; tone: 'orange' | 'success' | 'danger' | 'neutral' | 'warning' }> = {
-  PENDING: { label: 'En attente', tone: 'orange' },
-  CONFIRMED: { label: 'Confirmée', tone: 'neutral' },
-  COMPLETED: { label: 'Réalisée', tone: 'success' },
+type RequestTone = 'orange' | 'success' | 'danger' | 'neutral' | 'warning' | 'muted'
+
+export const MEETING_STATUS_BADGE: Record<MeetingStatus, { label: string; tone: RequestTone }> = {
+  PENDING: { label: 'À traiter', tone: 'warning' },
+  CONFIRMED: { label: 'Confirmée', tone: 'success' },
+  COMPLETED: { label: 'Réalisée', tone: 'neutral' },
   REFUSED: { label: 'Refusée', tone: 'danger' },
-  CANCELLED: { label: 'Annulée', tone: 'danger' },
+  CANCELLED: { label: 'Annulée', tone: 'muted' },
 }
 
 /** Badge d'une demande, du point de vue de l'intervenant. */
-export function requestBadge(meeting: Meeting): { label: string; tone: 'orange' | 'success' | 'danger' | 'neutral' | 'warning' } {
-  if (meeting.status === 'PENDING' && meeting.myDecision === 'VALIDATED') {
-    return { label: 'Acceptée · avis de la Fondation attendu', tone: 'warning' }
-  }
-  if (meeting.status === 'PENDING') return { label: 'À traiter', tone: 'orange' }
+/** Pastille d'une demande (maquette W2-E9 : À traiter jaune, Acceptée verte, Refusée rouge, créneau pris beige). */
+export function requestBadge(meeting: Meeting): { label: string; tone: RequestTone } {
+  if (meeting.status === 'PENDING' && meeting.myDecision === 'VALIDATED') return { label: 'Acceptée', tone: 'success' }
+  if (meeting.status === 'REFUSED' && meeting.closedBy === 'SYSTEM') return { label: 'Refusée · créneau pris', tone: 'muted' }
   return MEETING_STATUS_BADGE[meeting.status]
 }
 

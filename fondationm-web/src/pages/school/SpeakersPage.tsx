@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { PageTitle } from '../../components/layout/PageTitle'
 import { useSearchParams } from 'react-router'
 import { errorMessage } from '../../api/errors'
 import { useCurrentUser } from '../../auth/currentUserContext'
@@ -12,20 +13,18 @@ import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
 import { Spinner } from '../../components/ui/Spinner'
 import { parseIso } from '../../lib/dateTime'
-import { initialsOf } from '../../lib/initials'
 import { normalizeName, sameName } from '../../lib/normalize'
 import { SECTORS, type Sector } from '../../lib/referenceData'
 import { useNow } from '../../lib/useNow'
 import { NetworkSection } from './NetworkSection'
+import { useSchoolMeetings, type SchoolMeeting } from './meetingsData'
 import { RefusalBanner } from './RefusalBanner'
 import {
   useDirectory,
-  useRefusedMeetings,
   useSpeakerStats,
   type CityCount,
   type DirectoryFilter,
   type MeetingFormat,
-  type RefusedMeeting,
   type SpeakerSummary,
 } from './schoolData'
 import { SpeakerCard } from './SpeakerCard'
@@ -45,9 +44,10 @@ function speakersCount(count: number): string {
 }
 
 /** Refus le plus récent par l'intervenant, datant de 14 jours au plus. */
-function latestRefusal(meetings: readonly RefusedMeeting[], now: Date): RefusedMeeting | null {
-  let latest: { meeting: RefusedMeeting; at: number } | null = null
+function latestRefusal(meetings: readonly SchoolMeeting[], now: Date): SchoolMeeting | null {
+  let latest: { meeting: SchoolMeeting; at: number } | null = null
   for (const meeting of meetings) {
+    if (meeting.status !== 'REFUSED') continue
     const at = parseIso(meeting.refusedAt)?.getTime()
     if (meeting.closedBy !== 'SPEAKER' || at === undefined || now.getTime() - at > REFUSAL_WINDOW_MS) continue
     if (latest === null || at > latest.at) latest = { meeting, at }
@@ -113,7 +113,7 @@ export function SpeakersPage() {
   const now = useNow()
   const [params, setParams] = useSearchParams()
   const stats = useSpeakerStats()
-  const refused = useRefusedMeetings()
+  const meetings = useSchoolMeetings()
   const [sheet, setSheet] = useState<Sheet>(null)
   const [selectedCity, setSelectedCity] = useState<CityCount | null>(null)
 
@@ -131,7 +131,7 @@ export function SpeakersPage() {
   const otherCities = byCity.filter((entry) => !sameName(entry.city, myCity))
   const myCityEntry = byCity.find((entry) => sameName(entry.city, myCity)) ?? (myCity ? { city: myCity, country: myCountry, count: 0 } : null)
   const panelCity = selectedCity ?? myCityEntry ?? byCity[0] ?? null
-  const refusal = latestRefusal(refused.data?.items ?? [], now)
+  const refusal = latestRefusal(meetings.data?.items ?? [], now)
 
   function update(changes: Record<string, string | null>) {
     const next = new URLSearchParams(params)
@@ -181,20 +181,12 @@ export function SpeakersPage() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3 md:hidden">
-          <p className="font-extrabold text-muted">{[school?.schoolName, myCity].filter(Boolean).join(' · ')}</p>
-          <span
-            aria-hidden="true"
-            className="inline-flex size-10 items-center justify-center rounded-pill bg-indigo font-display text-cream"
-          >
-            {initialsOf(user.displayName)}
-          </span>
-        </div>
-        <p className="hidden text-xs font-black uppercase tracking-[0.12em] text-terra md:block">Tableau de bord</p>
-        <h1 className="text-[32px] leading-tight text-ink md:text-[40px]">Intervenants disponibles</h1>
-        <p className="text-[15px] font-semibold text-muted">
-          Tous validés par la Fondation M. Ceux de votre zone apparaissent en premier.
-        </p>
+        <PageTitle
+          kicker="Tableau de bord"
+          mobileKicker={[school?.schoolName, myCity].filter(Boolean).join(' · ')}
+          title="Intervenants disponibles"
+          subtitle="Tous validés par la Fondation M. Ceux de votre zone apparaissent en premier."
+        />
         <form role="search" onSubmit={submitSearch} className="flex gap-2">
           <Input
             type="search"

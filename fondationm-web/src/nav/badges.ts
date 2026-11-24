@@ -1,6 +1,7 @@
 import type { Role } from '../auth/currentUser'
 import { navItemsFor, type NavBadge } from '../auth/roles'
 import { usePendingTotal } from '../pages/foundation/accounts'
+import { useUpcomingMeetingsCount } from '../pages/school/meetingsData'
 import { usePendingRequestCount } from '../pages/speaker/speakerData'
 
 /** Compteurs de la navigation, chargés seulement pour le rôle qui les affiche. */
@@ -9,5 +10,6 @@ export function useNavBadges(role: Role): Record<NavBadge, number | undefined> {
   return {
     pendingAccounts: usePendingTotal(badges.has('pendingAccounts')),
     pendingRequests: usePendingRequestCount(badges.has('pendingRequests')),
+    upcomingMeetings: useUpcomingMeetingsCount(badges.has('upcomingMeetings')),
   }
 }

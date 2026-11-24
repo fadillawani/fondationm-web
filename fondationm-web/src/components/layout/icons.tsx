@@ -113,3 +113,12 @@ export function LockIcon({ className }: IconProps) {
     </Svg>
   )
 }
+
+export function PlusIcon({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </Svg>
+  )
+}

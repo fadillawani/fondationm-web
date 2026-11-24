@@ -1,6 +1,8 @@
 # État du frontend — Fondation M
 
-Dernière mise à jour : 24 novembre 2026 — lot F4 (espace établissement : intervenants et demande de rencontre).
+Dernière mise à jour : 24 novembre 2026 — lot F5 (« Mes rencontres » de l'école, socle commun conforme à la maquette).
+
+**Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 
 ## Avancement
 
@@ -12,10 +14,12 @@ Dernière mise à jour : 24 novembre 2026 — lot F4 (espace établissement : in
 | F2  | Espace Fondation : navigation, « Comptes à valider » (liste, détail, validation, refus motivé) | Terminé |
 | F3  | Espace intervenant : navigation, « Mon agenda » (calendrier, créneaux), « Demandes reçues » (accepter, refuser) | Terminé |
 | F4  | Espace établissement : « Intervenants disponibles » (annuaire, carte du réseau), « Demander une rencontre » ; thèmes de barre latérale par persona | Terminé |
-| F5+ | Autres écrans métier (mes rencontres, mon établissement, tableau de bord Fondation, retours, donateurs…) | À faire  |
+| F5  | « Mes rencontres » de l'école (calendrier, détail, listes) ; socle commun aligné sur la maquette (barres latérales, navigation basse blanche, en-têtes de page, carte utilisateur) ; corrections D1, E2, E5, B2, C2, F2 | Terminé |
+| F5.1 | Conformité à la maquette : écarts restants B, C, D, E, F, G (section « Écarts de design restants ») + agenda mobile en calendrier compact | À faire |
+| F6+ | Autres écrans métier (mon établissement, retours d'expérience, tableau de bord Fondation, donateurs…) | À faire  |
 
-Vérifications au moment de la livraison de F4 : `npm run build`, `npm run lint` et `npm test`
-(139 tests) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F5 : `npm run build`, `npm run lint` et `npm test`
+(152 tests) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -42,6 +46,31 @@ Vérifications au moment de la livraison de F4 : `npm run build`, `npm run lint`
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F5 livre
+
+- **Socle commun (maquette, toutes les personas)** :
+  - barre latérale : logo Lilita 30, sous-titre 12 px majuscules, liens 44 px rayon 12 en 15 px (inactif
+    poids 800, actif poids 900), pastilles 24 px, carte utilisateur rayon 16 avec avatar 44 px rayon 14 ;
+    lien sobre « Se déconnecter » (14 px, poids 800) sous la carte ;
+  - navigation basse mobile **blanche** (bordure haute `#E6DECB`, actif `#B8492A` poids 900, inactif
+    `#4A4A57` poids 800, 11 px ; Fondation 10 px et 5 entrées), libellés courts, sans « Déconnexion » ;
+  - plus d'en-tête mobile commun : chaque page a son en-tête (`components/layout/PageTitle.tsx`) ; sur
+    mobile, l'avatar (44 px, rayon 14) ouvre un menu « Se déconnecter » (`components/layout/UserMenu.tsx`).
+- **`/ecole/rencontres`** (« Mes rencontres », lecture seule), `?mois=AAAA-MM` et `?rencontre={id}` :
+  - en-tête « Mon planning » / « Mes rencontres » et « Nouvelle demande » (bouton « + » sur mobile) ;
+  - bandeau « Dans {n} jours · {Nom}, {métier}, rencontre vos {classe} {date} à {heure}. » + « Voir le
+    détail » (PC) ; bandeau « Votre rencontre avec {intervenant} est terminée. » si un retour est à rédiger,
+    « Partager mon retour » affiché « Bientôt » ;
+  - calendrier PC (tableau, cellules 104 px, jours passés `#F1EBDD`, aujourd'hui bordure et rond
+    `#B8492A`, une pastille-bouton « 10h00 · Awa » par rencontre, contour 3 px de sélection, légende) et
+    calendrier compact mobile (un bouton par jour qui a des rencontres, pastille de statut, nombre s'il y
+    en a plusieurs) ;
+  - détail (`aria-live`) : à venir / passée, statut, intervenant et métier, date, classe, lieu, cases
+    « Intervenant » et « Fondation M », message selon le statut, état du retour d'expérience, action ;
+  - listes « À venir » et « Passées » (repliable sur PC).
+- **Navigation école** : « Mes rencontres » active, pastille = rencontres PENDING ou CONFIRMED à venir.
+- **Bandeau de refus de l'annuaire (F4)** : « Voir la demande » mène à la rencontre, sur le mois de son créneau.
 
 ## Ce que F4 livre
 
@@ -326,6 +355,45 @@ Vérifications au moment de la livraison de F4 : `npm run build`, `npm run lint`
     de l'école, pour les tests de gardes qui aboutissent sur `/ecole` ; les tests de l'école les remplacent.
 46. **Fin de session** : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
     quand l'espace connecté se démonte (voir « Corrections »).
+47. **Statuts de « Mes rencontres »** (maquette W1-E5) : En attente `#EF7A0A`/`#1B1F3B` (5,71), Confirmée
+    `#4E6A2C`/blanc (6,14), Réalisée `#2B337A`/`#FDE7A6` (9,24), Refusée `#B81C1F`/blanc (6,51), Annulée
+    `#E6DECB`/`#1B1F3B` (12,00). Cases de validation : Validé `#3B5221`/`#E8EEDF` (7,34), En attente
+    `#7A4100`/`#FDEBD3` (6,97), Refusé `#8E1518`/`#FBE3E3` (7,57). Retour : À rédiger `#E5A60A`/`#1B1F3B`
+    (7,50), Soumis `#9DAA3C`/`#1B1F3B` (6,32), Validé `#4E6A2C`/blanc (6,14). Jour passé `#4A4A57` sur
+    `#F1EBDD` (7,34) ; aujourd'hui blanc sur `#B8492A` (5,22).
+48. **Rencontres passées non atténuées** : l'`opacity: 0.8` de la maquette fait chuter le contraste (En
+    attente 3,75:1, Confirmée 4,00:1). Elle n'est pas appliquée ; le fond `#F1EBDD` du jour et « passée »
+    dans le libellé ARIA marquent la rencontre passée.
+49. **Données de « Mes rencontres »** : `GET /api/school/meetings` sans filtre, toutes les pages
+    (`size=100`, 25 pages au plus), partagé par le calendrier, les listes, la pastille de navigation et le
+    bandeau de refus de F4 (la requête `status=REFUSED` de F4 est supprimée). Retours :
+    `GET /api/school/feedbacks/awaiting` (« À rédiger ») et `GET /api/school/feedbacks` (SUBMITTED →
+    « Soumis », PUBLISHED → « Validé »), toutes les pages. Métier : `GET /api/school/speakers/{id}` pour la
+    rencontre sélectionnée et celle du bandeau, omis si la fiche est introuvable (404).
+50. **Cases « Intervenant » / « Fondation M »** déduites du statut (pas de décision par partie dans le
+    contrat) : PENDING → En attente / En attente ; CONFIRMED, COMPLETED → Validé / Validé ; refus par
+    l'intervenant → Refusé / « — » ; refus par la Fondation → « — » / Refusé ; créneau pris → « — » / « — » ;
+    annulée → Validé / Validé si `confirmedAt` existe, sinon « — » / « — ».
+51. **Textes des messages** : ceux de la maquette (Tout est prêt, Demande envoyée, Refusée par l'intervenant
+    + motif, Annulée par la Fondation M + motif, Comment cela s'est-il passé ?, Merci pour votre retour, Une
+    belle rencontre) ; cas absents validés : « Refusée par la Fondation M » / {motif}, « Créneau pris » /
+    « Ce créneau a été attribué à une autre classe. » (`pages/school/meetingText.ts`).
+52. **Calendrier partagé** : `components/calendar/MonthTable.tsx` (tableau accessible, semaine du lundi,
+    `caption`, en-têtes `abbr`, `aria-current="date"`) et `lib/calendar.ts` servent l'agenda F3 et « Mes
+    rencontres ». Sélection : l'URL (`rencontre`), sinon la prochaine rencontre, sinon la plus récente.
+53. **Navigation (remplace les décisions 34 et 36 pour le mobile)** : navigation basse blanche commune ;
+    libellés courts (`NavItem.short`) ; Fondation : 5 entrées (« Requêtes donateurs » absente du mobile,
+    comme la maquette) ; plus de menu « Plus ». Les entrées sans écran restent « Bientôt », non cliquables.
+    Les pastilles de la navigation basse sont `#B8492A`/blanc (5,22), la maquette n'en montrant pas.
+54. **Barres latérales (maquette)** : table `components/layout/roleTheme.ts` mise à jour — texte inactif
+    école `#F7F3EA`, intervenant `#1B1F3B`, Fondation blanc ; avatars de carte : école `#E5A60A`/`#1B1F3B`
+    (7,50), intervenant `#2B337A`/`#FDE7A6` (9,24), Fondation `#FDE7A6`/`#B8492A` (**4,26, échec signalé**),
+    donateur `#FDE7A6`/`#4E6A2C` (5,01) ; détail de la carte en `#F7F3EA`.
+55. **Carte utilisateur** : école = nom de l'établissement + ville ; Fondation = « Fondation M » + « Équipe du
+    programme » (avatar « F ») ; intervenant inchangé (nom + « métier · ville »).
+56. **Corrections de conformité appliquées dans F5** : D1 (couleurs des états de l'agenda), E2 (pastilles des
+    demandes), E5 (« Accepter » terracotta, « Refuser » bordure encre), B2 (bandeau de refus), C2 (numéros
+    d'étape carrés indigo), F2 (liste des comptes). Le reste est listé dans « Écarts de design restants ».
 
 ## Écarts
 
@@ -368,6 +436,18 @@ Vérifications au moment de la livraison de F4 : `npm run build`, `npm run lint`
 | Classe : filière | `fieldOfStudy` existe côté école (absent de `ClassInfo` côté intervenant) | Demandée à la création, non affichée dans le choix |
 | Codes d'erreur de `POST /api/school/meetings` | Aucun dans le contrat ; statut HTTP non garanti | Traités par code (décision 43) |
 | Libellé « SÉNÉGAL » de la carte (`#B8AE98` sur `#F7F3EA`) | — | Contraste 1,99:1, couleur conservée (point ouvert 16) |
+| Cases « Intervenant » / « Fondation M » (W1-E5) | Pas de décision par partie dans `SchoolMeetingResponse` | Déduites du statut (décision 50) ; « Presque confirmée » (intervenant d'accord, Fondation en attente) impossible |
+| Métier de l'intervenant (W1-E5) | Absent de `SpeakerInfo` | Lu dans la fiche `GET /api/school/speakers/{id}` (décision 49), omis si 404 |
+| « Partager mon retour » (W1-E5, bandeau, cellule, détail) | « Retours d'expérience » pas encore livré | Affiché « Bientôt », non cliquable (cellule : « Partager mon retour · Bientôt ») |
+| Atténuation des rencontres passées (`opacity: 0.8`) | — | Non appliquée : contraste 3,75 et 4,00 (décision 48) |
+| Liste « Passées » sur PC | Absente de la maquette PC | Ajoutée sous « À venir », repliable |
+| Lignes des listes mobiles (W1-E5) | Maquette mobile : « Mar 17 nov. · {classe} » sans l'heure | Même format que le PC, heure comprise |
+| Déconnexion | Absente de la maquette (barre latérale et navigation basse) | PC : lien sous la carte ; mobile : avatar de l'en-tête → menu « Se déconnecter » |
+| Avatar d'en-tête mobile | Absent de la maquette sur W3-comptes, W2-E9, W1-E4, W1-E5 (bouton « + ») | Ajouté sur ces pages pour la déconnexion |
+| Entrées de navigation sans écran | La maquette les montre actives, avec pastilles | « Bientôt », non cliquables |
+| Pastilles de la navigation basse | Absentes de la maquette mobile | Conservées (`#B8492A`/blanc) |
+| « Requêtes donateurs » (Fondation) sur mobile | Absente de la navigation basse de la maquette (5 entrées) | Absente aussi |
+| Carte utilisateur école / Fondation | Maquette : nom du référent, « Samirath · Chargée de programme » | Établissement + ville ; « Fondation M » + « Équipe du programme » (données absentes) |
 | Code d'erreur « e-mail déjà utilisé » | Non documenté (aucun 409 ni code dans le contrat) | Règle de la décision 16. Code réellement observé : `EMAIL_ALREADY_USED` (HTTP 409, message « Cette adresse e-mail est déjà utilisée. ») |
 
 ## Points ouverts
@@ -414,8 +494,78 @@ Vérifications au moment de la livraison de F4 : `npm run build`, `npm run lint`
     exact de `CLASS_FULL` est supposé (« la classe ne peut plus recevoir de demande »).
 16. **Contrastes en échec, couleurs conservées comme demandé** : avatar de la carte Fondation
     (terracotta sur crème, 4,26:1) et libellé décoratif « SÉNÉGAL » de la carte (1,99:1).
-17. **Comparaison maquette des bandeaux d'en-tête et pastilles (intervenant, Fondation)** : la maquette
-    visuelle n'est pas dans le dépôt ; seuls les éléments décrits dans les cahiers des charges ont pu être
-    vérifiés. Écarts connus : l'en-tête mobile est le même pour toutes les personas (barre blanche, logo
-    terracotta, rôle) ; les couleurs des états de l'agenda (F3) et des onglets en pastilles (F2, F3 : fond
-    encre, texte blanc) viennent des cahiers des charges, sans maquette de référence pour les autres détails.
+17. **Conformité à la maquette** : la passe de F5 a relevé les écarts listés dans « Écarts de design
+    restants » ; ils sont traités dans le lot F5.1.
+18. **Décisions par partie d'une rencontre** (intervenant / Fondation) absentes des réponses de l'école :
+    un champ du type `speakerDecision` / `foundationDecision` permettrait « Presque confirmée ».
+19. **Retours d'expérience de l'école** : deux listes complètes chargées pour connaître l'état de chaque
+    rencontre ; un champ `feedbackStatus` dans `SchoolMeetingResponse` éviterait ces requêtes.
+
+## Écarts de design restants (lot F5.1)
+
+Relevés lors de la passe de conformité de F5 (maquette `docs/maquette/`). Non corrigés : à traiter dans F5.1.
+Les écarts assumés (backend, accessibilité, décisions validées) sont dans « Écarts maquette / backend ».
+
+### F4 — Intervenants disponibles (`pages/school/SpeakersPage.tsx`, `SpeakerCard.tsx`, `NetworkSection.tsx`, `NetworkMap.tsx`) — W1-E3
+
+| # | Attendu |
+| --- | --- |
+| B1 | Recherche : boîte 48 px, largeur 320, rayon 14, bordure 2 px `#E6DECB`, loupe, à droite de l'en-tête ; pas de bouton « Rechercher » visible |
+| B3 | Filtres dans une carte blanche rayon 20, padding 18 ; libellés 12 px / 900 majuscules `#4A4A57` ; select Zone bordure 2 px `#2B337A` poids 800, Format bordure `#E6DECB` ; pastilles 40 px 13 px, active `#1B1F3B`/blanc poids 900 sans bordure, inactives bordure 2 px `#E6DECB` |
+| B4 | Section carte blanche rayon 24 ; partie carte fond `#DCE3EF` padding 22 ; h2 « Le réseau près de chez vous » Lilita 24 majuscules ; « {n} bénévoles au Sénégal » 14 px / 800 `#2B337A` ; libellé SVG « Carte du Sénégal : 23 intervenants à Dakar, 7 à Thiès, … » |
+| B5 | Panneau de ville : surtitre 12 px / 900 `#B8492A` ; ville Lilita 28 ; avatars 40 px rayon 12 Lilita 15 ; « 1 bénévole prêt à rencontrer vos élèves » au singulier ; pastilles de ville 36 px, active `#B8492A`/blanc ; « Choisir une ville » 12 px / 900 majuscules |
+| B6 | Titres de section Lilita 24 majuscules : « À Saint-Louis » + « · 4 intervenants » (15 px / 800 `#4A4A57`, sans majuscules) ; « Autres zones » + « · disponibles en ligne » |
+| B7 | Cartes rayon 22, padding 18 ; avatar 52 px rayon 16 ; secteur 11 px / 900 majuscules, interlettrage 0,08em ; nom Lilita 20 ; compétences 12 px / 800 sur `#F7F3EA` ; bouton « Demander une rencontre » Lilita 17, 46 px, rayon 14 |
+| B8 | Mobile : filtres en pastilles 40 px (ville active `#2B337A`/`#FDE7A6`) ; bloc « Le réseau » fond `#DCE3EF` rayon 20 avec carte et 4 avatars 32 px ; cartes « Demander » (Lilita 16, 44 px) ; « Autres zones · en ligne » en lignes compactes avec bouton icône « Demander une rencontre avec {nom} » |
+
+### F4 — Demander une rencontre (`pages/school/MeetingRequestPage.tsx`) — W1-E4
+
+| # | Attendu |
+| --- | --- |
+| C1 | « Vous invitez » : carte `#4E6A2C`, blanc, rayon 24, padding 22 ; avatar 72 px rayon 22 `#FDE7A6`/`#4E6A2C` ; surtitre crème ; « {Nom}, {métier} à {ville} » Lilita 26 ; citation 15 px entre « » ; lien crème |
+| C3 | Créneau : radio visible 20 px, jour 12 px / 900 majuscules, date Lilita 22, heure 14 px / 800 ; bordure 3 px `#E6DECB`, sélection 3 px `#B8492A` sur `#FDE7A6` ; classe : ligne 56 px rayon 14 avec radio visible ; étapes en `fieldset` blancs rayon 22, padding 22, légende Lilita 21 |
+| C4 | Étape 4 fond `#FDE7A6`, bordure 2 px `#E5A60A` ; libellés « Intervenante / Intervenant » (PC), « Avec » (mobile) ; lieu « En classe · {lieu} » |
+| C5 | Placeholder du message « Ce qui intéresse vos élèves, les questions qu'ils se posent… » ; libellé « Un mot pour {Prénom} » + « (facultatif) » poids 600 `#4A4A57` |
+| C6 | « Envoyer la demande » 60 px, rayon 18, Lilita 22 (mobile 58 / 21) ; « Annuler » simple lien 15 px / 800 |
+
+### F3 — Mon agenda (`pages/speaker/MonthGrid.tsx`, `AgendaPage.tsx`, `SlotForm.tsx`, `AgendaItemDetail.tsx`) — W2-E8
+
+| # | Attendu |
+| --- | --- |
+| D2 | Cellules min. 108 px rayon 12 ; jour passé `#F1EBDD` ; aujourd'hui bordure 2 px et rond `#B8492A` ; « + Créneau » pointillé `#C9BFA8`, texte `#3B5221` 12 px / 900 |
+| D3 | Mois précédent / suivant : boutons icône 44×44 rayon 12 bordure 2 px `#E6DECB`, `aria-label` |
+| D4 | Bandeau des demandes : carte `#1B1F3B` rayon 18, chiffre Lilita 30 `#FDE7A6`, « demandes d'écoles attendent votre réponse », « Répondre » 14 px / 900 `#FDE7A6` |
+| D5 | Heures « 8h00 » (au lieu de « 08:00 ») ; formats « En classe · En ligne · En classe ou en ligne » (au lieu de « Les deux ») ; pastille active `#1B1F3B`/`#FDE7A6` |
+| D6 | Panneau blanc rayon 24, bordure 2 px de l'état ; pastille « Jour libre » / « Libre » (blanc, pointillé `#4E6A2C`) ; titres Lilita 23 ; succès `#E8EEDF`/`#3B5221` 14 px / 800 ; « Retirer ce créneau » 46 px bordure `#E6DECB` |
+| D7 | Mobile : calendrier compact (même composant que « Mes rencontres » mobile, pastilles 9 px, jours 48 px) et « Touchez un jour libre pour publier un créneau. », au lieu de la liste des jours |
+
+### F3 — Demandes reçues (`pages/speaker/RequestsPage.tsx`, `RequestDetail.tsx`, `RequestResult.tsx`) — W2-E9
+
+| # | Attendu |
+| --- | --- |
+| E1 | Onglets tous comptés (« Acceptées · n », « Toutes · n ») ; « Refusées ou annulées » conservé (décision validée) |
+| E3 | Cartes de liste rayon 18, bordure 2 px (sélection `#1B1F3B`) ; créneau 12 px / 900 majuscules `#B8492A` ; école Lilita 19 ; « 2 demandes sur ce créneau » 12 px / 900 `#7A4100` |
+| E4 | Faits dans des cases `#F7F3EA` rayon 14 ; « Dans votre zone » `#DCE3EF`/`#2B337A` ; mot de l'école sur `#FDE7A6` entre « » ; créneau partagé bordure 2 px `#EF7A0A` sur `#FDEBD3` |
+| E6 | Résultats : « Merci, votre accord est enregistré » / « Rencontre confirmée » sur `#E8EEDF`/`#3B5221` ; « Vous avez refusé cette demande » + « Votre mot : « … » » sur `#FBE3E3`/`#8E1518` ; « Refusée automatiquement · créneau pris » sur `#F1EBDD` ; lien « Voir dans mon agenda » |
+| E7 | Mobile : en-tête « Demande de {école} » avec retour en icône (`aria-label` « Retour à la liste »), « Envoyée le … » |
+
+### F2 — Comptes à valider (`pages/foundation/AccountsPage.tsx`, `AccountDetail.tsx`, `ResultBlock.tsx`) — W3-comptes
+
+| # | Attendu |
+| --- | --- |
+| F1 | Texte d'aide sur `#DCE3EF` rayon 14 ; version mobile « Ce n'est pas une sélection : vérifiez l'identité, sans critère de qualité. » |
+| F3 | Détail : avatar 64 px rayon 20 ; nom Lilita 28 ; faits en cases `#F7F3EA` ; compétences `#1B1F3B`/`#FDE7A6` ; citation sur `#FDE7A6` ; « Refuser » bordure 2 px `#1B1F3B` |
+| F4 | Résultat validé : école « L'établissement accède maintenant à son tableau de bord et peut demander des rencontres. » ; intervenant « {Prénom} peut maintenant publier ses … » (texte tronqué dans l'export, à confirmer) |
+
+### F1 — Inscription et attente (`components/layout/AuthSplitLayout.tsx`, `AuthTabs.tsx`, `pages/register/*`, `pages/PendingAccountPage.tsx`, `pages/status/*`) — W1-E1, W2-E1, W2-E7
+
+| # | Attendu |
+| --- | --- |
+| G1 | Colonne PC padding 48, logo 32, h1 Lilita 52 (école crème sur terracotta, intervenant encre sur orange) ; étapes en carrés 36 px rayon 12 ; ligne « Une question ? contact@fondationm.sn · +221 33 800 00 00 » 13 px / 700 |
+| G2 | Onglets d'accès en contrôle segmenté fond `#F7F3EA` rayon 16 padding 6 ; actif `#2B337A`/`#FDE7A6` (école) ou `#1B1F3B`/`#FDE7A6` (intervenant) ; onglet « Devenir intervenant » |
+| G3 | Libellés : « E-mail professionnel » (école) ; « Votre métier », « Votre secteur » + aide « Le secteur principal de votre métier. Il aide les écoles à vous trouver. » ; « Ce que vous transmettez » ; « Pourquoi voulez-vous transmettre ? (facultatif, visible par les écoles) » ; textes de charte de la maquette ; « Zone (ville) » bordure `#B8492A` |
+| G5 | Attente : en-tête blanc « {Établissement} · {référent} » / « {nom} · intervenant » ; pastille « Compte en attente » (intervenant « Compte en attente de validation ») ; h1 intervenant « Merci {Prénom}, les jeunes vont avoir de la chance » ; frise (terminé `#4E6A2C`, en cours `#FDE7A6` bordure 4 px `#E5A60A` point `#B8492A`, à venir bordure 3 px `#C9BFA8`) ; étape 4 intervenant « Vos créneaux · publiez vos disponibilités » ; bloc « En attendant » `#2B337A` (école) / `#1B1F3B` (intervenant) |
+
+Conservés volontairement (non à corriger) : G4 aide « 8 caractères minimum » (décision 14), G6 aucun texte
+promettant un e-mail, E1 nom « Refusées ou annulées », motifs de refus obligatoires (décisions 21 et 30),
+surtitres « E11 · E12 » remplacés par « Comptes ».

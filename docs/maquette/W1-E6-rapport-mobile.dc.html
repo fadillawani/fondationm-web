@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>E6 Retour d'expérience — mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+input,textarea{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 2500px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="display: flex; align-items: center; gap: 8px; padding: 14px 12px 6px 8px">
+    <a href="W1-E5-suivi-mobile.dc.html" aria-label="Retour à mes rencontres" style="width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #1B1F3B"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></a>
+    <span style="font-size: 14px; font-weight: 900">Retour d'expérience</span>
+  </header>
+
+  <section style="margin: 4px 16px 0 16px; display: flex; flex-direction: column; gap: 10px">
+    <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 30px; line-height: 1.05">Comment s'est passée la rencontre avec Aïssatou ?</h1>
+    <p style="margin: 0; font-size: 14px; font-weight: 600; line-height: 1.5; color: #4A4A57">Racontez-nous ce que vous avez vécu, avec vos mots. Ce sont les histoires qui comptent.</p>
+    <ol aria-label="Statut du retour" style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; font-size: 12px; font-weight: 900; text-align: center">
+      <li aria-current="step" style="padding: 8px 4px; border-radius: 999px; background: #E5A60A; color: #1B1F3B">À rédiger</li>
+      <li style="padding: 6px 4px; border-radius: 999px; border: 2px solid #E6DECB; color: #4A4A57">Soumis</li>
+      <li style="padding: 6px 4px; border-radius: 999px; border: 2px solid #E6DECB; color: #4A4A57">Validé</li>
+    </ol>
+  </section>
+
+  <section style="margin: 14px 16px 0 16px; background: #FFFFFF; border-radius: 20px; padding: 14px; display: flex; gap: 12px; align-items: center">
+    <div style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 14px; background: #EF7A0A; color: #1B1F3B; font-family: 'Lilita One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">AD</div>
+    <div style="flex: 1; display: flex; flex-direction: column; min-width: 0"><span style="font-family: 'Lilita One', sans-serif; font-size: 18px">Aïssatou Diop, maroquinière</span><span style="font-size: 12px; font-weight: 700; color: #4A4A57">Terminale L2 · Mer 4 nov · 14h</span></div>
+  </section>
+
+  <form style="margin: 14px 16px 0 16px; display: flex; flex-direction: column; gap: 14px">
+    <fieldset style="margin: 0; border: 0; background: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+      <legend style="float: left; width: 100%; padding: 0; font-family: 'Lilita One', sans-serif; font-size: 19px">La classe que vous avez réunie</legend>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <div style="display: flex; flex-direction: column; gap: 6px"><label for="m-presents" style="font-size: 12px; font-weight: 800">Présents</label><input id="m-presents" type="number" value="35" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 10px; font-size: 16px; font-weight: 800; color: #1B1F3B; min-width: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><label for="m-filles" style="font-size: 12px; font-weight: 800">Filles</label><input id="m-filles" type="number" value="19" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 10px; font-size: 16px; font-weight: 800; color: #1B1F3B; min-width: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><label for="m-garcons" style="font-size: 12px; font-weight: 800">Garçons</label><input id="m-garcons" type="number" value="16" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 10px; font-size: 16px; font-weight: 800; color: #1B1F3B; min-width: 0"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <div style="display: flex; flex-direction: column; gap: 6px"><label for="m-age" style="font-size: 12px; font-weight: 800">Âge moyen</label><input id="m-age" value="17 ans" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 10px; font-size: 16px; font-weight: 800; color: #1B1F3B; min-width: 0"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><label for="m-duree" style="font-size: 12px; font-weight: 800">Durée</label><input id="m-duree" value="1 h 30" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 10px; font-size: 16px; font-weight: 800; color: #1B1F3B; min-width: 0"></div>
+      </div>
+      <span style="font-size: 12px; font-weight: 700; color: #3B5221">19 filles + 16 garçons = 35 élèves sur 38.</span>
+    </fieldset>
+
+    <fieldset style="margin: 0; border: 0; background: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+      <legend style="float: left; width: 100%; padding: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Lilita One', sans-serif; font-size: 19px">Qu'avez-vous ressenti ?</span><span style="font-size: 13px; font-weight: 600; color: #4A4A57">Autant d'émotions que vous voulez.</span></legend>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{ emotions }}" as="e" hint-placeholder-count="9">
+          <button type="button" aria-pressed="{{ e.pressed }}" onClick="{{ e.toggle }}" style="min-height: 44px; padding: 0 14px; border-radius: 999px; border: 2px solid {{ e.border }}; background: {{ e.bg }}; color: {{ e.fg }}; font-family: inherit; font-weight: 800; font-size: 14px">{{ e.label }}</button>
+        </sc-for>
+      </div>
+    </fieldset>
+
+    <fieldset style="margin: 0; border: 0; background: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 16px">
+      <legend style="float: left; width: 100%; padding: 0; font-family: 'Lilita One', sans-serif; font-size: 19px">Ce que vous avez vécu</legend>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="m-moment" style="font-size: 14px; font-weight: 900">Le moment qui vous a le plus marqué</label>
+        <textarea id="m-moment" rows="4" style="border-radius: 12px; border: 2px solid #E6DECB; padding: 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; line-height: 1.5">Quand Aïssatou a fait passer un portefeuille à moitié cousu dans les rangs. Toute la classe s'est tue.</textarea>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="m-echange" style="font-size: 14px; font-weight: 900">Un échange qui vous a touché</label>
+        <textarea id="m-echange" rows="4" style="border-radius: 12px; border: 2px solid #E6DECB; padding: 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; line-height: 1.5">Mariama a demandé si une fille pouvait reprendre l'atelier de son père. Aïssatou lui a raconté ses débuts dans l'atelier de son oncle.</textarea>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="m-apport" style="font-size: 14px; font-weight: 900">Ce que cette rencontre vous a apporté, à vous</label>
+        <textarea id="m-apport" rows="4" style="border-radius: 12px; border: 2px solid #E6DECB; padding: 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; line-height: 1.5">J'ai vu des élèves que je croyais peu intéressés poser des questions pendant vingt minutes.</textarea>
+      </div>
+    </fieldset>
+
+    <fieldset style="margin: 0; border: 0; background: #FDE7A6; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+      <legend style="float: left; width: 100%; padding: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Lilita One', sans-serif; font-size: 19px">Un mot pour Aïssatou</span><span style="font-size: 13px; font-weight: 700">Facultatif · transmis tel quel, avec votre prénom.</span></legend>
+      <label for="m-merci" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Message pour Aïssatou</label>
+      <textarea id="m-merci" rows="3" placeholder="Merci pour… / Mes élèves ont…" style="border-radius: 12px; border: 2px solid #E5A60A; background: #FFFFFF; padding: 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; line-height: 1.5"></textarea>
+    </fieldset>
+
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-remarque" style="font-size: 13px; font-weight: 800">Une remarque pour la Fondation M <span style="font-weight: 600; color: #4A4A57">(facultatif)</span></label>
+      <input id="m-remarque" placeholder="Organisation, horaire, matériel…" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; background: #FFFFFF">
+    </div>
+
+    <p style="margin: 0; font-size: 13px; font-weight: 600; line-height: 1.45; color: #4A4A57">Une fois validé par la Fondation M, votre récit est partagé avec les donateurs qui rendent ces rencontres possibles.</p>
+    <a href="W1-E5-suivi-mobile.dc.html" style="min-height: 58px; border-radius: 18px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-size: 20px">Partager mon retour</a>
+    <a href="W1-E5-suivi-mobile.dc.html" style="min-height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800">Finir plus tard</a>
+  </form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2500}}'>
+class Component extends DCLogic {
+renderVals() {
+const all = ['Fierté', 'Joie', 'Émotion', 'Surprise', 'Espoir', 'Gratitude', 'Inspiration', 'Curiosité', 'Inquiétude'];
+const sel = (this.state && this.state.emo) || ['Fierté', 'Émotion', 'Espoir'];
+const emotions = all.map((label) => {
+const on = sel.indexOf(label) >= 0;
+return {
+label, pressed: on ? 'true' : 'false',
+bg: on ? '#B8492A' : '#FFFFFF', fg: on ? '#FFFFFF' : '#1B1F3B', border: on ? '#B8492A' : '#E6DECB',
+toggle: () => this.setState({ emo: on ? sel.filter((x) => x !== label) : sel.concat([label]) })
+};
+});
+return { emotions };
+}
+}
+</script>
+</body>
+</html>

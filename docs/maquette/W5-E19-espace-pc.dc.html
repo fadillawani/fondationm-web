@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>W5 Espace jeune</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-wrap: wrap; align-items: stretch">
+
+  <aside style="flex: 1 1 250px; max-width: 100%; box-sizing: border-box; background: #E5A60A; color: #1B1F3B; padding: 28px 20px; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="font-family: 'Lilita One', sans-serif; font-size: 30px; line-height: 1">FondationM</span>
+      <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase">Espace élève</span>
+    </div>
+    <nav aria-label="Navigation principale" style="display: flex; flex-direction: column; gap: 4px">
+      <a href="#" aria-current="page" style="min-height: 44px; padding: 0 14px; border-radius: 12px; background: #1B1F3B; color: #FDE7A6; text-decoration: none; display: flex; align-items: center; font-weight: 900; font-size: 15px">Les rencontres de ma classe</a>
+    </nav>
+    <div style="padding: 16px; border-radius: 18px; background: #FDE7A6; display: flex; flex-direction: column; gap: 6px">
+      <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase">Bon à savoir</span>
+      <span style="font-size: 13px; font-weight: 700; line-height: 1.45">Ici, tu consultes seulement. Une question pour un intervenant ? Pose-la pendant la rencontre ou passe par ton référent orientation.</span>
+    </div>
+    <div style="margin-top: auto; padding: 14px; border-radius: 16px; background: #1B1F3B; color: #FFFFFF; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; gap: 12px">
+        <div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: #E5A60A; color: #1B1F3B; font-family: 'Lilita One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">KB</div>
+        <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 900; font-size: 14px">Khadija Ba</span><span style="font-size: 12px; font-weight: 700; color: #F7F3EA">Terminale S2 · Lycée de Sor</span></div>
+      </div>
+      <a href="W5-E1-connexion-pc.dc.html" style="min-height: 44px; border-radius: 12px; border: 2px solid #E5A60A; color: #E5A60A; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px">Se déconnecter</a>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 640px; min-width: 0; box-sizing: border-box; padding: 28px 32px 40px 32px">
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px">
+      <header style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #B8492A">Mon espace · E19</span>
+        <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 42px; line-height: 1">Salut Khadija !</h1>
+        <span style="font-size: 16px; font-weight: 700; color: #4A4A57">Demain, ta classe rencontre une ingénieure data. Prête à découvrir son métier ?</span>
+      </header>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+          <section aria-labelledby="avenir" style="display: flex; flex-direction: column; gap: 10px">
+            <h2 id="avenir" style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 21px; text-transform: uppercase">À venir</h2>
+            <sc-for list="{{ upcoming }}" as="r" hint-placeholder-count="1">
+              <button onClick="{{ r.pick }}" aria-pressed="{{ r.selected }}" style="text-align: left; border-radius: 20px; border: 3px solid {{ r.border }}; background: #FFFFFF; padding: 14px; font-family: inherit; color: #1B1F3B; cursor: pointer; display: flex; gap: 12px; align-items: center">
+                <span style="width: 58px; flex-shrink: 0; border-radius: 14px; background: #1B1F3B; color: #FDE7A6; padding: 8px 0; display: flex; flex-direction: column; align-items: center"><span style="font-family: 'Lilita One', sans-serif; font-size: 24px; line-height: 1">{{ r.day }}</span><span style="font-size: 11px; font-weight: 900">{{ r.mon }}</span></span>
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-weight: 900; font-size: 16px">{{ r.name }}</span><span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ r.metier }} · {{ r.time }}</span><span style="align-self: flex-start; padding: 2px 10px; border-radius: 999px; background: {{ r.stBg }}; color: {{ r.stFg }}; font-size: 12px; font-weight: 900">{{ r.when }}</span></span>
+              </button>
+            </sc-for>
+            <p style="margin: 0; font-size: 13px; font-weight: 700; color: #4A4A57">Les prochaines rencontres apparaîtront ici dès qu'elles seront confirmées.</p>
+          </section>
+          <section aria-labelledby="vecues" style="display: flex; flex-direction: column; gap: 10px">
+            <h2 id="vecues" style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 21px; text-transform: uppercase">Déjà vécues</h2>
+            <sc-for list="{{ past }}" as="r" hint-placeholder-count="2">
+              <button onClick="{{ r.pick }}" aria-pressed="{{ r.selected }}" style="text-align: left; border-radius: 20px; border: 3px solid {{ r.border }}; background: #FFFFFF; padding: 14px; font-family: inherit; color: #1B1F3B; cursor: pointer; display: flex; gap: 12px; align-items: center">
+                <span style="width: 58px; flex-shrink: 0; border-radius: 14px; background: #2B337A; color: #FDE7A6; padding: 8px 0; display: flex; flex-direction: column; align-items: center"><span style="font-family: 'Lilita One', sans-serif; font-size: 24px; line-height: 1">{{ r.day }}</span><span style="font-size: 11px; font-weight: 900">{{ r.mon }}</span></span>
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-weight: 900; font-size: 16px">{{ r.name }}</span><span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ r.metier }}</span><span style="align-self: flex-start; padding: 2px 10px; border-radius: 999px; background: {{ r.stBg }}; color: {{ r.stFg }}; font-size: 12px; font-weight: 900">{{ r.when }}</span></span>
+              </button>
+            </sc-for>
+          </section>
+        </div>
+
+        <article aria-label="Détail de la rencontre" style="flex: 1.6 1 460px; min-width: 0; background: #FFFFFF; border-radius: 26px; overflow: hidden; display: flex; flex-direction: column">
+          <div style="background: {{ d.headBg }}; color: {{ d.headFg }}; padding: 22px 24px; display: flex; flex-direction: column; gap: 8px">
+            <span style="align-self: flex-start; padding: 3px 12px; border-radius: 999px; background: {{ d.stBg }}; color: {{ d.stFg }}; font-size: 12px; font-weight: 900">{{ d.status }}</span>
+            <span style="font-family: 'Lilita One', sans-serif; font-size: 30px; line-height: 1.05">{{ d.date }}</span>
+            <span style="font-size: 15px; font-weight: 800">{{ d.time }} · {{ d.lieu }}</span>
+          </div>
+          <div style="padding: 24px; display: flex; flex-direction: column; gap: 20px">
+            <div style="display: flex; gap: 16px; align-items: center">
+              <div aria-hidden="true" style="width: 72px; height: 72px; flex-shrink: 0; border-radius: 22px; background: {{ d.secBg }}; color: #FFFFFF; font-family: 'Lilita One', sans-serif; font-size: 26px; display: flex; align-items: center; justify-content: center">{{ d.ini }}</div>
+              <div style="display: flex; flex-direction: column; gap: 3px">
+                <span style="font-family: 'Lilita One', sans-serif; font-size: 28px; line-height: 1">{{ d.name }}</span>
+                <span style="font-size: 15px; font-weight: 800; color: #4A4A57">{{ d.metier }} · {{ d.ville }}</span>
+                <span style="align-self: flex-start; padding: 2px 10px; border-radius: 999px; background: {{ d.secBg }}; color: #FFFFFF; font-size: 12px; font-weight: 900">{{ d.secteur }}</span>
+              </div>
+            </div>
+            <section style="display: flex; flex-direction: column; gap: 8px">
+              <h3 style="margin: 0; font-size: 13px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #4A4A57">Ses compétences</h3>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{ d.skills }}" as="s" hint-placeholder-count="4"><span style="padding: 6px 14px; border-radius: 999px; background: #FDE7A6; font-size: 14px; font-weight: 800">{{ s }}</span></sc-for></div>
+            </section>
+            <section style="display: flex; flex-direction: column; gap: 6px">
+              <h3 style="margin: 0; font-size: 13px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #4A4A57">Son parcours</h3>
+              <p style="margin: 0; font-size: 16px; font-weight: 600; line-height: 1.55">{{ d.parcours }}</p>
+            </section>
+            <section style="border-radius: 18px; background: #F7F3EA; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+              <h3 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 19px">{{ d.boxTitle }}</h3>
+              <p style="margin: 0; font-size: 15px; font-weight: 700; line-height: 1.5">{{ d.boxText }}</p>
+            </section>
+            <p style="margin: 0; font-size: 13px; font-weight: 700; color: #4A4A57">Pas de contact direct avec l'intervenant : tout passe par ton établissement et la Fondation M.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const SEC = { 'Numérique': '#2B337A', 'Droit': '#1B1F3B', 'Agriculture': '#4E6A2C' };
+const M = [
+{ id: 'e5', st: 'confirmee', day: '17', mon: 'NOV.', date: 'Mardi 17 novembre', when: 'Demain', time: '10h00', lieu: 'En ligne, en salle informatique', name: 'Awa Sarr', ini: 'AS', metier: 'Ingénieure data', ville: 'Dakar', secteur: 'Numérique',
+skills: ['Analyse de données', 'Python', 'Statistiques', 'Intelligence artificielle'],
+parcours: 'Après un bac S à Dakar, Awa a étudié les mathématiques et l’informatique à l’Université Gaston Berger, ici à Saint-Louis. Aujourd’hui, elle aide une entreprise de télécoms à comprendre ce que disent ses données.',
+boxTitle: 'Pour te préparer', boxText: 'Note deux questions sur ton cahier avant demain. Par exemple : à quoi ressemble ta journée ? Faut-il être fort en maths pour faire ce métier ?' },
+{ id: 'e2', st: 'realisee', day: '22', mon: 'OCT.', date: 'Jeudi 22 octobre', when: 'Vécue avec ta classe', time: '11h00', lieu: 'En ligne', name: 'Fatou Ndiaye', ini: 'FN', metier: 'Avocate', ville: 'Dakar', secteur: 'Droit',
+skills: ['Droit du travail', 'Plaidoirie', 'Négociation', 'Droit des affaires'],
+parcours: 'Fatou a étudié le droit à l’UCAD, puis a passé le concours du barreau. Elle défend aujourd’hui des salariés et des petites entreprises à Dakar.',
+boxTitle: 'Ce que tu as vécu', boxText: 'Ta classe a découvert le métier d’avocate. Si ce métier t’a plu, parles-en à ton référent orientation : il peut t’aider à regarder les études de droit.' },
+{ id: 'e1', st: 'realisee', day: '8', mon: 'OCT.', date: 'Jeudi 8 octobre', when: 'Vécue avec ta classe', time: '10h00', lieu: 'Salle 4', name: 'Mame Diarra Sow', ini: 'MS', metier: 'Agronome', ville: 'Ross Béthio', secteur: 'Agriculture',
+skills: ['Riziculture', 'Irrigation', 'Agriculture durable', 'Gestion d’exploitation'],
+parcours: 'Ingénieure agronome formée à Thiès, Mame Diarra accompagne les riziculteurs de la vallée du fleuve Sénégal, tout près de chez toi.',
+boxTitle: 'Ce que tu as vécu', boxText: 'Ta classe a découvert les métiers de l’agriculture dans la vallée. Si ce métier t’a plu, parles-en à ton référent orientation.' }
+];
+const selId = st.sel || 'e5';
+const ST = { confirmee: ['Confirmée', '#4E6A2C', '#FFFFFF'], realisee: ['Réalisée', '#2B337A', '#FDE7A6'] };
+const row = (m) => ({ day: m.day, mon: m.mon, name: m.name, metier: m.metier, time: m.time, when: m.when, stBg: m.st === 'confirmee' ? '#E5A60A' : '#EDE6D6', stFg: '#1B1F3B', selected: m.id === selId ? 'true' : 'false', border: m.id === selId ? '#E5A60A' : 'transparent', pick: () => this.setState({ sel: m.id }) });
+const m = M.find((x) => x.id === selId);
+const up = m.st === 'confirmee';
+const d = { ...m, status: ST[m.st][0], stBg: up ? '#E5A60A' : '#FDE7A6', stFg: '#1B1F3B', headBg: up ? '#1B1F3B' : '#2B337A', headFg: '#FDE7A6', secBg: SEC[m.secteur], date: up ? 'Demain · ' + m.date : m.date };
+return { upcoming: M.filter((x) => x.st === 'confirmee').map(row), past: M.filter((x) => x.st === 'realisee').map(row), d };
+}
+}
+</script>
+</body>
+</html>

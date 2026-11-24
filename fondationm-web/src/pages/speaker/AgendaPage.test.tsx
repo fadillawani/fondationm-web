@@ -43,11 +43,17 @@ describe('Espace intervenant — navigation', () => {
     )
     expect(nav.queryByRole('link', { name: /Mon impact/ })).not.toBeInTheDocument()
     expect(nav.getByText('Mon impact').closest('li')).toHaveTextContent('Bientôt')
-    expect(screen.getByText('Espace intervenant')).toBeInTheDocument()
-    expect(screen.getByText('Awa Diallo')).toBeInTheDocument()
-    expect(screen.getByText('Ingénieure réseaux · Dakar')).toBeInTheDocument()
-    // 4 entrées au plus dans la navigation basse : pas de bouton « Plus ».
-    expect(screen.queryByRole('button', { name: 'Plus' })).not.toBeInTheDocument()
+    const [aside] = screen.getAllByRole('complementary')
+    if (aside === undefined) throw new Error('Barre latérale absente')
+    expect(within(aside).getByText('Espace intervenant')).toBeInTheDocument()
+    expect(within(aside).getByText('Awa Diallo')).toBeInTheDocument()
+    expect(within(aside).getByText('Ingénieure réseaux · Dakar')).toBeInTheDocument()
+    const [, bottom] = screen.getAllByRole('navigation', { name: 'Navigation principale' })
+    if (bottom === undefined) throw new Error('Navigation basse absente')
+    expect(within(bottom).getAllByRole('listitem')).toHaveLength(3)
+    expect(within(bottom).getByRole('link', { name: 'Mon agenda' })).toBeInTheDocument()
+    expect(within(bottom).getByRole('link', { name: 'Demandes reçues 2 en attente' })).toHaveTextContent('Demandes')
+    expect(within(bottom).getByText('Mon impact').closest('li')).toHaveTextContent('Bientôt')
   })
 
   it('refuse l’accès à un utilisateur d’un autre rôle', async () => {

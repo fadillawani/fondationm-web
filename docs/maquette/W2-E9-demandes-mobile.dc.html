@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>W2 E9 Demandes reçues — mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+textarea{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 1500px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+  <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+    <header style="padding: 18px 16px 6px 16px; display: flex; flex-direction: column">
+      <span style="font-size: 12px; font-weight: 800; color: #4A4A57">Des classes vous attendent</span>
+      <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 30px; line-height: 1.05">Demandes reçues</h1>
+    </header>
+    <div role="tablist" aria-label="Filtrer les demandes" style="display: flex; gap: 8px; padding: 10px 16px; overflow: hidden">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+        <button role="tab" aria-selected="{{ t.selected }}" onClick="{{ t.pick }}" style="flex-shrink: 0; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 2px solid {{ t.border }}; background: {{ t.bg }}; color: {{ t.fg }}; font-family: inherit; font-weight: 900; font-size: 13px">{{ t.label }}</button>
+      </sc-for>
+    </div>
+    <section style="padding: 6px 16px 0 16px; display: flex; flex-direction: column; gap: 10px">
+      <sc-for list="{{ items }}" as="r" hint-placeholder-count="3">
+        <button onClick="{{ r.open }}" style="text-align: left; border: 0; background: #FFFFFF; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-family: inherit; color: #1B1F3B">
+          <span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%">
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #B8492A">{{ r.slotShort }}</span>
+            <span style="font-size: 11px; font-weight: 900; padding: 3px 9px; border-radius: 999px; background: {{ r.bg }}; color: {{ r.fg }}; white-space: nowrap">{{ r.statusLabel }}</span>
+          </span>
+          <span style="font-family: 'Lilita One', sans-serif; font-size: 19px; line-height: 1.1">{{ r.school }}</span>
+          <span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ r.classe }} · {{ r.eleves }} élèves · {{ r.city }}</span>
+          <sc-if value="{{ r.conflict }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 900; color: #7A4100">2 demandes sur ce créneau</span></sc-if>
+        </button>
+      </sc-for>
+      <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 18px; border-radius: 18px; background: #FFFFFF; font-weight: 700; color: #4A4A57">Aucune demande ici pour le moment.</p></sc-if>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+    <header style="display: flex; align-items: center; gap: 8px; padding: 14px 12px 6px 8px">
+      <button onClick="{{ back }}" aria-label="Retour à la liste" style="width: 44px; height: 44px; border: 0; border-radius: 14px; background: transparent; color: #1B1F3B; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+      <span style="font-size: 14px; font-weight: 900">Demande de {{ d.school }}</span>
+    </header>
+    <section aria-live="polite" style="margin: 4px 16px 0 16px; background: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+        <span style="font-size: 12px; font-weight: 700; color: #4A4A57">Envoyée le {{ d.sent }}</span>
+        <span style="font-size: 11px; font-weight: 900; padding: 4px 9px; border-radius: 999px; background: {{ d.bg }}; color: {{ d.fg }}">{{ d.statusLabel }}</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <span style="font-family: 'Lilita One', sans-serif; font-size: 25px; line-height: 1.05">{{ d.school }}</span>
+        <span style="display: flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 800; color: #4A4A57">{{ d.city }}<sc-if value="{{ d.local }}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 900; padding: 3px 9px; border-radius: 999px; background: #DCE3EF; color: #2B337A">Dans votre zone</span></sc-if></span>
+      </div>
+      <dl style="margin: 0; display: flex; flex-direction: column; gap: 8px">
+        <div style="border-radius: 12px; background: #F7F3EA; padding: 10px 12px"><dt style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #4A4A57">Créneau demandé</dt><dd style="margin: 0; font-weight: 900">{{ d.slot }}</dd></div>
+        <div style="border-radius: 12px; background: #F7F3EA; padding: 10px 12px"><dt style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #4A4A57">Classe</dt><dd style="margin: 0; font-weight: 900">{{ d.classe }} · {{ d.filiere }}</dd></div>
+        <div style="border-radius: 12px; background: #F7F3EA; padding: 10px 12px"><dt style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #4A4A57">Élèves · format</dt><dd style="margin: 0; font-weight: 900">{{ d.eleves }} élèves · {{ d.format }}</dd></div>
+      </dl>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 13px; font-weight: 900">Le mot de l'école</span>
+        <blockquote style="margin: 0; padding: 12px 14px; border-radius: 12px; background: #FDE7A6; font-size: 14px; font-weight: 600; line-height: 1.5">« {{ d.message }} »</blockquote>
+      </div>
+      <sc-if value="{{ d.conflict }}" hint-placeholder-val="{{ false }}">
+        <p style="margin: 0; padding: 12px; border-radius: 12px; border: 2px solid #EF7A0A; background: #FDEBD3; font-size: 13px; font-weight: 700; line-height: 1.45">Une autre école demande ce créneau. Dès qu'une rencontre est confirmée, l'autre demande est refusée automatiquement (« créneau pris »).</p>
+      </sc-if>
+      <sc-if value="{{ d.isTodo }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ d.notRefusing }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <button onClick="{{ accept }}" style="min-height: 54px; border: 0; border-radius: 16px; background: #B8492A; color: #FFFFFF; font-family: 'Lilita One', sans-serif; font-size: 19px">Accepter</button>
+            <button onClick="{{ startRefuse }}" style="min-height: 50px; border-radius: 16px; border: 2px solid #1B1F3B; background: #FFFFFF; color: #1B1F3B; font-family: inherit; font-weight: 900; font-size: 15px">Refuser</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ refusing }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 14px; background: #F7F3EA">
+            <label for="m-motif" style="font-size: 14px; font-weight: 900">Un mot pour expliquer ? <span style="font-weight: 600; color: #4A4A57">(facultatif)</span></label>
+            <textarea id="m-motif" rows="3" value="{{ motifDraft }}" onChange="{{ setMotif }}" placeholder="Ex. : en déplacement ce jour-là…" style="border-radius: 12px; border: 2px solid #E6DECB; padding: 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; line-height: 1.5; background: #FFFFFF"></textarea>
+            <button onClick="{{ confirmRefuse }}" style="min-height: 48px; border: 0; border-radius: 14px; background: #B81C1F; color: #FFFFFF; font-family: inherit; font-weight: 900; font-size: 15px">Confirmer le refus</button>
+            <button onClick="{{ cancelRefuse }}" style="min-height: 44px; border: 0; background: transparent; color: #2B337A; font-family: inherit; font-weight: 800; font-size: 14px">Annuler</button>
+          </div>
+        </sc-if>
+      </sc-if>
+      <sc-if value="{{ d.hasOutcome }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 12px 14px; border-radius: 14px; background: {{ d.outBg }}; display: flex; flex-direction: column; gap: 6px">
+          <span style="font-weight: 900; font-size: 15px; color: {{ d.outFg }}">{{ d.outTitle }}</span>
+          <span style="font-size: 13px; font-weight: 600; line-height: 1.45">{{ d.outText }}</span>
+          <sc-if value="{{ d.hasLink }}" hint-placeholder-val="{{ false }}"><a href="W2-E8-creneaux-mobile.dc.html" style="font-size: 14px; font-weight: 900">Voir dans mon agenda</a></sc-if>
+        </div>
+      </sc-if>
+      <p style="margin: 0; font-size: 12px; font-weight: 700; color: #4A4A57; line-height: 1.45">Les noms des élèves et les coordonnées du référent ne sont jamais affichés. La Fondation M fait le lien avec l'école.</p>
+    </section>
+  </sc-if>
+
+  <nav aria-label="Navigation principale" style="margin-top: auto; background: #FFFFFF; border-top: 1px solid #E6DECB; padding: 8px 8px 22px 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))">
+    <a href="W2-E8-creneaux-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M3 10h18"/></svg>Agenda</a>
+    <a href="#" aria-current="page" style="min-height: 52px; text-decoration: none; color: #B8492A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 900">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1Z"/></svg>Demandes</a>
+    <a href="W2-impact-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg>Mon impact</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1500}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const DATA = [
+{ id: 'd1', slotShort: 'Mar 24 nov · 10h00', slot: 'Mardi 24 novembre, 10h00 – 11h30', sent: '12 novembre', school: 'Lycée de Sor', city: 'Saint-Louis', local: false, classe: 'Terminale S2', filiere: 'Sciences expérimentales', eleves: 32, format: 'En ligne', message: 'Nos élèves hésitent entre la médecine et les écoles d’ingénieurs. Ils aimeraient comprendre concrètement votre métier.', status: 'todo', conflict: true },
+{ id: 'd2', slotShort: 'Mar 24 nov · 10h00', slot: 'Mardi 24 novembre, 10h00 – 11h30', sent: '13 novembre', school: 'Lycée de Grand-Yoff', city: 'Dakar', local: true, classe: 'Première S1', filiere: 'Sciences mathématiques', eleves: 41, format: 'En classe', message: 'Classe très curieuse du numérique. Beaucoup veulent « faire de l’informatique » sans savoir ce que cela recouvre.', status: 'todo', conflict: true },
+{ id: 'd3', slotShort: 'Jeu 26 nov · 15h00', slot: 'Jeudi 26 novembre, 15h00 – 16h00', sent: '11 novembre', school: 'CEM Parcelles Assainies', city: 'Dakar', local: true, classe: '3e B', filiere: 'Enseignement moyen général', eleves: 41, format: 'En ligne', message: 'Nos élèves vont bientôt choisir leur série au lycée. Un témoignage les aiderait à se projeter.', status: 'todo' },
+{ id: 'd4', slotShort: 'Mar 1 déc · 10h00', slot: 'Mardi 1er décembre, 10h00 – 11h30', sent: '9 novembre', school: 'Lycée de Mbour', city: 'Mbour', local: false, classe: 'Première S2', filiere: 'Sciences expérimentales', eleves: 36, format: 'En classe', message: 'Nous préparons une semaine de l’orientation et aimerions l’ouvrir avec un métier du numérique.', status: 'accepted', fm: 'pending' },
+{ id: 'd5', slotShort: 'Mer 25 nov · 14h00', slot: 'Mercredi 25 novembre, 14h00 – 15h30', sent: '6 novembre', school: 'Lycée de Thiès', city: 'Thiès', local: false, classe: 'Terminale S1', filiere: 'Sciences mathématiques', eleves: 29, format: 'En ligne', message: 'Plusieurs élèves veulent passer le concours de l’ESP. Ils ont plein de questions.', status: 'accepted', fm: 'ok' },
+{ id: 'd6', slotShort: 'Mer 25 nov · 14h00', slot: 'Mercredi 25 novembre, 14h00 – 15h30', sent: '8 novembre', school: 'Lycée de Rufisque', city: 'Rufisque', local: false, classe: 'Terminale S1', filiere: 'Sciences mathématiques', eleves: 33, format: 'En ligne', message: 'Nos élèves aimeraient découvrir les métiers des télécoms.', status: 'auto' },
+{ id: 'd7', slotShort: 'Jeu 3 déc · 14h00', slot: 'Jeudi 3 décembre, 14h00 – 15h30', sent: '7 novembre', school: 'Lycée de Kaolack', city: 'Kaolack', local: false, classe: 'Première L2', filiere: 'Lettres', eleves: 44, format: 'En classe', message: 'Une classe littéraire qui pense que le numérique n’est pas pour elle.', status: 'refused', motif: 'Le trajet est trop long sur ce créneau. Je peux le faire en ligne.' }
+];
+const over = st.over || {};
+const all = DATA.map((x) => ({ ...x, ...(over[x.id] || {}) }));
+const tab = st.tab || 'todo';
+const inTab = (x) => tab === 'all' || (tab === 'todo' && x.status === 'todo') || (tab === 'accepted' && x.status === 'accepted') || (tab === 'refused' && (x.status === 'refused' || x.status === 'auto'));
+const visible = all.filter(inTab);
+const S = { todo: ['À traiter', '#E5A60A', '#1B1F3B'], accepted: ['Acceptée', '#4E6A2C', '#FFFFFF'], refused: ['Refusée', '#B81C1F', '#FFFFFF'], auto: ['Créneau pris', '#E6DECB', '#1B1F3B'] };
+const count = (k) => all.filter((x) => k === 'refused' ? (x.status === 'refused' || x.status === 'auto') : x.status === k).length;
+const tabs = [['todo', 'À traiter · ' + count('todo')], ['accepted', 'Acceptées · ' + count('accepted')], ['refused', 'Refusées · ' + count('refused')], ['all', 'Toutes']].map(([k, label]) => ({
+label, selected: tab === k ? 'true' : 'false', bg: tab === k ? '#1B1F3B' : '#FFFFFF', fg: tab === k ? '#FFFFFF' : '#1B1F3B', border: tab === k ? '#1B1F3B' : '#E6DECB',
+pick: () => this.setState({ tab: k })
+}));
+const items = visible.map((x) => ({
+slotShort: x.slotShort, school: x.school, classe: x.classe, eleves: x.eleves, city: x.city,
+statusLabel: S[x.status][0], bg: S[x.status][1], fg: S[x.status][2], conflict: !!x.conflict && x.status === 'todo',
+open: () => this.setState({ sel: x.id, view: 'detail', refusing: false, motifDraft: '' })
+}));
+const x = all.find((y) => y.id === (st.sel || 'd1'));
+let outTitle = '', outText = '', outBg = '#F7F3EA', outFg = '#1B1F3B', hasLink = false;
+if (x.status === 'accepted') {
+outBg = '#E8EEDF'; outFg = '#3B5221'; hasLink = true;
+if (x.fm === 'ok') { outTitle = 'Rencontre confirmée'; outText = 'Vous et la Fondation M avez validé. Les autres demandes sur ce créneau ont été refusées automatiquement.'; }
+else { outTitle = 'Merci, votre accord est enregistré'; outText = 'La Fondation M donne aussi son avis. Dès que vous êtes tous les deux d’accord, la rencontre est confirmée.'; }
+} else if (x.status === 'refused') {
+outTitle = 'Vous avez refusé cette demande'; outText = x.motif ? 'Votre mot : « ' + x.motif + ' »' : 'Aucun motif donné.'; outBg = '#FBE3E3'; outFg = '#8E1518';
+} else if (x.status === 'auto') {
+outTitle = 'Refusée automatiquement · créneau pris'; outText = 'Une rencontre a été confirmée avec une autre école sur ce créneau.'; outBg = '#F1EBDD';
+}
+const d = { ...x, statusLabel: S[x.status][0], bg: S[x.status][1], fg: S[x.status][2], conflict: !!x.conflict && x.status === 'todo', isTodo: x.status === 'todo', notRefusing: !st.refusing, hasOutcome: x.status !== 'todo', outTitle, outText, outBg, outFg, hasLink };
+const setOver = (patch) => this.setState({ over: { ...over, [x.id]: { ...(over[x.id] || {}), ...patch } }, refusing: false, motifDraft: '' });
+const view = st.view || 'list';
+return {
+isList: view === 'list', isDetail: view === 'detail',
+tabs, items, d, empty: visible.length === 0,
+refusing: !!st.refusing, motifDraft: st.motifDraft || '',
+back: () => this.setState({ view: 'list', refusing: false }),
+accept: () => setOver({ status: 'accepted', fm: 'pending' }),
+startRefuse: () => this.setState({ refusing: true }),
+cancelRefuse: () => this.setState({ refusing: false, motifDraft: '' }),
+setMotif: (e) => this.setState({ motifDraft: e.target.value }),
+confirmRefuse: () => setOver({ status: 'refused', motif: (st.motifDraft || '').trim() })
+};
+}
+}
+</script>
+</body>
+</html>
