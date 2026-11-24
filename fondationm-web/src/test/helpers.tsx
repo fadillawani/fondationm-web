@@ -225,6 +225,8 @@ const SCHOOL_HOME_DEFAULTS: Record<string, Handler> = {
   'GET /api/school/speakers': emptyPage,
   'GET /api/school/meetings': emptyPage,
   'GET /api/school/speakers/stats': () => jsonResponse(200, { total: 0, byCity: [], bySector: [] }),
+  // Pastilles de la navigation Fondation (F7).
+  'GET /api/foundation/meetings': emptyPage,
 }
 
 export function mockApi(handlers: Record<string, Handler>) {

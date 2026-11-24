@@ -4,6 +4,8 @@ import { PATHS, ROLE_HOME } from '../auth/roles'
 import { AppLayout } from '../components/layout/AppLayout'
 import { RootLayout } from '../components/layout/RootLayout'
 import { AccountsPage } from '../pages/foundation/AccountsPage'
+import { MeetingsPage as FoundationMeetingsPage } from '../pages/foundation/meetings/MeetingsPage'
+import { RequestsPage as FoundationRequestsPage } from '../pages/foundation/meetings/RequestsPage'
 import { AgendaPage } from '../pages/speaker/AgendaPage'
 import { RequestsPage } from '../pages/speaker/RequestsPage'
 import { HomePage } from '../pages/HomePage'
@@ -33,6 +35,8 @@ function rolePages(role: Role): RouteObject[] {
       // Le tableau de bord viendra plus tard : l'accueil de la Fondation ouvre les comptes à valider.
       { path: ROLE_HOME.FOUNDATION, element: <Navigate to={PATHS.foundationAccounts} replace /> },
       { path: PATHS.foundationAccounts, element: <AccountsPage /> },
+      { path: PATHS.foundationRequests, element: <FoundationRequestsPage /> },
+      { path: PATHS.foundationMeetings, element: <FoundationMeetingsPage /> },
     ]
   }
   if (role === 'SPEAKER') {

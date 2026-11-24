@@ -17,7 +17,9 @@ interface ReasonFormProps {
   fieldNote?: string
   placeholder?: string
   maxLength: number
-  requiredMessage: string
+  /** Absent : motif facultatif (une chaîne vide est envoyée). */
+  requiredMessage?: string
+  cancelLabel?: string
   submitLabel: string
   submitting: boolean
   /** `setServerError` place un message du serveur sous le champ. */
@@ -25,7 +27,7 @@ interface ReasonFormProps {
   onCancel: () => void
 }
 
-/** Formulaire de motif obligatoire (1 à maxLength caractères après retrait des espaces). */
+/** Formulaire de motif (1 à maxLength caractères après retrait des espaces), facultatif sans `requiredMessage`. */
 export function ReasonForm({
   formLabel,
   fieldLabel,
@@ -33,6 +35,7 @@ export function ReasonForm({
   placeholder,
   maxLength,
   requiredMessage,
+  cancelLabel = 'Annuler',
   submitLabel,
   submitting,
   onSubmit,
@@ -44,7 +47,7 @@ export function ReasonForm({
         reason: z
           .string()
           .trim()
-          .min(1, requiredMessage)
+          .min(requiredMessage === undefined ? 0 : 1, requiredMessage)
           .max(maxLength, `Le motif ne doit pas dépasser ${maxLength} caractères.`),
       }),
     [maxLength, requiredMessage],
@@ -65,7 +68,7 @@ export function ReasonForm({
         onSubmit(values, (message) => setError('reason', { type: 'server', message }, { shouldFocus: true })),
       )}
     >
-      <FormField label={fieldLabel} labelNote={fieldNote} required error={errors.reason?.message}>
+      <FormField label={fieldLabel} labelNote={fieldNote} required={requiredMessage !== undefined} error={errors.reason?.message}>
         {(control) => (
           <Textarea
             {...control}
@@ -82,7 +85,7 @@ export function ReasonForm({
           {submitLabel}
         </Button>
         <Button variant="outline" size="md" onClick={onCancel} disabled={submitting} className="min-h-12 rounded-[14px] px-[18px] text-[15px]">
-          Annuler
+          {cancelLabel}
         </Button>
       </div>
     </form>
