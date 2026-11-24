@@ -19,7 +19,7 @@ import { buttonClass } from '../../components/ui/styles'
 import { Textarea } from '../../components/ui/Textarea'
 import { cn } from '../../lib/cn'
 import { formatDayMonth, formatSlot, formatTimeRange, formatWeekday, parseIso } from '../../lib/dateTime'
-import { NewClassForm } from './NewClassForm'
+import { ClassForm } from './classes/ClassForm'
 import {
   useClasses,
   useCreateMeeting,
@@ -200,9 +200,9 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
   const chosenClass: SchoolClass | undefined = classList.find((entry) => entry.id === values.classId)
   const format = formatOf(slot, values.format ?? '')
 
-  function classCreated(created: SchoolClass) {
+  function classCreated(id: string) {
     setAddingClass(false)
-    setValue('classId', created.id, { shouldValidate: true })
+    setValue('classId', id, { shouldValidate: true })
   }
 
   const submit = handleSubmit((form) => {
@@ -321,7 +321,7 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
                 <p className="font-semibold text-muted">
                   Vous n'avez pas encore de classe. Ajoutez-en une pour envoyer votre demande.
                 </p>
-                <NewClassForm onCreated={classCreated} />
+                <ClassForm onSaved={classCreated} />
               </>
             ) : (
               <>
@@ -345,7 +345,7 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
                   </div>
                 </fieldset>
                 {addingClass ? (
-                  <NewClassForm onCreated={classCreated} onCancel={() => setAddingClass(false)} />
+                  <ClassForm onSaved={classCreated} onCancel={() => setAddingClass(false)} />
                 ) : (
                   <Button variant="ghost" size="md" className="self-start" onClick={() => setAddingClass(true)}>
                     + Ajouter une classe

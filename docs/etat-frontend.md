@@ -1,6 +1,6 @@
 # État du frontend — Fondation M
 
-Dernière mise à jour : 24 novembre 2026 — lot F5.2 (connexions par persona, Pays et Zone en listes fermées).
+Dernière mise à jour : 24 novembre 2026 — lot F6 (« Mon établissement ») et F6-bis (carte du réseau interactive).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 
@@ -17,10 +17,12 @@ Dernière mise à jour : 24 novembre 2026 — lot F5.2 (connexions par persona, 
 | F5  | « Mes rencontres » de l'école (calendrier, détail, listes) ; socle commun aligné sur la maquette (barres latérales, navigation basse blanche, en-têtes de page, carte utilisateur) ; corrections D1, E2, E5, B2, C2, F2 | Terminé |
 | F5.1 | Conformité à la maquette de F1 à F5 (valeur par valeur), agenda mobile en calendrier compact | Terminé |
 | F5.2 | Une page de connexion par persona (W3, W4, W5 ; école et intervenant), Pays et Zone (ville) en listes fermées | Terminé |
-| F6+ | Autres écrans métier (mon établissement, retours d'expérience, tableau de bord Fondation, donateurs…) | À faire  |
+| F6-bis | Carte du réseau interactive (W1-E3) : villes cliquables au clavier, état unique `?zone=`, chiffres sous filtres | Terminé |
+| F6  | « Mon établissement » (W5-E2) : classes, élèves, fiches d'accès, ajout en série | Terminé |
+| F7+ | Autres écrans métier (retours d'expérience, espace élève, tableau de bord Fondation, donateurs…) | À faire  |
 
-Vérifications au moment de la livraison de F5.2 : `npm run build`, `npm run lint` et `npm test`
-(172 tests) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F6 et F6-bis : `npm run build`, `npm run lint` et `npm test`
+(207 tests, deux passages) passent sans erreur ni avertissement. Après la seule partie carte : 182 tests.
 
 ## Corrections
 
@@ -47,6 +49,94 @@ Vérifications au moment de la livraison de F5.2 : `npm run build`, `npm run lin
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F6-bis livre — carte du réseau interactive (W1-E3)
+
+**Un seul état : `?zone=`.** Carte, pastilles « Choisir une ville », select « Zone », feuille mobile, panneau de ville,
+listes « À {ville} » / « Autres zones » et bouton-filtre mobile se déduisent de l'URL (l'ancien état local du panneau,
+qui ne changeait pas les listes, est supprimé). La ville de l'école donne « ma zone » ; une autre ville,
+`?zone={ville}` ; re-cliquer la ville choisie revient à « ma zone » (ou « Toutes les zones » sans ville d'école) ;
+re-cliquer la ville de l'école en « ma zone » ne fait rien. Une ville choisie sur la carte sans intervenant dans les
+statistiques est ajoutée aux options du select, qui reste synchronisé.
+
+- **Villes = boutons** : `<g role="button" tabIndex=0>`, `aria-label` « Saint-Louis, 4 intervenants » (« 0 intervenant »,
+  « …, votre ville »), `aria-pressed`, Entrée / Espace, ordre de tabulation du nord au sud, curseur main ; survol =
+  anneau indigo 2 px, focus clavier = anneau encre 3 px, ville choisie = terracotta + anneau (inchangé).
+  Le SVG est un groupe étiqueté (`role="group"`, libellé « Carte du Sénégal : … ») ; les textes décoratifs sont
+  `aria-hidden`.
+- **Zones de clic** (`mapCities.ts`, `hitArea`) : disque invisible de 24 unités découpé à la médiatrice entre villes
+  voisines (zones disjointes) ; au moins 24 px de diamètre sur mobile (≈ 0,8 px par unité), plus de 44 px sur PC.
+  Le filtre « Zone » reste l'alternative à 44 px.
+- **Les 8 villes sont toujours dessinées** ; une ville à 0 : cercle blanc, bord pointillé `#2B337A`, « 0 » en encre
+  (16,08:1), sans opacité, cliquable. Ville de l'école : losange terracotta au-dessus du cercle et « · vous »
+  après l'étiquette (`#B8492A` sur `#F7F3EA`, 4,72:1).
+- **Chiffres fidèles aux filtres** : sans filtre, `GET /api/school/speakers/stats` ; avec un secteur, un format ou une
+  recherche, `GET /api/school/speakers` sans ville (toutes les pages), compté par ville sans casse ni accents
+  (`countByCity`) — c'est la requête de la liste « Toutes les zones » (cache partagé). Les villes des statistiques
+  gardent leur pastille (0 si personne ne correspond). Titre : « {n} intervenants correspondent à vos critères » au
+  lieu de « {n} bénévoles au Sénégal ». Limite de 25 pages atteinte : « Chiffres partiels : affinez la recherche pour
+  tout compter. »
+- **Panneau de ville** : même requête que la liste « À {ville} » (filtres compris), 4 personnes puis « et {n} autres
+  personnes », lien vers la liste (`#liste-ville`, focus déplacé sur son titre) ; « Aucun bénévole pour ces
+  critères. » ; en « Toutes les zones », « Choisissez une ville sur la carte ou ci-dessous. ».
+- **Mobile** : même interaction ; « {n} bénévoles près de vous, à {ville} » (ville de l'école) ou « {n} bénévoles à
+  {ville} ».
+
+**Fichiers (commit « carte »)** : `src/pages/school/NetworkMap.tsx`, `NetworkSection.tsx`, `SpeakersPage.tsx`,
+`mapCities.ts`, `mapCities.test.ts`, `schoolData.ts` (`countByCity` ; `useCityPeople` supprimé),
+`schoolData.test.ts` (nouveau), `SpeakersPage.test.tsx`.
+
+## Ce que F6 livre — « Mon établissement » (W5-E2)
+
+`/ecole/etablissement` (rôle SCHOOL), entrée « Mon établissement » active (icône « établissement » de la maquette) ;
+« Retours d'expérience » reste « Bientôt ».
+
+- **Classes** : onglets « Terminale S2 · 10 » (élèves rattachés, `accountsCount`), flèches / Début / Fin, `?classe={id}` ;
+  « + Nouvelle classe » ; « Modifier la classe » (PATCH des seuls champs modifiés) ; « Supprimer la classe » avec
+  confirmation. Aucune classe : « Vous n'avez pas encore de classe. Créez la première. » et le formulaire ouvert.
+  `ClassForm` (`pages/school/classes/`) remplace `NewClassForm` et sert aussi « Demander une rencontre » (F4).
+- **Élèves** : résumé « {n} élèves rattachés · effectif déclaré {studentCount} » (classe vide : « Aucun élève rattaché
+  pour l'instant. Ajoutez le premier ci-dessous. ») ; ajout prénom + nom (« Indiquez le prénom et le nom de
+  l'élève. ») ; « Changer de classe » et « Retirer l'élève » (confirmation « Son accès sera supprimé. ») dans le
+  panneau de l'élève choisi.
+- **Accès** : l'ajout crée le compte. Adresse `{prénom}.{nom}.{suffixe}@eleve.fondationm.sn` ; suffixe = premier mot
+  distinctif du nom de l'établissement (mots génériques retirés), sinon 6 premiers caractères de l'identifiant de
+  l'école ; sur `EMAIL_ALREADY_USED` lu dans le corps de la réponse (jamais le statut seul) : `.sor2`, `.sor3`… (20 essais).
+  Code d'accès : 8 caractères de l'alphabet de la maquette, `crypto.getRandomValues` avec tirage par rejet
+  (`lib/accessCode.ts`), envoyé comme mot de passe temporaire.
+- **Fiche d'accès à remettre** (jaune `#E5A60A`, encre 7,50:1) : nom, identifiant sans le domaine, code, note
+  `ACCESS_NOTE` (une seule constante, `establishmentText.ts`) : « Remettez cette fiche en main propre. Ce code ne sera
+  plus affiché après votre départ de cette page. » ; « Imprimer la fiche » (PC et mobile). Les codes vivent dans
+  l'état de la page (pas d'un onglet) : jamais dans l'URL, un stockage, la console ni le cache des requêtes (création
+  et nouvelle fiche hors TanStack Query) ; test : rien dans `localStorage` / `sessionStorage`.
+- **Statuts** : « Fiche à remettre » (`#FDE7A6`/encre, 13,14:1) pour un code produit pendant la visite ; « Accès créé »
+  (`#EDE6D6`/`#4A4A57`) sinon. Bouton de ligne : « Voir la fiche » (mobile « Fiche ») ou « Nouvelle fiche »
+  (terracotta/blanc 5,22:1).
+- **Nouvelle fiche** : confirmation « L'ancien code ne fonctionnera plus et l'élève sera déconnecté. », puis
+  `POST /api/school/students/{id}/password`.
+- **« Imprimer les fiches ({n}) »** remplace « Donner l'accès à tous » : toutes les fiches de la classe produites pendant
+  la visite, une par page (classe `impression-fiches` sur `<body>`, `@media print` dans `styles/theme.css`).
+  Bandeau « Imprimez les fiches avant de quitter cette page : les codes ne seront plus affichés. », `beforeunload`
+  et confirmation « Quitter sans imprimer ? » (navigation dans l'application, `useBlocker`) tant qu'une fiche n'est pas
+  imprimée ; pas de blocage en fin de session.
+- **« Ajouter plusieurs élèves »** : une personne par ligne (point-virgule, tabulation, sinon premier espace) ;
+  aperçu « Prénom | Nom » modifiable ; « {r} places restantes » ; envoi refusé au-delà, avec « Modifier la classe » ;
+  création une par une ; à la première erreur : « {k} élèves créés. Échec à la ligne {i} ({nom}) : {message}. {m}
+  lignes restantes. » et « Reprendre » ; 429 : « Trop de demandes, réessayez dans un instant. »
+- **Erreurs** (codes lus dans le corps) : `CLASS_NOT_EMPTY`, `CLASS_HAS_MEETINGS`, `STUDENT_COUNT_TOO_LOW` (« … ({n}) »),
+  `CLASS_FULL` (« Cette classe est complète (effectif déclaré {n}). Augmentez l'effectif pour ajouter un élève. » +
+  « Modifier la classe ») ; sinon message du serveur ou message générique.
+- **« Ce que vos élèves verront »** : 4 puces (PC), paragraphe court (mobile), textes de la maquette.
+
+**Fichiers (commit « établissement »)** : `src/pages/school/establishment/` (`EstablishmentPage.tsx`,
+`EstablishmentPage.test.tsx`, `ClassTabs.tsx`, `AddStudentForm.tsx`, `BulkAddForm.tsx`, `bulkParse.ts`,
+`bulkParse.test.ts`, `StudentTable.tsx`, `AccessPanel.tsx`, `sheets.ts`, `WhatStudentsSee.tsx`, `establishmentData.ts`,
+`establishmentText.ts`), `src/pages/school/classes/` (`ClassForm.tsx`, `classData.ts`), `src/pages/school/NewClassForm.tsx`
+(supprimé), `src/pages/school/MeetingRequestPage.tsx`, `src/lib/accessCode.ts`, `src/lib/accessCode.test.ts`,
+`src/lib/studentLogin.ts`, `src/lib/studentLogin.test.ts`, `src/lib/useMediaQuery.ts`, `src/auth/roles.ts`,
+`src/routes/routes.tsx`, `src/components/layout/AppLayout.tsx`, `icons.tsx`, `PageTitle.tsx` (`mobileSubtitle`,
+`kickerTone`), `src/styles/theme.css`. **Fichier partagé avec le commit « carte »** : `src/pages/school/SpeakersPage.test.tsx`
+(test de navigation : « Mon établissement » devient un lien).
 
 ## Ce que F5.2 livre
 
@@ -581,6 +671,21 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 64. **Pays / Zone** : listes fermées (`lib/places.ts`, une seule orthographe pour l'inscription et la carte) ;
     Zone libre hors Sénégal faute de villes dans la maquette ; pas d'« Autre ».
 65. **Bouton encre / crème** : variante `ink` de `Button` (connexion élève).
+66. **Zone de l'annuaire, état unique** : `?zone=` est la seule source de la ville choisie (carte, pastilles, select,
+    feuille mobile, panneau, listes) ; l'état local du panneau est supprimé.
+67. **Chiffres de la carte sous filtres** : comptage des intervenants chargés par `GET /api/school/speakers` sans ville
+    (même requête que « Toutes les zones ») ; statistiques sans filtre. La recherche compte comme un filtre (Carte-Q4).
+68. **Zones de clic de la carte** : disques de 24 unités découpés à la médiatrice (fonction pure testée) ; cibles ≥ 24 px
+    sur mobile (WCAG 2.5.8), alternative 44 px par le filtre « Zone » (Carte-Q2).
+69. **Codes d'accès hors cache** : création d'élève et nouvelle fiche appelées sans TanStack Query ; seules les listes
+    sont invalidées. Les codes vivent dans l'état de la page « Mon établissement ».
+70. **Adresse générée** : suffixe = premier mot distinctif du nom de l'établissement, repli sur l'identifiant de l'école ;
+    numérotation uniquement sur `EMAIL_ALREADY_USED` lu dans le corps (F6-Q2).
+71. **Statuts d'accès honnêtes** : « Fiche à remettre » / « Accès créé » ; « Connecté·e » non affichable (F6, point ouvert 23).
+72. **Clés de cache des classes** : « Mon établissement » lit les classes sous `['school', 'classes', 'etablissement']`
+    (avec `accountsCount`) ; toute action invalide le préfixe `['school', 'classes']`, partagé avec F4.
+73. **Placement responsive sans doublon de champs** : le panneau de l'élève et « Imprimer les fiches » sont rendus une
+    seule fois, à la place PC ou mobile (`useMediaQuery`, 1024 px) ; sans `matchMedia` (tests), place mobile.
 
 ## Écarts
 
@@ -618,6 +723,10 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | « Prochains créneaux · {format} » (2 créneaux) sur chaque carte | L'annuaire ne renvoie que `nextSlotStartAt` et `availableSlotsCount` | Un créneau, sans format (décision 39). **Backend : prochains créneaux et formats dans l'annuaire.** |
 | Surtitre « Disponibles surtout en ligne » du panneau de ville | Aucun format dans les statistiques ni dans l'annuaire | Omis ; « Votre zone » ou « Autre zone · en ligne possible » |
 | Position des villes sur la carte | Aucune coordonnée dans `CityCount` | Table de la maquette (8 villes) ; autres villes en pastilles seulement |
+| Chiffres de la carte sous filtres | `/stats` n'accepte aucun filtre | Comptage de l'annuaire filtré (décision 67, point ouvert 21) |
+| Statut « Connecté·e » / « Code remis, pas encore connecté·e » (W5-E2) | `StudentResponse` sans information de connexion | « Fiche à remettre » / « Accès créé » (point ouvert 23) |
+| Élève « sans accès » et « Donner l'accès à tous » (W5-E2) | L'élève est créé avec son compte (`email` + `password` obligatoires) | « Imprimer les fiches ({n}) » et « Ajouter plusieurs élèves » |
+| Relire le code d'un élève | Aucun point d'accès | Code affiché une seule fois ; « Nouvelle fiche » (`POST …/password`) |
 | Citation de présentation de l'intervenant | `motivation` | Affichée si renseignée |
 | Prénom et nom du référent (carte utilisateur) | Absents (déjà noté) | Initiales et nom de l'établissement |
 | Lien « Voir la demande » du bandeau de refus | « Mes rencontres » pas encore livré | Affiché désactivé, « Bientôt » |
@@ -692,7 +801,26 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 20. **Identifiant des élèves** : la connexion élève complète un identifiant sans « @ » avec
     `@eleve.fondationm.sn` (`lib/studentLogin.ts`). Le lot « Mon établissement » devra créer les comptes élèves
     avec cette adresse générée (identifiant lisible = partie avant le « @ », `studentIdentifier`).
-    **Backend : un vrai champ identifiant éviterait cette convention.**
+    **Backend : un vrai champ identifiant éviterait cette convention.** Appliquée par « Mon établissement » (F6) :
+    `{prénom}.{nom}.{suffixe}@eleve.fondationm.sn`.
+21. **Filtres sur `/api/school/speakers/stats`** : sous un filtre, la carte charge tout l'annuaire filtré (25 pages au
+    plus, « Chiffres partiels » au-delà). **Backend : des filtres `sector`, `format`, `q` sur `/stats` éviteraient ce
+    parcours.** Les statistiques et l'annuaire peuvent aussi ne pas compter les mêmes intervenants (non documenté).
+22. **Codes d'erreur des classes et des élèves non documentés** : `CLASS_NOT_EMPTY`, `CLASS_HAS_MEETINGS`,
+    `STUDENT_COUNT_TOO_LOW`, `CLASS_FULL`, `EMAIL_ALREADY_USED` sur `POST /api/school/classes/{classId}/students`
+    (statut HTTP et corps à confirmer).
+23. **Statut de connexion d'un élève** : `StudentResponse` ne dit pas si l'élève s'est connecté. **Backend : un champ
+    `lastLoginAt` ou `mustChangePassword` permettrait « Connecté·e » / « Code remis, pas encore connecté·e ».**
+24. **Changement de mot de passe imposé à un élève créé par l'école (à vérifier)** : `MeResponse` expose déjà
+    `mustChangePassword` dans `openapi.json`. Vérification : se connecter avec un élève fraîchement créé, `GET /api/me`,
+    lire `mustChangePassword`. Si `true`, remplacer `ACCESS_NOTE` (une ligne, `establishmentText.ts`).
+25. **« Voir ce que l'élève verra » / « Vue élève »** omis jusqu'au lot de l'espace élève (W5-E19) : une seule session
+    par onglet ; l'aperçu réutilisera les composants de cet espace avec les rencontres de la classe (F6-Q5).
+26. **Vraie carte géographique (non implémentée)** : fond OpenStreetMap avec zoom = autre design que la maquette.
+    Coût : bibliothèque (Leaflet ≈ 40 kB compressé, MapLibre ≈ 200 kB), fournisseur de tuiles avec clé et facturation
+    (la politique d'OSM exclut un usage applicatif soutenu), RGPD (chaque tuile envoie l'adresse IP à un tiers :
+    mention, sans doute consentement), poids sur réseau mobile, coordonnées réelles des villes, lisibilité moindre
+    qu'un schéma à 8 cercles.
 
 ## Écarts de design restants
 
@@ -731,10 +859,20 @@ attendue (maquette) et la raison.
 | Demandes | `pages/speaker/RequestsPage.tsx` | Onglet « Refusées · n » | « Refusées ou annulées · n » (décision E1 validée). |
 | Demandes | `pages/speaker/RequestDetail.tsx` | Pas de fait « Lieu » | Conservé : lieu choisi par l'école, utile à l'intervenant. |
 | Annuaire (W1-E3) | `pages/school/SpeakerCard.tsx` | « Prochains créneaux · {format} » (2 créneaux) | L'annuaire ne renvoie que `nextSlotStartAt` (décision 39). |
-| Annuaire | `pages/school/NetworkSection.tsx` | Surtitre « Disponibles surtout en ligne » ; pastilles de ville sur mobile | Aucune donnée de format ; sur mobile le choix de ville passe par le filtre « Zone ». |
+| Annuaire | `pages/school/NetworkSection.tsx` | Surtitre « Disponibles surtout en ligne » ; pastilles de ville sur mobile | Aucune donnée de format ; sur mobile le choix de ville passe par la carte et le filtre « Zone ». |
+| Annuaire (carte) | `pages/school/NetworkMap.tsx` | Villes à 0 absentes ; aucun repère de la ville de l'école | Ajoutés : cercle blanc à bord pointillé, losange et « · vous » (F6-bis). |
+| Annuaire (carte) | `pages/school/mapCities.ts` | — | Cibles de 24 px au moins sur mobile pour Saint-Louis–Louga et Dakar–Thiès (médiatrice), pas 44 px ; alternative : filtre « Zone ». |
+| Annuaire (carte) | `pages/school/NetworkSection.tsx` | « {n} bénévoles au Sénégal » | Sous filtre : « {n} intervenants correspondent à vos critères » ; « Chiffres partiels » au-delà de 25 pages. |
 | Annuaire | `pages/school/SpeakersPage.tsx` | Bouton-filtre « Date » (mobile) | Aucun filtre par date côté backend. |
 | Annuaire | `pages/school/NetworkMap.tsx` | Libellé « SÉNÉGAL » `#B8AE98` | Contraste 1,99:1, couleur conservée (décoratif, point ouvert 16). |
 | Demande (W1-E4) | `pages/school/MeetingRequestPage.tsx` | Libellé « Intervenante » | Genre inconnu : « Intervenant ». |
 | Mes rencontres (W1-E5) | voir « Écarts maquette / backend » | Opacité des rencontres passées, « Presque confirmée », retours « Bientôt », liste « Passées » sur PC, heure dans les listes mobiles | Contraste, données absentes, décisions validées. |
 | Toutes | `components/layout/AppLayout.tsx`, `UserMenu.tsx` | Pas de déconnexion ; entrées actives avec pastilles | Déconnexion conservée (lien PC, menu avatar mobile) ; entrées sans écran « Bientôt ». |
 | Toutes | `components/layout/roleTheme.ts` | Avatar Fondation `#B8492A` sur `#FDE7A6` | Contraste 4,26:1, couleur conservée (point ouvert 16). |
+| Mon établissement (W5-E2) | `pages/school/establishment/EstablishmentPage.tsx` | Sur-ligne « Mon établissement · Élèves · E2 » | Code d'écran retiré (comme « E11 · E12 »). |
+| Mon établissement | `pages/school/establishment/StudentTable.tsx` | « Connecté·e », « Code remis, pas encore connecté·e », « Pas encore d'accès » ; résumé « … · {m} déjà connectés » | Données absentes : « Fiche à remettre » / « Accès créé » ; « effectif déclaré {n} » dans le résumé. |
+| Mon établissement | `pages/school/establishment/EstablishmentPage.tsx` | « Donner l'accès à tous ({n}) », « Donner l'accès » | Ajout = création du compte : « Imprimer les fiches ({n}) », « Nouvelle fiche », « Ajouter plusieurs élèves » (F6-Q1). |
+| Mon établissement | `pages/school/establishment/AccessPanel.tsx` | Code « SOR-XXXX » ; note « L'élève choisira son mot de passe à la première connexion » | 8 caractères aléatoires ; note prudente `ACCESS_NOTE` tant que `mustChangePassword` n'est pas vérifié (F6-Q3). |
+| Mon établissement | `pages/school/establishment/AccessPanel.tsx` | « Voir ce que l'élève verra » (PC), « Vue élève » et « Partager la fiche » (mobile) | Omis (F6-Q5) ; « Imprimer la fiche » aussi sur mobile (F6-Q6). |
+| Mon établissement | `pages/school/classes/ClassForm.tsx`, `ClassTabs.tsx`, `AccessPanel.tsx` | Aucune gestion de classe ni changement de classe | Ajoutés sans maquette : « + Nouvelle classe », « Modifier / Supprimer la classe », « Changer de classe », « Retirer l'élève ». |
+| Mon établissement | `pages/school/establishment/StudentTable.tsx` | Ligne : un seul bouton | Le nom devient aussi un bouton (« {nom} : gérer l'accès ») qui ouvre le panneau de l'élève. |

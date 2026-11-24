@@ -120,6 +120,7 @@ src/
 | `/ecole/intervenants` | connecté, validé, rôle SCHOOL | Intervenants disponibles (`?zone=`, `secteur=`, `format=`, `q=`) |
 | `/ecole/intervenants/{id}/demande` | connecté, validé, rôle SCHOOL | Demander une rencontre |
 | `/ecole/rencontres` | connecté, validé, rôle SCHOOL | Mes rencontres (`?mois=AAAA-MM`, `rencontre={id}`) |
+| `/ecole/etablissement` | connecté, validé, rôle SCHOOL | Mon établissement : classes, élèves, fiches d'accès (`?classe={id}`) |
 | `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
 
 ## Règles de session

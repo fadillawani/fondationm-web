@@ -3,6 +3,7 @@ import { api, unwrap } from '../../api/client'
 import { invalidResponseError } from '../../api/errors'
 import { FETCH_PAGE_SIZE, fetchAllPages } from '../../api/paging'
 import { asRecord, integer, oneOf, recordList, text, textList } from '../../api/wire'
+import { normalizeName } from '../../lib/normalize'
 import { SECTORS, type Sector } from '../../lib/referenceData'
 
 export type SlotFormats = 'IN_PERSON' | 'ONLINE' | 'BOTH'
@@ -147,24 +148,20 @@ export function useDirectory(filter: DirectoryFilter, enabled = true) {
   return useQuery({ ...directoryQuery(filter), enabled })
 }
 
-/** Jusqu'à 4 intervenants d'une ville, et leur nombre total. */
-export function useCityPeople(city: string | null, country: string) {
-  return useQuery({
-    queryKey: [...SCHOOL_KEY, 'speakers', 'ville', city, country],
-    enabled: city !== null,
-    queryFn: async () => {
-      const record = asRecord(
-        await unwrap(
-          api.GET('/api/school/speakers', {
-            params: { query: { city: city ?? '', ...(country ? { country } : {}), page: 0, size: 4 } },
-          }),
-        ),
-      )
-      if (record === null) throw invalidResponseError()
-      const items = recordList(record, 'content').flatMap((item) => readSpeakerSummary(item) ?? [])
-      return { items, total: integer(record, 'totalElements') ?? items.length }
-    },
-  })
+/**
+ * Nombre d'intervenants par ville parmi ceux réellement chargés (chiffres de la carte sous filtres) : villes
+ * comparées sans casse ni accents, pays compris s'il est fourni ; ordre décroissant puis alphabétique.
+ */
+export function countByCity(speakers: readonly SpeakerSummary[]): CityCount[] {
+  const groups = new Map<string, CityCount>()
+  for (const speaker of speakers) {
+    if (!speaker.city) continue
+    const key = `${normalizeName(speaker.city)}|${normalizeName(speaker.country)}`
+    const entry = groups.get(key)
+    if (entry) entry.count += 1
+    else groups.set(key, { city: speaker.city, country: speaker.country, count: 1 })
+  }
+  return [...groups.values()].toSorted((a, b) => b.count - a.count || a.city.localeCompare(b.city, 'fr'))
 }
 
 export function useSpeakerStats() {

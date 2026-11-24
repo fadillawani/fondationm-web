@@ -68,3 +68,10 @@
     background-color: rgb(27 31 59 / 0.5);
   }
 }
+
+/* Impression des fiches d'accès (« Mon établissement ») : seules les fiches sont imprimées. */
+@media print {
+  body.impression-fiches #root {
+    display: none;
+  }
+}
