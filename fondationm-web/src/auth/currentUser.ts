@@ -1,34 +1,17 @@
 import { invalidResponseError } from '../api/errors'
 import type { components } from '../api/schema'
-import type { SchoolType, Sector } from '../lib/referenceData'
+import { asRecord, oneOf, text, type WireRecord } from '../api/wire'
+import { profileName, readSchoolDetails, readSpeakerDetails, type ProfileDetails } from '../lib/profiles'
+
+export type { SchoolDetails, SpeakerDetails } from '../lib/profiles'
 
 type MeResponse = components['schemas']['MeResponse']
-type Profile = NonNullable<MeResponse['profile']>
 
 export type Role = NonNullable<MeResponse['role']>
 export type AccountStatus = NonNullable<MeResponse['status']>
 
-export interface SchoolDetails {
-  kind: 'school'
-  schoolName: string
-  schoolType: SchoolType | null
-  city: string
-  country: string
-  referentRole: string
-  phone: string
-}
-
-export interface SpeakerDetails {
-  kind: 'speaker'
-  fullName: string
-  jobTitle: string
-  organization: string
-  sector: Sector | null
-  city: string
-  country: string
-  phone: string
-  skills: string[]
-}
+export const ROLES = ['SCHOOL', 'SPEAKER', 'FOUNDATION', 'DONOR', 'STUDENT'] as const satisfies readonly Role[]
+export const STATUSES = ['PENDING', 'VALIDATED', 'REJECTED'] as const satisfies readonly AccountStatus[]
 
 export interface CurrentUser {
   id: string
@@ -39,66 +22,41 @@ export interface CurrentUser {
   mustChangePassword: boolean
   createdAt: string | null
   displayName: string
-  details: SchoolDetails | SpeakerDetails | null
+  details: ProfileDetails | null
 }
 
-function displayNameOf(me: MeResponse): string {
-  const profile = me.profile
-  if (profile !== undefined) {
-    if ('schoolName' in profile && profile.schoolName) return profile.schoolName
-    if ('fullName' in profile && profile.fullName) return profile.fullName
-    if ('firstName' in profile || 'lastName' in profile) {
-      const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
-      if (name) return name
-    }
-    if ('name' in profile && profile.name) return profile.name
-  }
-  return me.email ?? ''
-}
-
-function detailsOf(role: Role, profile: Profile | undefined): SchoolDetails | SpeakerDetails | null {
-  if (profile === undefined) return null
-  if (role === 'SCHOOL' && 'schoolName' in profile) {
-    return {
-      kind: 'school',
-      schoolName: profile.schoolName ?? '',
-      schoolType: profile.schoolType ?? null,
-      city: profile.city ?? '',
-      country: profile.country ?? '',
-      referentRole: profile.referentRole ?? '',
-      phone: profile.phone ?? '',
-    }
-  }
-  if (role === 'SPEAKER' && 'fullName' in profile) {
-    return {
-      kind: 'speaker',
-      fullName: profile.fullName ?? '',
-      jobTitle: profile.jobTitle ?? '',
-      organization: profile.organization ?? '',
-      sector: profile.sector ?? null,
-      city: profile.city ?? '',
-      country: profile.country ?? '',
-      phone: profile.phone ?? '',
-      skills: profile.skills ?? [],
-    }
-  }
+/*
+ * La réponse de GET /api/me est lue comme une donnée non fiable (voir api/wire.ts) : le backend envoie
+ * `profile: null` pour la Fondation, `rejectionReason: null` hors refus… Seuls id, role et status sont
+ * indispensables.
+ */
+function detailsOf(role: Role, profile: WireRecord | null): ProfileDetails | null {
+  if (profile === null) return null
+  if (role === 'SCHOOL') return readSchoolDetails(profile)
+  if (role === 'SPEAKER') return readSpeakerDetails(profile)
   return null
 }
 
-export function toCurrentUser(me: MeResponse | undefined): CurrentUser {
-  if (me?.id === undefined || me.role === undefined || me.status === undefined) {
+export function toCurrentUser(me: unknown): CurrentUser {
+  const record = asRecord(me)
+  const id = record === null ? null : text(record, 'id')
+  const role = record === null ? null : oneOf(ROLES, text(record, 'role'))
+  const status = record === null ? null : oneOf(STATUSES, text(record, 'status'))
+  if (record === null || id === null || role === null || status === null) {
     throw invalidResponseError()
   }
+  const email = text(record, 'email') ?? ''
+  const profile = asRecord(record.profile)
   return {
-    id: me.id,
-    email: me.email ?? '',
-    role: me.role,
-    status: me.status,
-    rejectionReason: me.rejectionReason ?? null,
-    mustChangePassword: me.mustChangePassword === true,
-    createdAt: me.createdAt ?? null,
-    displayName: displayNameOf(me),
-    details: detailsOf(me.role, me.profile),
+    id,
+    email,
+    role,
+    status,
+    rejectionReason: text(record, 'rejectionReason'),
+    mustChangePassword: record.mustChangePassword === true,
+    createdAt: text(record, 'createdAt'),
+    displayName: profileName(profile) ?? email,
+    details: detailsOf(role, profile),
   }
 }
 

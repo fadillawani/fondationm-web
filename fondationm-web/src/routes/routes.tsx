@@ -1,8 +1,9 @@
-import type { RouteObject } from 'react-router'
+import { Navigate, type RouteObject } from 'react-router'
 import type { Role } from '../auth/currentUser'
 import { PATHS, ROLE_HOME } from '../auth/roles'
 import { AppLayout } from '../components/layout/AppLayout'
 import { RootLayout } from '../components/layout/RootLayout'
+import { AccountsPage } from '../pages/foundation/AccountsPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { MustChangePasswordPage } from '../pages/MustChangePasswordPage'
@@ -15,6 +16,17 @@ import { RejectedAccountPage } from '../pages/RejectedAccountPage'
 import { GuestOnly, HomeRedirect, RequireAuth, RequireDestination, RequireRole } from './guards'
 
 const ROLES: readonly Role[] = ['SCHOOL', 'SPEAKER', 'FOUNDATION', 'DONOR', 'STUDENT']
+
+function rolePages(role: Role): RouteObject[] {
+  if (role === 'FOUNDATION') {
+    return [
+      // Le tableau de bord viendra plus tard : l'accueil de la Fondation ouvre les comptes à valider.
+      { path: ROLE_HOME.FOUNDATION, element: <Navigate to={PATHS.foundationAccounts} replace /> },
+      { path: PATHS.foundationAccounts, element: <AccountsPage /> },
+    ]
+  }
+  return [{ path: ROLE_HOME[role], element: <HomePage /> }]
+}
 
 export const routes: RouteObject[] = [
   {
@@ -62,7 +74,7 @@ export const routes: RouteObject[] = [
               children: [
                 {
                   element: <AppLayout />,
-                  children: [{ path: ROLE_HOME[role], element: <HomePage /> }],
+                  children: rolePages(role),
                 },
               ],
             }),

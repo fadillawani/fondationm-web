@@ -8,6 +8,7 @@ export const PATHS = {
   pending: '/compte-en-attente',
   rejected: '/compte-refuse',
   mustChangePassword: '/mot-de-passe-obligatoire',
+  foundationAccounts: '/fondation/comptes',
 } as const
 
 export const ROLE_HOME: Record<Role, string> = {
@@ -26,13 +27,39 @@ export const ROLE_LABEL: Record<Role, string> = {
   STUDENT: 'Élève',
 }
 
+export type NavIcon = 'home' | 'dashboard' | 'accounts' | 'requests' | 'meetings' | 'feedbacks' | 'donors'
+
 export interface NavItem {
-  to: string
   label: string
+  icon: NavIcon
+  /** Absent : entrée affichée mais désactivée (« Bientôt »). */
+  to?: string
+  /** Pastille de compteur alimentée par la mise en page. */
+  badge?: 'pendingAccounts'
 }
 
+const FOUNDATION_NAV: NavItem[] = [
+  { label: 'Tableau de bord', icon: 'dashboard' },
+  { label: 'Comptes à valider', icon: 'accounts', to: PATHS.foundationAccounts, badge: 'pendingAccounts' },
+  { label: 'Demandes de rencontre', icon: 'requests' },
+  { label: 'Rencontres', icon: 'meetings' },
+  { label: "Retours d'expérience", icon: 'feedbacks' },
+  { label: 'Requêtes donateurs', icon: 'donors' },
+]
+
 export function navItemsFor(role: Role): NavItem[] {
-  return [{ to: ROLE_HOME[role], label: 'Accueil' }]
+  if (role === 'FOUNDATION') return FOUNDATION_NAV
+  return [{ to: ROLE_HOME[role], label: 'Accueil', icon: 'home' }]
+}
+
+/** Sous-titre du logo dans la barre latérale. */
+export const ROLE_TAGLINE: Partial<Record<Role, string>> = {
+  FOUNDATION: 'Pilotage du programme',
+}
+
+/** Nom de la carte utilisateur : la Fondation n'a pas de profil (profile: null). */
+export function accountCardName(user: CurrentUser): string {
+  return user.role === 'FOUNDATION' ? 'Fondation M' : user.displayName
 }
 
 export function destinationFor(user: CurrentUser): string {

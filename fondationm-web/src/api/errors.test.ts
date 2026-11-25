@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   ApiError,
+  NetworkFailureError,
   RequestTimeoutError,
   errorFromException,
   errorFromResponse,
@@ -58,8 +59,14 @@ describe('errorFromException', () => {
     expect(errorFromException(new RequestTimeoutError()).code).toBe('TIMEOUT')
   })
 
-  it('convertit une panne réseau en NETWORK_ERROR', () => {
-    expect(errorFromException(new TypeError('Failed to fetch')).code).toBe('NETWORK_ERROR')
+  it('convertit un échec de fetch (aucune réponse) en NETWORK_ERROR', () => {
+    expect(errorFromException(new NetworkFailureError()).code).toBe('NETWORK_ERROR')
+  })
+
+  it('ne confond pas une exception interne avec une panne réseau', () => {
+    const error = errorFromException(new TypeError("Cannot use 'in' operator to search for 'schoolName' in null"))
+    expect(error.code).toBe('UNEXPECTED_ERROR')
+    expect(errorMessage(error)).toBe("Une erreur inattendue s'est produite. Réessayez.")
   })
 
   it('laisse passer une ApiError telle quelle', () => {
@@ -100,7 +107,7 @@ describe('errorMessage', () => {
 
 describe('isRetryable', () => {
   it('propose de réessayer pour les pannes réseau, délais et erreurs serveur seulement', () => {
-    expect(isRetryable(new TypeError('Failed to fetch'))).toBe(true)
+    expect(isRetryable(new NetworkFailureError())).toBe(true)
     expect(isRetryable(new RequestTimeoutError())).toBe(true)
     expect(isRetryable(errorFromResponse(response(502), null))).toBe(true)
     expect(isRetryable(errorFromResponse(response(401), { code: 'INVALID_CREDENTIALS' }))).toBe(false)
