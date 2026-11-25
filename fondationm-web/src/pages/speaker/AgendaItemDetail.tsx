@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { errorFromException, errorMessage } from '../../api/errors'
-import { PATHS } from '../../auth/roles'
+import { PATHS, feedbackFormPath } from '../../auth/roles'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
@@ -162,6 +162,14 @@ function MeetingDetail({ item, meeting }: { item: AgendaItem; meeting: Meeting }
           {closedByText(meeting) && <span className="font-black">{closedByText(meeting)}</span>}
           {meeting.reason && <span>{meeting.reason}</span>}
         </div>
+      )}
+      {meeting.status === 'COMPLETED' && (
+        <Link
+          to={feedbackFormPath('speaker', meeting.id)}
+          className="inline-flex min-h-[46px] items-center justify-center self-start rounded-[14px] bg-terra px-4 text-sm font-black text-white"
+        >
+          Mon retour d'expérience
+        </Link>
       )}
       {meeting.message && (
         <section aria-label="Le mot de l'école" className="flex flex-col gap-1 rounded-[14px] bg-canvas px-3.5 py-3">

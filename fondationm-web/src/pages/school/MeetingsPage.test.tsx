@@ -85,15 +85,14 @@ describe('Mes rencontres', () => {
     expect(await detail().findByText('En classe · CDI, bâtiment B')).toBeInTheDocument()
   })
 
-  it('invite à partager le retour d’une rencontre terminée (bientôt)', async () => {
+  it('invite à partager le retour d’une rencontre terminée', async () => {
     setupMeetings()
     renderApp('/ecole/rencontres', { token: true })
 
     const banner = await screen.findByRole('status', { name: 'Rencontre terminée' })
     expect(banner).toHaveTextContent('Votre rencontre avec Aminata Ba est terminée.')
     expect(banner).toHaveTextContent('Comment s\'est-elle passée pour vous et vos Terminale L2 ?')
-    expect(within(banner).getByText('Partager mon retour')).toHaveTextContent('Bientôt')
-    expect(within(banner).queryByRole('link')).not.toBeInTheDocument()
+    expect(within(banner).getByRole('link', { name: 'Partager mon retour' })).toHaveAttribute('href', `/ecole/retours/${COMPLETED_TO_WRITE.id}`)
   })
 
   it('affiche le calendrier du mois, la légende et navigue entre les mois', async () => {
@@ -109,7 +108,7 @@ describe('Mes rencontres', () => {
     expect(grid.getByRole('button', { name: 'Fatou, 15h00, Refusée' })).toBeInTheDocument()
     expect(grid.getByRole('button', { name: 'Aminata, 14h00, Réalisée, passée' })).toBeInTheDocument()
     expect(grid.getByRole('button', { name: 'Moussa, 16h00, Annulée, passée' })).toBeInTheDocument()
-    expect(grid.getByText('Partager mon retour · Bientôt')).toBeInTheDocument()
+    expect(await grid.findByRole('link', { name: 'Partager mon retour avec Aminata Ba' })).toHaveAttribute('href', `/ecole/retours/${COMPLETED_TO_WRITE.id}`)
     expect(grid.getByText('24').closest('td')).toHaveAttribute('aria-current', 'date')
 
     const legend = within(screen.getByRole('list', { name: 'Légende' }))
@@ -165,7 +164,7 @@ describe('Mes rencontres', () => {
     await calendar()
     expect(detail().getByText('Comment cela s’est-il passé ?')).toBeInTheDocument()
     expect(detail().getByText("Retour d'expérience").nextElementSibling).toHaveTextContent('À rédiger')
-    expect(detail().getByText('Partager votre retour d’expérience')).toHaveTextContent('Bientôt')
+    expect(detail().getByRole('link', { name: 'Partager votre retour d’expérience' })).toHaveAttribute('href', `/ecole/retours/${COMPLETED_TO_WRITE.id}`)
 
     // Rencontre d'octobre ouverte par l'URL : le calendrier s'ouvre sur son mois.
     await user.click(screen.getByRole('button', { name: 'Afficher les rencontres passées' }))
@@ -173,6 +172,7 @@ describe('Mes rencontres', () => {
     expect(await calendar('Octobre 2026')).toBeTruthy()
     expect(detail().getByText('Une belle rencontre')).toBeInTheDocument()
     expect(detail().getByText("Retour d'expérience").nextElementSibling).toHaveTextContent('Validé')
+    expect(detail().getByRole('link', { name: 'Lire mon retour' })).toHaveAttribute('href', `/ecole/retours/${COMPLETED_PUBLISHED.id}`)
   })
 
   it('ouvre le mois de la rencontre demandée dans l’URL', async () => {

@@ -1,5 +1,5 @@
 # État du frontend — Fondation M
-Dernière mise à jour : 25 novembre 2026 — lot F8 (« Tableau de bord » et « Requêtes donateurs » de la Fondation).
+Dernière mise à jour : 25 novembre 2026 — lot F9 (« Retours d'expérience » : école, intervenant, Fondation).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 ## Avancement
@@ -19,10 +19,11 @@ Dernière mise à jour : 25 novembre 2026 — lot F8 (« Tableau de bord » et �
 | F6.1 | Rencontres uniquement en classe : drapeau `ONLINE_MEETINGS_ENABLED`, aucun choix ni envoi « en ligne » | Terminé |
 | F7  | Fondation : « Demandes de rencontre » (avis en parallèle de l'intervenant) et « Rencontres » (calendrier, Réalisée, Annulée) | Terminé |
 | F8  | Fondation : « Tableau de bord » (À faire, indicateurs, rencontres par mois et statut) et « Requêtes donateurs » (réponses, comptes donateurs) | Terminé |
-| F9+ | Autres écrans métier (retours d'expérience, espace élève, espace donateur…) | À faire  |
+| F9  | Retours d'expérience : formulaires école (W1-E6) et intervenant (W2-E10), « Mon impact » réduit, validation par la Fondation (W3-retours) | Terminé |
+| F10+ | Autres écrans métier (« Mon impact » complet, espace élève, espace donateur…) | À faire  |
 
-Vérifications au moment de la livraison de F8 : `npm run build`, `npm run lint` et `npm test`
-(270 tests, deux passages, tests de F6 compris) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F9 : `npm run build`, `npm run lint` et `npm test`
+(311 tests dans 38 fichiers, deux passages) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -49,6 +50,72 @@ Vérifications au moment de la livraison de F8 : `npm run build`, `npm run lint`
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F9 livre — « Retours d'expérience » (W1-E6, W2-E10, W2-impact, W3-retours)
+
+- **Format du commentaire** (`pages/feedback/feedbackFormat.ts`, décision 87) : le contrat n'a qu'un `comment` libre de
+  2000 caractères, lu tel quel par les donateurs. Les champs des maquettes y sont rangés en blocs étiquetés lisibles
+  (`[Classe] 35 présents sur 38 · 19 filles · 16 garçons · âge moyen 17 ans · durée 1 h 30`, `[Les élèves étaient] …`,
+  `[Émotions] …`, `[Moment marquant] …`, `[Un échange] …`, `[Ce que j'en retiens] …`), séparés par une ligne vide.
+  Parseur défensif : tout commentaire hors format est lu en texte brut, rien n'est perdu.
+- **École, `/ecole/retours/{meetingId}`** (W1-E6) : fil d'Ariane, « Comment s'est passée la rencontre avec {prénom} ? »,
+  étapes « À rédiger / Soumis / Validé », « La classe que vous avez réunie » (présents, filles, garçons, âge moyen, durée
+  préremplie avec la durée du créneau) et ligne de synthèse calculée, émotions (9 pastilles), trois récits, encart « La
+  rencontre », « Pourquoi votre récit compte », « Mes autres retours ». **Aucune note envoyée.**
+- **Intervenant, `/intervenant/retours/{meetingId}`** (W2-E10) : « Qu'avez-vous vécu avec les {classe} de {lieu} ? »,
+  « Dans l'ensemble, cette rencontre… » (5 boutons radio natifs, Difficile → 1 … Inoubliable → 5, aucun choisi par
+  défaut), « Les élèves étaient… » (6 pastilles), émotions (10 pastilles), trois récits, « Que devient votre récit ? ».
+- **Commun aux deux formulaires** : compteurs « n / 500 » par récit et « N / 2000 caractères au total » ; sous les
+  récits, la ligne « Ce texte sera lu par les donateurs après validation de la Fondation. Évitez les noms et prénoms des
+  élèves. » ; aucun exemple ni texte indicatif ne contient de prénom. Résumé des erreurs (`role="alert"`, focus) ;
+  « Partager mon retour » (POST) puis « Mettre à jour mon retour » (PATCH) tant que le retour est « Soumis » ; retour
+  validé en lecture seule ; « Finir plus tard » ; garde de sortie « Quitter sans partager ? ». « Un mot pour {prénom} /
+  pour la classe » et « Une remarque pour la Fondation M » sont **retirés** (décision 92).
+- **Cas sans formulaire** : rencontre inconnue (« Rencontre introuvable ») ou pas encore réalisée (« Pas encore de retour
+  possible ») ; un lien ramène à la liste.
+- **`/ecole/retours`** (sans maquette) : « À rédiger » d'abord, puis « Soumis » et « Validé », avec « Partager mon retour »,
+  « Modifier mon retour » ou « Lire mon retour ». La navigation « Retours d'expérience » de l'école est active.
+- **`/intervenant/impact`** (W2-impact réduit) : seulement « Mes retours d'expérience · Une rencontre, une histoire »
+  (rencontres « À rédiger » avec « Raconter cette rencontre », récits repliés « Lire tout mon récit » / « Replier mon
+  récit », `aria-expanded`). La navigation « Mon impact » est active. Les chiffres, thèmes et émotions viendront dans un lot
+  ultérieur (point ouvert 46).
+- **Fondation, `/fondation/retours`** (W3-retours) : onglets « À valider · N » / « Validés » / « Tous » (flèches du
+  clavier), liste des rencontres (« École · {état} », « Intervenant · {état} »), détail avec « Retour de l'école » et
+  « Retour de l'intervenant » relus par le parseur (chiffres, note par son libellé, pastilles, récits) ou en texte brut,
+  « Ce retour n'a pas encore été écrit. » pour un côté absent. « Valider et partager aux donateurs » ouvre « Publier ce
+  retour ? Il sera visible des donateurs et ne pourra plus être retiré. » (« Annuler » focalisé, « Publier »), puis
+  « Validé ! Ce retour apparaît maintenant dans le rapport d'impact des donateurs. » (`aria-live`). Mobile : liste puis
+  détail plein écran, choix « Retour de l'école / de l'intervenant » (`?partie=`). Pastille de navigation = nombre de
+  retours SUBMITTED.
+- **Liens activés** (anciens « Bientôt ») : bandeau, cellule du calendrier et détail de « Mes rencontres » (F5), plus
+  « Voir ou modifier mon retour » / « Lire mon retour » ; « Voir les retours d'expérience » du panneau des rencontres (F7) ;
+  carte « retours à valider » et « Lire les retours » du tableau de bord (F8), dont la citation est désormais le moment
+  marquant relu par le parseur ; « Mon retour d'expérience » sur une rencontre réalisée de l'agenda de l'intervenant.
+
+### Fichiers de F9
+
+- **Nouveaux** :
+  - `src/pages/feedback/` : `feedbackFormat.ts`, `feedbackForm.ts`, `feedbackDraft.ts`, `feedbackData.ts`,
+    `feedbackText.ts`, `FeedbackParts.tsx`, `FeedbackContent.tsx`, `FeedbackEditor.tsx`, `FeedbackFormPage.tsx` ;
+    tests `feedbackFormat.test.ts`, `feedbackForm.test.ts`, `feedbackDraft.test.ts`, `SchoolFeedbackPage.test.tsx`,
+    `SpeakerFeedbackPage.test.tsx`.
+  - `src/pages/foundation/feedbacks/` : `FeedbacksPage.tsx`, `FeedbackPairViews.tsx`, `foundationFeedbacksData.ts`,
+    `foundationFeedbackModel.ts` ; tests `FeedbacksPage.test.tsx`, `foundationFeedbackModel.test.ts`.
+  - `src/pages/school/feedbacks/SchoolFeedbacksPage.tsx`, `src/pages/speaker/ImpactPage.tsx`,
+    `src/test/feedbackFixtures.ts`.
+- **Modifiés** :
+  - Socle : `src/auth/roles.ts` (chemins, entrées de navigation, pastille `feedbacksToValidate`), `src/auth/hooks.ts`
+    (brouillons effacés en fin de session), `src/nav/badges.ts`, `src/routes/routes.tsx`, `src/components/ui/Modal.tsx`
+    (`initialFocus`), `src/components/access/LeaveGuardModal.tsx` (titre et bouton configurables, textes de F6/F8
+    inchangés par défaut).
+  - École (F5) : `src/pages/school/meetingsData.ts` (`useFeedbackStates` sur les requêtes partagées),
+    `meetingText.ts`, `MeetingBanners.tsx`, `MeetingsCalendar.tsx`, `MeetingDetail.tsx`.
+  - Intervenant : `src/pages/speaker/AgendaItemDetail.tsx`.
+  - Fondation : `src/pages/foundation/meetings/MeetingPanel.tsx` (F7), `src/pages/foundation/dashboard/dashboardData.ts`,
+    `DashboardBlocks.tsx`, `DashboardPage.tsx` (F8).
+  - Tests mis à jour (anciens « Bientôt ») : `AccountsPage.test.tsx`, `SpeakersPage.test.tsx`, `AgendaPage.test.tsx`,
+    `school/MeetingsPage.test.tsx`, `foundation/meetings/MeetingsPage.test.tsx`, `DashboardPage.test.tsx`.
+  - Documentation : `docs/etat-frontend.md`, `fondationm-web/README.md`.
 
 ## Ce que F8 livre — « Tableau de bord » et « Requêtes donateurs » de la Fondation (W3-pilotage, W3-requetes)
 
@@ -876,6 +943,45 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 86. **Comptes donateurs** : consultations en liste principale, e-mail joint par identifiant seulement s'il correspond ;
     création et nouveau code hors TanStack Query, code dans l'état de l'onglet (gardé monté), fiche imprimable partagée
     avec F6 (`components/access/`).
+87. **Format du `comment`** : blocs `[Étiquette] contenu` séparés par une ligne vide ; une étiquette n'est reconnue qu'en
+    début de ligne. Une ligne de récit qui commence par une étiquette connue (précédée ou non d'espaces) reçoit une
+    espace de plus à l'écriture, retirée à la lecture : l'aller-retour est exact. Texte avant la première étiquette,
+    étiquette inconnue ou en double, ligne « Classe » ou de pastilles illisible : lecture en texte brut. Un commentaire
+    brut se modifie d'un seul tenant (« Votre récit », 2000 caractères), sans mélange avec les rubriques.
+88. **Note** : intervenant obligatoire, 5 boutons radio natifs, aucune valeur choisie par défaut (la maquette présélectionne
+    « Très bien ») ; affichée par son libellé (Difficile … Inoubliable). **L'école n'envoie pas de note** (pas de maquette).
+89. **`rating` envoyé en chaîne** (`{"rating":"4","comment":…}`), comme le type généré du contrat (`type: string`,
+    minimum 1, maximum 5) ; vérifié en test.
+90. **États et lecture seule** : l'état vient des listes (`/feedbacks` et `/feedbacks/awaiting`, toutes les pages), pas
+    d'un GET individuel dont le 404 n'est pas documenté. SUBMITTED : PATCH (« Mettre à jour mon retour ») ; PUBLISHED :
+    lecture seule, aucun PATCH tenté.
+91. **Brouillon** : `sessionStorage`, clé `fondationm.retour.{compte}.{rencontre}`, valeurs du formulaire seulement
+    (jamais de jeton) ; « Finir plus tard » l'enregistre et revient à la liste ; il est repris à l'ouverture (« Brouillon
+    repris : il est gardé sur cet appareil, dans cet onglet. »), effacé après un envoi réussi, à la lecture d'un retour
+    validé et à toute fin de session (déconnexion ou session expirée). Garde de sortie tant que le formulaire diffère de
+    son état de départ.
+92. **Confidentialité** : « Un mot pour {prénom} / pour la classe » et « Une remarque pour la Fondation M » sont retirés
+    sans « Bientôt » (aucun canal dans le contrat ; le `comment` est lu par les donateurs). Ligne d'aide « vie privée »
+    visible sous les récits ; aucun prénom dans les exemples ni les textes indicatifs.
+93. **POST en double** : si le POST échoue sans erreur de champ, la liste des retours est relue ; si un retour SUBMITTED
+    existe pour la rencontre, un seul PATCH part avec le même corps ; sinon l'erreur lue dans le corps est affichée (y
+    compris au-dessus de la lecture seule si le retour s'avère déjà publié).
+94. **Publication confirmée** : fenêtre « Publier ce retour ? » (« Il sera visible des donateurs et ne pourra plus être
+    retiré. »), focus sur « Annuler » à l'ouverture (`Modal.initialFocus`), boutons « Annuler » / « Publier ».
+95. **Retours de la Fondation** : un seul chargement de `GET /api/foundation/feedbacks` (toutes les pages), regroupé par
+    `meeting.id` (sans les rencontres : `FoundationFeedbackResponse` porte école, classe, intervenant et créneau). « À
+    valider » = au moins un SUBMITTED ; « À valider · N » et la pastille comptent les retours SUBMITTED. La rencontre est
+    fixée dans l'URL avant la publication et lue parmi toutes les rencontres : elle reste affichée après avoir quitté
+    l'onglet. Le retour publié renvoyé remplace celui de la liste jusqu'au rechargement (non attendu) ; tableau de bord et
+    cases de « Rencontres » rechargés.
+96. **Pages sans maquette ou réduites** : `/ecole/retours` (liste « À rédiger », « Soumis », « Validé ») ;
+    `/intervenant/impact` limité à « Mes retours d'expérience ».
+97. **Règles du formulaire** : école = « Présents » (1 à l'effectif de la classe) + au moins un récit ; filles et garçons
+    facultatifs mais ensemble, de somme égale aux présents ; âge moyen entier de 8 à 30 ans ; durée par quarts d'heure de
+    15 min à 4 h (« Non précisée » possible). Intervenant = note + au moins un récit. Émotions facultatives. 500 caractères
+    par récit (`maxLength`), 2000 au total : au-delà, envoi bloqué, rien n'est tronqué.
+98. **Citation du tableau de bord** : le moment marquant du retour publié le plus récent (sinon un autre récit, sinon le
+    texte brut), pour ne jamais citer les étiquettes.
 
 ## Écarts
 
@@ -905,7 +1011,7 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | Filière de la classe | Absente de `ClassInfo` (`title`, `studentCount`) | Non affichée |
 | « Dans votre zone » | Aucun champ | Calculé : ville et pays de l'école = ceux de l'intervenant |
 | Format du créneau dans une rencontre | `SpeakerMeetingResponse` ne donne que le format choisi (`format`) et `place` | Format choisi et lieu affichés |
-| Invite « Partager mon retour » | Pas d'indicateur dans les rencontres ; seulement `/api/speaker/feedbacks/awaiting` | Omise (décision 33) |
+| Invite « Partager mon retour » (agenda de l'intervenant) | Pas d'indicateur dans les rencontres ; seulement `/api/speaker/feedbacks/awaiting` | Bandeau toujours omis (décision 33) ; lien « Mon retour d'expérience » sur une rencontre réalisée et rencontres à raconter dans « Mon impact » (F9) |
 | Agenda d'un mois donné | Pas de filtre par période sur les créneaux ni sur les rencontres | Toutes les pages chargées une fois (point ouvert 9) |
 | Créneaux libres passés | `includePast=false` par défaut | Non chargés ; les rencontres passées restent visibles |
 | Filtre « Date » de l'annuaire (téléphone) | Aucun filtre par date sur `GET /api/school/speakers` | Bouton omis |
@@ -926,7 +1032,7 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | Libellé « SÉNÉGAL » de la carte (`#B8AE98` sur `#F7F3EA`) | — | Contraste 1,99:1, couleur conservée (point ouvert 16) |
 | Cases « Intervenant » / « Fondation M » (W1-E5) | Pas de décision par partie dans `SchoolMeetingResponse` | Déduites du statut (décision 50) ; « Presque confirmée » (intervenant d'accord, Fondation en attente) impossible |
 | Métier de l'intervenant (W1-E5) | Absent de `SpeakerInfo` | Lu dans la fiche `GET /api/school/speakers/{id}` (décision 49), omis si 404 |
-| « Partager mon retour » (W1-E5, bandeau, cellule, détail) | « Retours d'expérience » pas encore livré | Affiché « Bientôt », non cliquable (cellule : « Partager mon retour · Bientôt ») |
+| « Partager mon retour » (W1-E5, bandeau, cellule, détail) | — | Liens vers `/ecole/retours/{id}` depuis F9 |
 | Atténuation des rencontres passées (`opacity: 0.8`) | — | Non appliquée : contraste 3,75 et 4,00 (décision 48) |
 | Liste « Passées » sur PC | Absente de la maquette PC | Ajoutée sous « À venir », repliable |
 | Lignes des listes mobiles (W1-E5) | Maquette mobile : « Mar 17 nov. · {classe} » sans l'heure | Même format que le PC, heure comprise |
@@ -944,6 +1050,18 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | « Bonjour Samirath » (W3-pilotage) | Compte Fondation sans profil | « Bonjour l'équipe » (point ouvert 35) |
 | « En cours », plusieurs messages, « Rouvrir », « Mécène depuis 2024 » (W3-requetes) | Un message, une réponse, OPEN / ANSWERED, `DonorInfo` = id + nom | Retirés (point ouvert 37) |
 | Code d'erreur « e-mail déjà utilisé » | Non documenté (aucun 409 ni code dans le contrat) | Règle de la décision 16. Code réellement observé : `EMAIL_ALREADY_USED` (HTTP 409, message « Cette adresse e-mail est déjà utilisée. ») |
+| Champs structurés des retours (classe, émotions, récits) | Un seul `comment` libre de 2000 caractères | Sérialisés en blocs étiquetés (décision 87) |
+| Note « Dans l'ensemble » de l'école | Aucune maquette ; `rating` facultatif | Non demandée ni envoyée : la note moyenne école des indicateurs restera « — » (point ouvert 44) |
+| `rating` de `CreateFeedbackRequest` / `UpdateFeedbackRequest` | Typé `string` avec minimum / maximum | Envoyé en chaîne `"4"` (décision 89, point ouvert 42) |
+| « Un mot pour {prénom} / pour la classe » (« transmis tel quel, avec votre prénom ») | Aucun canal de message | Retiré (décision 92, point ouvert 43) |
+| « Une remarque pour la Fondation M (facultatif) » | Aucun canal privé vers la Fondation | Retiré (décision 92, point ouvert 43) |
+| Auteur « Moussa Ndiaye, référent orientation », « Aïssatou Diop, maroquinière » (W3-retours) | Ni nom du référent ni métier dans `FoundationFeedbackResponse` | Nom de l'établissement ; nom complet de l'intervenant (point ouvert 47) |
+| « Envoyer un rappel bienveillant » (W3-retours) | Aucun point d'accès | Retiré, ainsi que « Un petit mot chaleureux aide souvent à le recevoir. » (point ouvert 49) |
+| Rencontre réalisée sans aucun retour (W3-retours) | La liste Fondation ne contient que des retours écrits | Non listée (point ouvert 45) |
+| « Âge moyen : 17 ans », « Durée : 1 h 30 » en texte libre (W1-E6) | — | Entier en années ; durée en liste par quarts d'heure (décision 97) |
+| Erreurs d'un retour (doublon, retour publié, rencontre non réalisée) | Aucune documentée | Lues dans le corps ; doublon traité par relecture puis PATCH (décision 93, point ouvert 41) |
+| Liste des retours de l'école (`/ecole/retours`) | — | Sans maquette (décision 96) |
+| « Mon impact » : chiffres, thèmes, émotions (W2-impact) | Aucune donnée d'impact de l'intervenant | Non livrés ; seule la section « Mes retours d'expérience » (point ouvert 46) |
 
 ## Points ouverts
 
@@ -1044,6 +1162,23 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     correspond pas.
 40. **Changement de mot de passe imposé à un donateur créé par la Fondation** à vérifier (`mustChangePassword`), comme le
     point 24 ; la note de la fiche ne promet rien.
+41. **Erreurs des retours non documentées** : réponse d'un PATCH sur un retour publié, d'un POST en double, d'un retour sur
+    une rencontre non réalisée. Le frontend ne tente pas de PATCH sur un retour publié et lit tout message dans le corps.
+42. **`rating` en chaîne** : à vérifier contre le vrai serveur, que le rating soit lu comme un entier. **Backend :
+    `type: integer` dans `CreateFeedbackRequest` et `UpdateFeedbackRequest`.**
+43. **Canal de message et canal privé vers la Fondation** absents : « Un mot pour… » et « Une remarque pour la Fondation
+    M » retirés. **Backend : un champ de message transmis à l'autre partie et une remarque privée, hors `comment`.**
+44. **Note moyenne école** : l'école n'envoie pas de note ; `averageRating.school` restera « — » au tableau de bord.
+45. **Rencontres réalisées sans retour** absentes de « Retours d'expérience » (Fondation) : il faudrait joindre les
+    rencontres COMPLETED. **Backend : une liste « attendus » côté Fondation.**
+46. **Lot « Mon impact » complet** (W2-impact) : élèves rencontrés, filles, heures, thèmes, émotions des retours, mot de
+    l'école. Les données manquent dans le contrat.
+47. **Auteur d'un retour** (nom et fonction du référent, métier de l'intervenant) absent de `FoundationFeedbackResponse`.
+48. **Texte non modéré lu par les donateurs** : malgré la ligne d'aide, un prénom d'élève peut être écrit ; la Fondation
+    publie sans pouvoir modifier. **Backend ou produit : modération ou refus à prévoir.**
+49. **Rappel bienveillant** à l'auteur d'un retour non écrit : aucun point d'accès.
+50. **Brouillons effacés à l'expiration de la session** (401) comme à la déconnexion : choix de confidentialité pour les
+    ordinateurs partagés ; un récit en cours non enregistré est perdu si la session expire.
 
 ## Écarts de design restants
 
@@ -1076,7 +1211,13 @@ attendue (maquette) et la raison.
 | Agenda (W2-E8) | `pages/speaker/SlotForm.tsx` | Heures proposées de 8h00 à 17h30 | Pas de 15 min de 0h00 à 23h45 (décision 28) : comportement inchangé. |
 | Agenda (W2-E8) | `pages/speaker/SlotForm.tsx`, `speakerText.ts` | Champ « Format » (« En classe », « En ligne », « En classe ou en ligne ») | Retiré volontairement (F6.1, décision 74) : rencontres en classe seulement ; BOTH affiché « En classe ». |
 | Demandes (W2-E9) | `pages/speaker/RequestDetail.tsx` | Fait « Format souhaité » | Retiré (toujours en classe), sauf demande ONLINE ancienne (décision 74). |
-| Agenda | `pages/speaker/AgendaItemDetail.tsx` | Ligne « Retour d'expérience » et bouton « Partager mon retour » d'une rencontre réalisée ; invite du bandeau | Demanderait `/api/speaker/feedbacks*` (décision 33) ; écran des retours non livré. |
+| Agenda | `pages/speaker/AgendaItemDetail.tsx` | Ligne « Retour d'expérience » et bouton « Partager mon retour » d'une rencontre réalisée ; invite du bandeau | Lien « Mon retour d'expérience » vers le formulaire (F9), sans état du retour ; bandeau omis (décision 33). |
+| Retour école (W1-E6 mobile) | `pages/feedback/FeedbackEditor.tsx` | Libellé « Présents » sur mobile | « Élèves présents » partout (un seul libellé accessible). |
+| Retour école (W1-E6) | `pages/feedback/FeedbackEditor.tsx` | Fil d'Ariane « Mes rencontres / Retour d'expérience · {nom} » | « Retours d'expérience / … » : la page de liste existe désormais. |
+| Retours (W1-E6, W2-E10) | `pages/feedback/FeedbackEditor.tsx` | Textes d'exemple dans les récits (prénoms d'élèves) | Champs vides, aides seulement (décision 92). |
+| Retour intervenant (W2-E10) | `routes/routes.tsx` | Fil « Mon impact / Retour d'expérience » | Formulaire sur `/intervenant/retours/{id}` (contrat validé) : l'entrée « Mon impact » n'y est pas surlignée. |
+| Retours (W3-retours) | `pages/foundation/feedbacks/FeedbacksPage.tsx` | Surtitre « E14 » | Code d'écran : « Rencontres racontées ». |
+| Retours (W3-retours) | `pages/foundation/feedbacks/FeedbackPairViews.tsx` | Accent orange `#EF7A0A` de la carte intervenant | Bande décorative seulement : blanc sur orange = 2,82:1, aucun texte dessus. |
 | Agenda | `pages/speaker/MonthGrid.tsx` | Pastille Confirmé / Réalisé « 10h00 · Thiès » seule | Seconde ligne d'état conservée (décision 59, accessibilité). |
 | Agenda | `pages/speaker/MonthGrid.tsx` | « + Créneau » seulement sur les jours à venir sans élément (hors aujourd'hui) | Publication possible aujourd'hui et sur un jour occupé (décision 28) : comportement inchangé. |
 | Demandes (W2-E9) | `pages/speaker/RequestDetail.tsx` | « Filière · élèves » | Filière absente de `ClassInfo` : « Élèves ». |

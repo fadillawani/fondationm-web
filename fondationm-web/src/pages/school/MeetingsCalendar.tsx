@@ -1,3 +1,5 @@
+import { Link } from 'react-router'
+import { feedbackFormPath } from '../../auth/roles'
 import { CompactMonth } from '../../components/calendar/CompactMonth'
 import { MonthNav } from '../../components/calendar/MonthNav'
 import { MonthTable } from '../../components/calendar/MonthTable'
@@ -72,9 +74,13 @@ export function MeetingsCalendar({ month, now, byDay, feedback, selectedId, onSe
                       {start ? clock(start) : ''} · {firstName(meeting.speakerName)}
                     </button>
                     {toWrite && (
-                      <span className="flex min-h-8 items-center justify-center rounded-[8px] border-2 border-terra bg-surface px-1 text-center text-[11px] font-black leading-tight text-terra">
-                        Partager mon retour · Bientôt
-                      </span>
+                      <Link
+                        to={feedbackFormPath('school', meeting.id)}
+                        className="flex min-h-8 items-center justify-center rounded-[8px] border-2 border-terra bg-surface px-1 text-center text-[11px] font-black leading-tight text-terra"
+                      >
+                        Partager mon retour{' '}
+                        <span className="sr-only">avec {meeting.speakerName}</span>
+                      </Link>
                     )}
                   </div>
                 )

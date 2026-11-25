@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { errorFromException } from '../../../api/errors'
-import { PATHS } from '../../../auth/roles'
+import { PATHS, foundationFeedbackPath } from '../../../auth/roles'
 import { Alert } from '../../../components/ui/Alert'
 import { ReasonForm } from '../../../components/ui/ReasonForm'
 import { cn } from '../../../lib/cn'
@@ -52,10 +52,9 @@ function FeedbackCases({ meetingId }: { meetingId: string }) {
           Réessayer
         </button>
       )}
-      <span className="inline-flex min-h-touch items-center gap-2 text-sm font-black text-ink">
+      <Link to={foundationFeedbackPath(meetingId)} className="inline-flex min-h-touch items-center self-start text-sm font-black text-indigo underline underline-offset-2">
         Voir les retours d'expérience
-        <span className="rounded-pill bg-canvas px-2 py-0.5 text-[11px] font-black text-muted">Bientôt</span>
-      </span>
+      </Link>
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { api, unwrap } from '../../../api/client'
 import { invalidResponseError } from '../../../api/errors'
 import { asRecord, integer, recordList, text } from '../../../api/wire'
 import { parseIso } from '../../../lib/dateTime'
+import { quoteOf } from '../../feedback/feedbackFormat'
 import { MEETING_STATUSES, type FoundationMeetingStatus } from '../meetings/foundationMeetingsData'
 import { periodQuery, type Period } from './dashboardModel'
 
@@ -78,7 +79,9 @@ export function useIndicators(period: Period | null) {
 }
 
 export interface Moment {
+  /** Récit cité (le moment marquant d'un retour structuré, sinon le texte brut). */
   comment: string
+  meetingId: string | null
   author: string
   context: string
   publishedAt: string | null
@@ -97,7 +100,7 @@ export function useLatestMoment() {
       )
       if (record === null) throw invalidResponseError()
       const moments = recordList(record, 'content').flatMap((entry): Moment[] => {
-        const comment = text(entry, 'comment')?.trim()
+        const comment = quoteOf(text(entry, 'comment'))?.trim()
         if (!comment || text(entry, 'status') !== 'PUBLISHED') return []
         const school = asRecord(entry.school)
         const speaker = asRecord(entry.speaker)
@@ -107,6 +110,7 @@ export function useLatestMoment() {
         return [
           {
             comment,
+            meetingId: text(asRecord(entry.meeting) ?? {}, 'id'),
             author: bySchool ? schoolName : speakerName,
             context: bySchool ? `après sa rencontre avec ${speakerName}` : `après sa rencontre au ${schoolName}`,
             publishedAt: text(entry, 'publishedAt'),

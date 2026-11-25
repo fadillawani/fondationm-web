@@ -64,7 +64,7 @@ describe('Espace Fondation — navigation', () => {
     expect(router.state.location.pathname).toBe('/fondation/tableau-de-bord')
   })
 
-  it('affiche les entrées actives, les entrées « Bientôt », le badge et la carte utilisateur', async () => {
+  it('affiche les entrées actives, le badge et la carte utilisateur', async () => {
     setup([schoolAccount(), otherSchool, speakerAccount()])
     renderApp('/fondation/comptes', { token: true })
 
@@ -77,8 +77,8 @@ describe('Espace Fondation — navigation', () => {
     expect(nav.getByRole('link', { name: /^Rencontres/ })).toHaveAttribute('href', '/fondation/rencontres')
     expect(nav.getByRole('link', { name: 'Tableau de bord' })).toHaveAttribute('href', '/fondation/tableau-de-bord')
     expect(nav.getByRole('link', { name: /^Requêtes donateurs/ })).toHaveAttribute('href', '/fondation/requetes')
-    expect(nav.queryByRole('link', { name: /Retours d'expérience/ })).not.toBeInTheDocument()
-    expect(nav.getByText("Retours d'expérience").closest('li')).toHaveTextContent('Bientôt')
+    expect(nav.getByRole('link', { name: /^Retours d'expérience/ })).toHaveAttribute('href', '/fondation/retours')
+    expect(nav.queryByText('Bientôt')).not.toBeInTheDocument()
     const [aside] = screen.getAllByRole('complementary')
     if (aside === undefined) throw new Error('Barre latérale absente')
     expect(within(aside).getByText('Pilotage du programme')).toBeInTheDocument()
@@ -97,7 +97,7 @@ describe('Espace Fondation — navigation', () => {
       'Comptes',
       'Demandes',
       'Rencontres',
-      'RetoursBientôt',
+      'Retours',
     ])
     expect(within(bottom).getByRole('link', { name: 'Comptes à valider' })).toHaveAttribute('href', '/fondation/comptes')
     expect(screen.queryByRole('button', { name: 'Plus' })).not.toBeInTheDocument()

@@ -123,7 +123,7 @@ export function DashboardPage() {
           detail: 'passées, encore « confirmées »',
           to: PATHS.foundationMeetings,
         },
-        { key: 'retours', count: snap.submittedFeedbacks, label: 'retours à valider', detail: 'avant partage aux donateurs' },
+        { key: 'retours', count: snap.submittedFeedbacks, label: 'retours à valider', detail: 'avant partage aux donateurs', to: PATHS.foundationFeedbacks },
         {
           key: 'requetes',
           count: snap.openDonorRequests,
