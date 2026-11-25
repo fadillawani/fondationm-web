@@ -118,7 +118,7 @@ export const DEFAULT_FOUNDATION_MEETINGS = [
   CANCELLED,
 ]
 
-type Handler = Parameters<typeof mockApi>[0][string]
+export type Handler = Parameters<typeof mockApi>[0][string]
 
 export interface FoundationMeetingsSetup {
   meetings?: FoundationMeetingJson[]

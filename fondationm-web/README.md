@@ -111,10 +111,12 @@ src/
 | `/compte-en-attente` | connecté, statut PENDING | Demande en cours de vérification |
 | `/compte-refuse` | connecté, statut REJECTED | Demande refusée et motif |
 | `/mot-de-passe-obligatoire` | connecté, `mustChangePassword` | Changement de mot de passe obligatoire |
-| `/fondation` | connecté, validé, rôle FOUNDATION | Redirige vers `/fondation/comptes` |
+| `/fondation` | connecté, validé, rôle FOUNDATION | Redirige vers `/fondation/tableau-de-bord` |
+| `/fondation/tableau-de-bord` | connecté, validé, rôle FOUNDATION | Tableau de bord (`?periode=trimestre\|annee`) |
 | `/fondation/comptes` | connecté, validé, rôle FOUNDATION | Comptes à valider (`?onglet=`, `type=`, `decision=`, `page=`, `compte=`) |
-| `/fondation/demandes` | connecté, validé, rôle FOUNDATION | Demandes de rencontre (`?onglet=a-traiter|confirmees|refusees|toutes`, `demande={id}`) |
+| `/fondation/demandes` | connecté, validé, rôle FOUNDATION | Demandes de rencontre (`?onglet=a-traiter\|confirmees\|refusees\|toutes`, `demande={id}`) |
 | `/fondation/rencontres` | connecté, validé, rôle FOUNDATION | Rencontres (`?mois=AAAA-MM`, `rencontre={id}`) |
+| `/fondation/requetes` | connecté, validé, rôle FOUNDATION | Requêtes donateurs et comptes donateurs (`?onglet=requetes\|donateurs`, `requete={id}`) |
 | `/intervenant` | connecté, validé, rôle SPEAKER | Redirige vers `/intervenant/agenda` |
 | `/intervenant/agenda` | connecté, validé, rôle SPEAKER | Mon agenda (`?mois=AAAA-MM`) |
 | `/intervenant/demandes` | connecté, validé, rôle SPEAKER | Demandes reçues (`?onglet=`, `page=`, `demande=`) |

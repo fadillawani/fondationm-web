@@ -225,8 +225,13 @@ const SCHOOL_HOME_DEFAULTS: Record<string, Handler> = {
   'GET /api/school/speakers': emptyPage,
   'GET /api/school/meetings': emptyPage,
   'GET /api/school/speakers/stats': () => jsonResponse(200, { total: 0, byCity: [], bySector: [] }),
-  // Pastilles de la navigation Fondation (F7).
+  // Pastilles de la navigation Fondation (F7, F8) et tableau de bord (F8).
   'GET /api/foundation/meetings': emptyPage,
+  'GET /api/foundation/donor-requests': emptyPage,
+  'GET /api/foundation/feedbacks': emptyPage,
+  'GET /api/foundation/donors': emptyPage,
+  'GET /api/foundation/donor-consultations': emptyPage,
+  'GET /api/foundation/indicators': () => jsonResponse(200, {}),
 }
 
 export function mockApi(handlers: Record<string, Handler>) {

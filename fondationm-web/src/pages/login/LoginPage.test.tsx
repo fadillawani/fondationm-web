@@ -170,9 +170,9 @@ describe('Connexion', () => {
 
     await fillLoginForm(user)
 
-    // /fondation redirige vers les comptes à valider (lot F2).
-    expect(await screen.findByRole('heading', { name: 'Comptes à valider' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/fondation/comptes')
+    // /fondation redirige vers le tableau de bord (lot F8).
+    expect(await screen.findByRole('heading', { level: 1, name: "Bonjour l'équipe" })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/fondation/tableau-de-bord')
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
