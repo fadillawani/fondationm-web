@@ -13,6 +13,8 @@ import { ImpactPage } from '../pages/speaker/ImpactPage'
 import { MeetingsPage as FoundationMeetingsPage } from '../pages/foundation/meetings/MeetingsPage'
 import { RequestsPage as FoundationRequestsPage } from '../pages/foundation/meetings/RequestsPage'
 import { AgendaPage } from '../pages/speaker/AgendaPage'
+import { ImpactPage as DonorImpactPage } from '../pages/donor/ImpactPage'
+import { RequestsPage as DonorRequestsOwnPage } from '../pages/donor/RequestsPage'
 import { RequestsPage } from '../pages/speaker/RequestsPage'
 import { HomePage } from '../pages/HomePage'
 import { MeetingRequestPage } from '../pages/school/MeetingRequestPage'
@@ -65,6 +67,13 @@ function rolePages(role: Role): RouteObject[] {
       { path: PATHS.schoolEstablishment, element: <EstablishmentPage /> },
       { path: PATHS.schoolFeedbacks, element: <SchoolFeedbacksPage /> },
       { path: `${PATHS.schoolFeedbacks}/:meetingId`, element: <SchoolFeedbackPage /> },
+    ]
+  }
+  if (role === 'DONOR') {
+    return [
+      { path: ROLE_HOME.DONOR, element: <Navigate to={PATHS.donorImpact} replace /> },
+      { path: PATHS.donorImpact, element: <DonorImpactPage /> },
+      { path: PATHS.donorRequests, element: <DonorRequestsOwnPage /> },
     ]
   }
   return [{ path: ROLE_HOME[role], element: <HomePage /> }]

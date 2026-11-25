@@ -90,11 +90,12 @@ src/
     speaker/          espace intervenant : agenda, créneaux, demandes reçues
     school/           espace établissement : annuaire, carte du réseau, demande de rencontre, mes rencontres,
                       liste des retours d'expérience (feedbacks/)
+    donor/            espace donateur : rapport d'impact, retours publiés, mes requêtes
     feedback/         retours d'expérience de l'école et de l'intervenant : format du commentaire (feedbackFormat),
                       règles du formulaire, brouillon de l'onglet, formulaire et lecture partagés
   nav/                compteurs de la navigation (badges)
   routes/             définition des routes et gardes
-  lib/                utilitaires (cn, QueryClient, données de référence, dates, erreurs de formulaire)
+  lib/                utilitaires (cn, QueryClient, données de référence, dates, périodes, erreurs de formulaire)
   styles/theme.css    jetons de design (couleurs, rayons, ombres, espacements, polices)
   test/               configuration et utilitaires de test (API simulée, aucun appel réseau)
 ```
@@ -133,7 +134,10 @@ src/
 | `/ecole/etablissement` | connecté, validé, rôle SCHOOL | Mon établissement : classes, élèves, fiches d'accès (`?classe={id}`) |
 | `/ecole/retours` | connecté, validé, rôle SCHOOL | Retours d'expérience : à rédiger, soumis, validés |
 | `/ecole/retours/{meetingId}` | connecté, validé, rôle SCHOOL | Retour d'expérience d'une rencontre réalisée |
-| `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
+| `/donateur` | connecté, validé, rôle DONOR | Redirige vers `/donateur/impact` |
+| `/donateur/impact` | connecté, validé, rôle DONOR | Rapport d'impact (`?periode=trimestre\|annee`, `filtre=ecoles\|intervenants`, `retour={id}`) |
+| `/donateur/requetes` | connecté, validé, rôle DONOR | Mes requêtes (`?requete={id}`, `vue=nouvelle`, `objet=`) |
+| `/eleve` | connecté, validé, rôle STUDENT | Accueil provisoire |
 
 ## Règles de session
 

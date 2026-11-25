@@ -29,7 +29,7 @@ const speakerHandlers = {
 describe('Connexions par persona', () => {
   it.each([
     ['/connexion/fondation', 'Connectez-vous avec votre adresse de la Fondation.', 'Se connecter'],
-    ['/connexion/donateur', "Utilisez l'accès reçu par e-mail de la Fondation M.", 'Se connecter'],
+    ['/connexion/donateur', "Utilisez l'accès remis par la Fondation M.", 'Se connecter'],
     ['/connexion/eleve', "Utilise l'identifiant et le code de ta fiche d'accès.", 'Entrer'],
   ])('%s affiche les textes de sa maquette et renvoie vers la connexion école / intervenant', (path, subtitle, button) => {
     mockApi({})

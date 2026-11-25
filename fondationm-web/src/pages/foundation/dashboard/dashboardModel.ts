@@ -1,37 +1,10 @@
-import { parseIso, toOffsetIso } from '../../../lib/dateTime'
+import { parseIso } from '../../../lib/dateTime'
+import type { Period, PeriodKind } from '../../../lib/period'
 import type { FoundationMeeting } from '../meetings/foundationMeetingsData'
 import { isToMark } from '../meetings/foundationMeetingState'
 
-export type PeriodKind = 'trimestre' | 'annee'
-export const PERIODS: readonly PeriodKind[] = ['trimestre', 'annee']
-export const PERIOD_LABEL: Record<PeriodKind, string> = { trimestre: 'Ce trimestre', annee: 'Cette année' }
-
-export interface Period {
-  kind: PeriodKind
-  from: Date
-  to: Date
-}
-
-/**
- * Bornes de la période dans le fuseau du navigateur : trimestre civil en cours ou année civile ; `to` exclu,
- * comme `GET /api/foundation/indicators`.
- */
-export function periodBounds(kind: PeriodKind, now: Date): Period {
-  const year = now.getFullYear()
-  if (kind === 'annee') return { kind, from: new Date(year, 0, 1), to: new Date(year + 1, 0, 1) }
-  const first = Math.floor(now.getMonth() / 3) * 3
-  return { kind, from: new Date(year, first, 1), to: new Date(year, first + 3, 1) }
-}
-
-/** Paramètres `from` / `to` avec décalage (« 2026-10-01T00:00:00+01:00 »). */
-export function periodQuery(period: Period): { from: string; to: string } {
-  return { from: toOffsetIso(period.from), to: toOffsetIso(period.to) }
-}
-
-/** « ce trimestre » / « depuis janvier » (sous-ligne des jeunes touchés). */
-export function periodPhrase(kind: PeriodKind): string {
-  return kind === 'trimestre' ? 'ce trimestre' : 'depuis janvier'
-}
+// Bornes de période partagées avec le rapport d'impact du donateur (F10) : déplacées dans `lib/period.ts`.
+export { PERIODS, PERIOD_LABEL, periodBounds, periodPhrase, periodQuery, type Period, type PeriodKind } from '../../../lib/period'
 
 function inPeriod(meeting: FoundationMeeting, period: Period): boolean {
   const start = parseIso(meeting.startAt)

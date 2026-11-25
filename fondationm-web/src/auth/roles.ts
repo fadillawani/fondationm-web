@@ -26,7 +26,14 @@ export const PATHS = {
   schoolMeetings: '/ecole/rencontres',
   schoolEstablishment: '/ecole/etablissement',
   schoolFeedbacks: '/ecole/retours',
+  donorImpact: '/donateur/impact',
+  donorRequests: '/donateur/requetes',
 } as const
+
+/** Nouvelle requête du donateur, objet prérempli (complément, question sur un retour). */
+export function donorNewRequestPath(subject: string): string {
+  return `${PATHS.donorRequests}?vue=nouvelle&objet=${encodeURIComponent(subject)}`
+}
 
 /** Formulaire de retour d'expérience d'une rencontre (école ou intervenant). */
 export function feedbackFormPath(role: 'school' | 'speaker', meetingId: string): string {
@@ -90,7 +97,7 @@ export interface NavItem {
   mobile?: boolean
 }
 
-export type NavBadge = 'pendingAccounts' | 'pendingRequests' | 'upcomingMeetings' | 'awaitingFoundation' | 'meetingsToMark' | 'openDonorRequests' | 'feedbacksToValidate'
+export type NavBadge = 'pendingAccounts' | 'pendingRequests' | 'upcomingMeetings' | 'awaitingFoundation' | 'meetingsToMark' | 'openDonorRequests' | 'feedbacksToValidate' | 'myOpenRequests'
 
 const FOUNDATION_NAV: NavItem[] = [
   { label: 'Tableau de bord', short: 'Accueil', icon: 'dashboard', to: PATHS.foundationDashboard },
@@ -115,10 +122,16 @@ const SCHOOL_NAV: NavItem[] = [
   { label: 'Mon établissement', short: 'Établissement', icon: 'school', to: PATHS.schoolEstablishment },
 ]
 
+const DONOR_NAV: NavItem[] = [
+  { label: "Rapport d'impact", short: 'Impact', icon: 'dashboard', to: PATHS.donorImpact },
+  { label: 'Mes requêtes', short: 'Requêtes', icon: 'requests', to: PATHS.donorRequests, badge: 'myOpenRequests' },
+]
+
 export function navItemsFor(role: Role): NavItem[] {
   if (role === 'FOUNDATION') return FOUNDATION_NAV
   if (role === 'SCHOOL') return SCHOOL_NAV
   if (role === 'SPEAKER') return SPEAKER_NAV
+  if (role === 'DONOR') return DONOR_NAV
   return [{ to: ROLE_HOME[role], label: 'Accueil', short: 'Accueil', icon: 'home' }]
 }
 
@@ -127,7 +140,7 @@ export const ROLE_TAGLINE: Partial<Record<Role, string>> = {
   FOUNDATION: 'Pilotage du programme',
   SPEAKER: 'Espace intervenant',
   SCHOOL: 'Espace établissement',
-  DONOR: 'Espace mécène',
+  DONOR: 'Espace donateur',
 }
 
 export interface AccountCard {

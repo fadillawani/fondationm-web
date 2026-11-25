@@ -6,12 +6,16 @@ interface FeedbackContentProps {
   rating: number | null
   /** Récits affichés (« Mon impact » replie l'échange et l'apport). */
   stories?: readonly (keyof FeedbackStories)[]
+  /** Intertitres des récits (par défaut ceux de la Fondation ; le donateur a ceux de W4-impact). */
+  headings?: Record<keyof FeedbackStories, string>
+  /** Préfixe de la note (« Dans l'ensemble : » ; W4-impact : « Ressenti : »). */
+  ratingPrefix?: string
 }
 
 const STORY_KEYS: readonly (keyof FeedbackStories)[] = ['moment', 'exchange', 'takeaway']
 
 /** Lecture d'un retour : chiffres, note, pastilles et récits relus par le parseur, sinon le texte brut. */
-export function FeedbackContent({ comment, rating, stories = STORY_KEYS }: FeedbackContentProps) {
+export function FeedbackContent({ comment, rating, stories = STORY_KEYS, headings = STORY_HEADINGS, ratingPrefix = "Dans l'ensemble :" }: FeedbackContentProps) {
   const parsed = parseComment(comment)
   const label = ratingLabel(rating)
   const stats =
@@ -39,7 +43,7 @@ export function FeedbackContent({ comment, rating, stories = STORY_KEYS }: Feedb
       )}
       {label && (
         <p className="text-sm font-bold text-ink">
-          Dans l'ensemble : <span className="rounded-pill bg-ink px-2.5 py-1 text-xs font-black text-cream">{label}</span>
+          {ratingPrefix} <span className="rounded-pill bg-ink px-2.5 py-1 text-xs font-black text-cream">{label}</span>
         </p>
       )}
       {parsed.kind === 'structured' && parsed.pupils.length > 0 && (
@@ -64,8 +68,8 @@ export function FeedbackContent({ comment, rating, stories = STORY_KEYS }: Feedb
       {parsed.kind === 'structured' &&
         stories.map((key) =>
           parsed.stories[key] === '' ? null : (
-            <section key={key} aria-label={STORY_HEADINGS[key]} className="flex flex-col gap-1">
-              <h4 className="font-sans text-[13px] font-black uppercase text-muted">{STORY_HEADINGS[key]}</h4>
+            <section key={key} aria-label={headings[key]} className="flex flex-col gap-1">
+              <h4 className="font-sans text-[13px] font-black uppercase text-muted">{headings[key]}</h4>
               <p className={key === 'moment' ? 'whitespace-pre-line font-display text-lg leading-snug text-ink' : 'whitespace-pre-line text-sm font-semibold text-ink'}>
                 {key === 'moment' ? `« ${parsed.stories[key]} »` : parsed.stories[key]}
               </p>

@@ -1,5 +1,5 @@
 # État du frontend — Fondation M
-Dernière mise à jour : 25 novembre 2026 — lot F9 (« Retours d'expérience » : école, intervenant, Fondation).
+Dernière mise à jour : 25 novembre 2026 — lot F10 (espace donateur : rapport d'impact, mes requêtes, connexion).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 ## Avancement
@@ -20,10 +20,15 @@ Dernière mise à jour : 25 novembre 2026 — lot F9 (« Retours d'expérience �
 | F7  | Fondation : « Demandes de rencontre » (avis en parallèle de l'intervenant) et « Rencontres » (calendrier, Réalisée, Annulée) | Terminé |
 | F8  | Fondation : « Tableau de bord » (À faire, indicateurs, rencontres par mois et statut) et « Requêtes donateurs » (réponses, comptes donateurs) | Terminé |
 | F9  | Retours d'expérience : formulaires école (W1-E6) et intervenant (W2-E10), « Mon impact » réduit, validation par la Fondation (W3-retours) | Terminé |
-| F10+ | Autres écrans métier (« Mon impact » complet, espace élève, espace donateur…) | À faire  |
+| F10 | Espace donateur : « Rapport d'impact » (W4-impact), « Mes requêtes » (W4-requetes), connexion alignée (W4-connexion) | Terminé |
+| F11+ | Autres écrans métier (« Mon impact » complet, espace élève…) | À faire  |
 
-Vérifications au moment de la livraison de F9 : `npm run build`, `npm run lint` et `npm test`
-(311 tests dans 38 fichiers, deux passages) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F10 : `npm run build`, `npm run lint` et `npm test`
+(333 tests dans 41 fichiers, deux passages ; tests de F8 inchangés après le déménagement des périodes) passent sans
+erreur ni avertissement.
+
+Les sections « Ce que Fn livre » décrivent chaque lot à sa livraison. Les entrées et boutons « Bientôt » qu'elles citent
+sont tous devenus des liens depuis (F5 à F10) : il n'en reste aucun dans l'application (décision 106).
 
 ## Corrections
 
@@ -50,6 +55,59 @@ Vérifications au moment de la livraison de F9 : `npm run build`, `npm run lint`
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F10 livre — espace donateur (W4-impact, W4-requetes, W4-connexion)
+
+- **Navigation donateur** (sous-titre « Espace donateur », comme la maquette) : « Rapport d'impact » et « Mes requêtes »
+  (pastille = requêtes OPEN) ; navigation basse à 2 entrées ; carte utilisateur = nom du donateur (`profile.name`) et
+  e-mail (« Mécène depuis » retiré) ; « Se déconnecter » conservé. `/donateur` redirige vers `/donateur/impact` ;
+  l'accueil provisoire ne reste que pour l'élève.
+- **`/donateur/impact`** (« Rapport d'impact ») : sur-ligne « Rapport d'impact », « Bonjour {nom} », « Voici ce que votre
+  soutien a fait naître dans les classes accompagnées par la Fondation M. », sélecteur « Ce trimestre / Cette année »
+  (`?periode=`, mêmes bornes que F8).
+  - **Indicateurs** (`GET /api/donor/impact`) : Jeunes touchés (« ce trimestre » / « depuis janvier », « Effectif déclaré
+    par les écoles, pas un comptage des présents. »), Rencontres réalisées (« en classe, avec un professionnel »), Écoles
+    engagées (« dans {n} classes »), Intervenants engagés (« bénévoles »), Note moyenne (« 4,6 / 5 » ou « — », « moyenne des
+    notes publiées », puis « écoles {x} · intervenants {y} » pour les seules parts présentes). Les compteurs à zéro
+    s'affichent « 0 », avec « Aucune rencontre réalisée sur cette période. ».
+  - **« Retours d'expérience validés »** (`GET /api/donor/feedbacks`, période choisie) : encart « Ce que vous voyez »,
+    filtre « Tous · n / Écoles / Intervenants » (côté client), cartes (date de la rencontre, « Avis de l'école / de
+    l'intervenant », ville et pays, début du moment marquant, « Ressenti : {libellé} ») triées par date de rencontre ;
+    détail relu par le parseur de F9 (chiffres de classe, pastilles, récits « Le moment fort », « Un échange marquant »,
+    « Ce que cette rencontre a changé » ; texte brut en repli), « Validé par la Fondation M · le {date} », « Une question
+    sur cette rencontre ? Écrire à la Fondation » (formulaire prérempli « Retour du {date} à {ville} »). `?retour={id}`.
+  - Chaque bloc a son chargement, son erreur et « Réessayer » ; mobile : liste puis détail plein écran (« Rapport
+    d'impact »).
+- **`/donateur/requetes`** (« Mes requêtes ») : « Une question ? On vous répond ici », « + Nouvelle requête », encart
+  « La Fondation M lit et répond à chaque requête ici. ».
+  - Liste (plus récente d'abord) : « 12 nov », pastille « Envoyée » (encre sur orange) ou « Traitée » (blanc sur vert),
+    objet, « En attente de réponse » / « Réponse reçue ».
+  - Détail : « Envoyée le … », objet, suivi à 2 étapes, bulle « Vous · {date} », bulle « Fondation M · {date} » ou « La
+    Fondation M n'a pas encore répondu. Sa réponse s'affichera ici. », « Besoin d'un complément ? » → « Envoyer une
+    nouvelle requête » (« Complément : {objet} », 150 caractères au plus).
+  - Formulaire (`?vue=nouvelle`, `?objet=`) : Objet (« n / 150 »), Message (« n / 2000 »), « Ajoutez un objet et un
+    message pour envoyer votre requête. », « Envoyer à la Fondation » désactivé pendant l'envoi, « Annuler » ; garde de
+    sortie « Quitter sans envoyer ? ». Après l'envoi : requête sélectionnée (`?requete={id}`) et « Votre requête est partie.
+    La Fondation M vous répondra ici. » (`aria-live`).
+- **Connexion** (`/connexion/donateur`, F5.2) : sous-titre « Utilisez l'accès remis par la Fondation M. » (PC et mobile),
+  cohérent avec la fiche d'accès de F8 (« Aucun e-mail n'est envoyé : remettez-le vous-même au donateur. ») ; le reste de
+  F5.2 est conforme (encadré « 1 240 jeunes », « Rester connecté » et « Mot de passe oublié » retirés ; « Accès perdu ?
+  Écrivez à donateurs@fondationm.sn. », adresse de la maquette non confirmée).
+
+### Fichiers de F10
+
+- **Nouveaux** : `src/pages/donor/` (`ImpactPage.tsx`, `RequestsPage.tsx`, `donorData.ts`, `donorModel.ts` ; tests
+  `ImpactPage.test.tsx`, `RequestsPage.test.tsx`, `donorModel.test.ts`), `src/lib/period.ts`,
+  `src/components/ui/PeriodTabs.tsx`, `src/test/donorFixtures.ts`.
+- **Modifiés** :
+  - Socle : `src/auth/roles.ts` (chemins, navigation donateur, pastille `myOpenRequests`, « Espace donateur »),
+    `src/nav/badges.ts`, `src/routes/routes.tsx`, `src/test/helpers.tsx` (réponses donateur par défaut).
+  - F8 : `src/pages/foundation/dashboard/dashboardModel.ts` (réexporte les périodes de `lib/period.ts`),
+    `DashboardPage.tsx` (sélecteur extrait dans `PeriodTabs`) ; tests de F8 inchangés.
+  - F9 : `src/pages/feedback/FeedbackContent.tsx` (intertitres et préfixe de note configurables, valeurs par défaut
+    inchangées).
+  - F5.2 : `src/pages/login/DonorLoginPage.tsx` (sous-titre), `src/pages/login/LoginPages.test.tsx`.
+  - Documentation : `docs/etat-frontend.md`, `fondationm-web/README.md`.
 
 ## Ce que F9 livre — « Retours d'expérience » (W1-E6, W2-E10, W2-impact, W3-retours)
 
@@ -982,12 +1040,48 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     par récit (`maxLength`), 2000 au total : au-delà, envoi bloqué, rien n'est tronqué.
 98. **Citation du tableau de bord** : le moment marquant du retour publié le plus récent (sinon un autre récit, sinon le
     texte brut), pour ne jamais citer les étiquettes.
+99. **Consultations du donateur** : chaque `GET /api/donor/impact` et chaque page 0 de `GET /api/donor/feedbacks` compte
+    côté Fondation. Plan d'appels : un appel d'impact et une liste de retours (toutes les pages, une seule page 0) par
+    période affichée, sans `authorRole` ; le filtre est côté client. Ces requêtes ne se relancent jamais d'elles-mêmes
+    (`staleTime` et `gcTime` infinis, ni au focus, ni à la reconnexion, ni au montage) : revenir à une période déjà vue
+    ne fait aucun appel. Seul « Réessayer » relance un bloc en échec.
+100. **Pas d'histogramme « Rencontres réalisées par mois »** : aucune série mensuelle dans le contrat ; un appel d'impact par
+     mois fausserait les consultations.
+101. **Indicateurs du donateur** : compteurs à zéro affichés « 0 » (exact selon le contrat), « — » seulement pour un champ
+     absent ou null ; note moyenne « — » sans note ; « Aucune rencontre réalisée sur cette période. » si
+     `completedMeetings` = 0 ; sous-lignes « dans {n} classes », « bénévoles », « moyenne des notes publiées », puis
+     « écoles {x} · intervenants {y} » sans la part absente (la note école est `null` depuis F9).
+102. **Retours publiés** : retours individuels anonymes (ni paires, ni noms, ni secteurs) ; triés par date de rencontre
+     décroissante, puis date de publication, puis identifiant ; détail lu par le parseur de F9 avec les libellés de
+     W4-impact ; sélection `?retour={id}` lue dans la liste filtrée.
+103. **« Ce que vous voyez »** : « Uniquement des retours validés par la Fondation M. Les fiches n'indiquent que la ville et
+     le pays de l'école ; les récits sont publiés tels que leurs auteurs les ont écrits. » (mobile : « Validés par la
+     Fondation M, publiés tels qu'écrits par leurs auteurs. »). Placé dans la page, au-dessus des retours.
+104. **Envoi d'une requête** : objet et message obligatoires après retrait des espaces (le contrat accepte vide) ; bouton
+     désactivé pendant l'envoi, un seul POST, aucune nouvelle tentative. Après un échec sans erreur de champ, la liste
+     est relue : une requête n'est retenue comme envoyée que si son objet ET son message sont identiques ET si elle a été
+     créée après le début de l'envoi ; sinon le texte saisi reste affiché avec l'erreur. Erreurs de champ sous le champ.
+105. **Requêtes à deux états** : Envoyée = OPEN, Traitée = ANSWERED, une réponse ; « la Fondation M » au lieu de
+     « Samirath » ; aucune promesse d'e-mail ; complément = nouvelle requête « Complément : {objet} » (150 caractères,
+     « … ») ; tri par `createdAt` décroissant ; pas de `GET /{id}` (liste et réponse du POST) ; `?requete=`, `?vue=nouvelle`,
+     `?objet=` ; garde de sortie sur un formulaire modifié.
+106. **Navigation donateur** : deux entrées, pastille = requêtes OPEN (requête partagée avec la page) ; `/donateur` →
+     `/donateur/impact` ; carte = nom + e-mail ; « Espace donateur ». Plus aucune entrée « Bientôt » dans les
+     navigations (l'élève n'a que « Accueil »).
+107. **Périodes partagées** : `lib/period.ts` (`PeriodKind`, `periodBounds`, `periodQuery`, `periodPhrase`,
+     `periodFromParam`) et `components/ui/PeriodTabs.tsx` servent F8 et F10 ; `dashboardModel.ts` les réexporte.
+108. **Connexion donateur** : « Utilisez l'accès remis par la Fondation M. », pour ne pas promettre un e-mail que le
+     backend n'envoie pas.
+109. **Contrastes de F10** (calculés) : « Envoyée » encre sur `#EF7A0A` 5,71 (blanc de la maquette : 2,82, échec) ;
+     « Traitée », « Validé par la Fondation M », bouton, carte « Jeunes touchés » et barre latérale blanc sur `#4E6A2C`
+     6,14 ; bulle Fondation blanc sur `#2B337A` 11,31 ; bulle « Vous » et pastille d'auteur encre sur `#F7F3EA` 14,52 ;
+     gris `#4A4A57` sur `#F7F3EA` 7,87 et sur blanc 8,72 ; « Ce que vous voyez » encre sur `#FDE7A6` 13,14 ; succès
+     `#4E6A2C` sur `#E8EFDC` 5,21 ; erreur `#B81C1F` sur `#FBE3E3` 5,33 ; lien indigo sur blanc 11,31. Aucun échec retenu.
 
 ## Écarts
 
 - `--legacy-peer-deps` remplacé par l'exécution `npx` isolée (voir décision 3).
-- La navigation des rôles donateur et élève ne contient que « Accueil » : les entrées viendront avec
-  leurs écrans.
+- La navigation de l'élève ne contient que « Accueil » : les entrées viendront avec ses écrans.
 
 ## Écarts maquette / backend
 
@@ -1025,7 +1119,7 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | Relire le code d'un élève | Aucun point d'accès | Code affiché une seule fois ; « Nouvelle fiche » (`POST …/password`) |
 | Citation de présentation de l'intervenant | `motivation` | Affichée si renseignée |
 | Prénom et nom du référent (carte utilisateur) | Absents (déjà noté) | Initiales et nom de l'établissement |
-| Lien « Voir la demande » du bandeau de refus | « Mes rencontres » pas encore livré | Affiché désactivé, « Bientôt » |
+| Lien « Voir la demande » du bandeau de refus | — | Lien vers la rencontre dans « Mes rencontres » depuis F5 |
 | Classe : intitulé | `CreateClassRequest.title` accepte une chaîne vide (`minLength: 0`) | Obligatoire côté client (1–100) |
 | Classe : filière | `fieldOfStudy` existe côté école (absent de `ClassInfo` côté intervenant) | Demandée à la création, non affichée dans le choix |
 | Codes d'erreur de `POST /api/school/meetings` | Aucun dans le contrat ; statut HTTP non garanti | Traités par code (décision 43) |
@@ -1038,7 +1132,7 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | Lignes des listes mobiles (W1-E5) | Maquette mobile : « Mar 17 nov. · {classe} » sans l'heure | Même format que le PC, heure comprise |
 | Déconnexion | Absente de la maquette (barre latérale et navigation basse) | PC : lien sous la carte ; mobile : avatar de l'en-tête → menu « Se déconnecter » |
 | Avatar d'en-tête mobile | Absent de la maquette sur W3-comptes, W2-E9, W1-E4, W1-E5 (bouton « + ») | Ajouté sur ces pages pour la déconnexion |
-| Entrées de navigation sans écran | La maquette les montre actives, avec pastilles | « Bientôt », non cliquables |
+| Entrées de navigation sans écran | La maquette les montre actives, avec pastilles | Plus aucune depuis F10 (toutes les entrées ont leur écran ; l'élève n'a que « Accueil ») |
 | Pastilles de la navigation basse | Absentes de la maquette mobile | Conservées (`#B8492A`/blanc) |
 | « Requêtes donateurs » (Fondation) sur mobile | Absente de la navigation basse de la maquette (5 entrées) | Absente aussi |
 | Carte utilisateur école / Fondation | Maquette : nom du référent, « Samirath · Chargée de programme » | Établissement + ville ; « Fondation M » + « Équipe du programme » (données absentes) |
@@ -1062,6 +1156,18 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | Erreurs d'un retour (doublon, retour publié, rencontre non réalisée) | Aucune documentée | Lues dans le corps ; doublon traité par relecture puis PATCH (décision 93, point ouvert 41) |
 | Liste des retours de l'école (`/ecole/retours`) | — | Sans maquette (décision 96) |
 | « Mon impact » : chiffres, thèmes, émotions (W2-impact) | Aucune donnée d'impact de l'intervenant | Non livrés ; seule la section « Mes retours d'expérience » (point ouvert 46) |
+| « Rencontres réalisées par mois » (W4-impact, PC et mobile) | Aucune série mensuelle dans `DonorImpactResponse` | Non livré (décision 100, point ouvert 51) |
+| Retours en paires école × intervenant, noms d'école, d'intervenant et d'auteur, classe, secteur, filtres par secteur (W4-impact) | `DonorFeedbackResponse` : retours individuels, ville et pays seulement, sans identifiant de rencontre | Retours individuels, filtre « Tous / Écoles / Intervenants » (décision 102, point ouvert 55) |
+| « dans 9 régions », « bénévoles, 6 secteurs » | Ni région ni secteur dans l'impact | « dans {n} classes », « bénévoles » |
+| « ce trimestre (sept. à nov.) » | Période libre (`from` / `to`) | Trimestre civil, comme F8 (« ce trimestre » / « depuis janvier ») |
+| « Les noms des élèves ne sont jamais affichés » | Texte libre non modéré | Texte vrai de la décision 103 (point ouvert 52) |
+| « Bonjour M. Diaw » | `DonorProfileResponse` : `name` seulement, sans civilité | « Bonjour {nom} » |
+| « Mécène depuis 2024 » (carte utilisateur) | Seule la date de création du compte (`createdAt`) | Retiré ; e-mail à la place (point ouvert 57) |
+| « Samirath » (encart, bulles, attente, texte indicatif) ; statut « En cours », fil de messages (W4-requetes) | Aucun membre de la Fondation nommé ; OPEN / ANSWERED, une réponse | « la Fondation M » ; deux états (décision 105) |
+| « vous serez prévenu par e-mail » ; « l'accès reçu par e-mail » (W4) | Le backend n'envoie aucun e-mail | Retiré ; « Utilisez l'accès remis par la Fondation M. » (décision 108) |
+| « n'a pas encore ouvert votre requête » | Aucun statut de lecture | « n'a pas encore répondu » |
+| « Cet avis apparaîtra ici dès qu'il aura été validé » | Seuls les retours publiés sont transmis | Retiré |
+| Requête envoyée deux fois (réponse perdue) | Aucune clé d'idempotence ni code d'erreur documenté | Relecture prudente (décision 104, point ouvert 56) |
 
 ## Points ouverts
 
@@ -1179,6 +1285,19 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 49. **Rappel bienveillant** à l'auteur d'un retour non écrit : aucun point d'accès.
 50. **Brouillons effacés à l'expiration de la session** (401) comme à la déconnexion : choix de confidentialité pour les
     ordinateurs partagés ; un récit en cours non enregistré est perdu si la session expire.
+51. **Série mensuelle absente de `GET /api/donor/impact`** : l'histogramme « Rencontres réalisées par mois » n'est pas
+    livré. **Backend : une série par mois (ou par trimestre) dans la réponse, sans consultation supplémentaire.**
+52. **Texte non modéré lu par les donateurs** (suite du point 48) : les prénoms d'élèves écrits dans les récits arrivent
+    tels quels dans l'espace donateur ; aucun filtrage côté client n'est tenté.
+53. **Adresse donateurs@fondationm.sn** (« Accès perdu ? », connexion donateur) reprise de la maquette, non confirmée par
+    l'équipe.
+54. **Notes des écoles absentes** depuis F9 : `averageRating.school` est `null` ; la part « écoles » de la note moyenne
+    n'est pas affichée.
+55. **Aucun lien entre les retours d'une même rencontre** dans `DonorFeedbackResponse` (pas d'identifiant de rencontre) :
+    les paires école × intervenant de la maquette sont impossibles. **Backend : un identifiant de rencontre anonyme.**
+56. **Doublon d'une requête donateur** : sans clé d'idempotence ni code documenté, seule la relecture prudente de la
+    décision 104 évite un double envoi après une réponse perdue.
+57. **Début du soutien d'un donateur** absent (« Mécène depuis ») : `createdAt` est la date de création du compte.
 
 ## Écarts de design restants
 
@@ -1236,8 +1355,8 @@ attendue (maquette) et la raison.
 | Inscription, choix du compte | `pages/register/authColumns.ts`, `RegisterChoicePage.tsx` | « … dans vos classes, ou en ligne, … », « en classe ou en ligne » | « … dans vos classes … », « en classe » (F6.1). |
 | Annuaire | `pages/school/NetworkMap.tsx` | Libellé « SÉNÉGAL » `#B8AE98` | Contraste 1,99:1, couleur conservée (décoratif, point ouvert 16). |
 | Demande (W1-E4) | `pages/school/MeetingRequestPage.tsx` | Libellé « Intervenante » | Genre inconnu : « Intervenant ». |
-| Mes rencontres (W1-E5) | voir « Écarts maquette / backend » | Opacité des rencontres passées, « Presque confirmée », retours « Bientôt », liste « Passées » sur PC, heure dans les listes mobiles | Contraste, données absentes, décisions validées. |
-| Toutes | `components/layout/AppLayout.tsx`, `UserMenu.tsx` | Pas de déconnexion ; entrées actives avec pastilles | Déconnexion conservée (lien PC, menu avatar mobile) ; entrées sans écran « Bientôt ». |
+| Mes rencontres (W1-E5) | voir « Écarts maquette / backend » | Opacité des rencontres passées, « Presque confirmée », liste « Passées » sur PC, heure dans les listes mobiles | Contraste, données absentes, décisions validées. |
+| Toutes | `components/layout/AppLayout.tsx`, `UserMenu.tsx` | Pas de déconnexion ; entrées actives avec pastilles | Déconnexion conservée (lien PC, menu avatar mobile) ; toutes les entrées ont leur écran depuis F10. |
 | Toutes | `components/layout/roleTheme.ts` | Avatar Fondation `#B8492A` sur `#FDE7A6` | Contraste 4,26:1, couleur conservée (point ouvert 16). |
 | Mon établissement (W5-E2) | `pages/school/establishment/EstablishmentPage.tsx` | Sur-ligne « Mon établissement · Élèves · E2 » | Code d'écran retiré (comme « E11 · E12 »). |
 | Mon établissement | `pages/school/establishment/StudentTable.tsx` | « Connecté·e », « Code remis, pas encore connecté·e », « Pas encore d'accès » ; résumé « … · {m} déjà connectés » | Données absentes : « Fiche à remettre » / « Accès créé » ; « effectif déclaré {n} » dans le résumé. |
@@ -1254,7 +1373,7 @@ attendue (maquette) et la raison.
 | Rencontres (W3-rencontres) | `pages/foundation/meetings/MeetingsPage.tsx` | Sur-ligne « E15 · suivi » / « E15 · suivi du programme » | « Suivi » / « Suivi du programme ». |
 | Rencontres | idem | Boutons du bandeau mobile 40 px | 44 px (cible tactile). |
 | Rencontres | idem | Flèches de mois atténuées (opacité 0,4) aux bornes | Mois non bornés, pas d'opacité. |
-| Rencontres | `pages/foundation/meetings/MeetingPanel.tsx` | Mobile : bouton « Voir les retours (école : … · intervenant : …) » | Cases « Retour école » / « Retour intervenant » et « Voir les retours d'expérience · Bientôt » (écran non livré), comme sur PC. |
+| Rencontres | `pages/foundation/meetings/MeetingPanel.tsx` | Mobile : bouton « Voir les retours (école : … · intervenant : …) » | Cases « Retour école » / « Retour intervenant » et lien « Voir les retours d'expérience » vers `/fondation/retours` (F9), comme sur PC. |
 | Rencontres | idem | « avec Amadou Baila, ingénieur réseaux » | « avec Amadou Baila » (métier absent). |
 | Tableau de bord (W3-pilotage) | `pages/foundation/dashboard/DashboardPage.tsx` | « Bonjour Samirath », phrase « 18 actions… » | « Bonjour l'équipe » ; phrase accordée, positive à 0. |
 | Tableau de bord | `pages/foundation/dashboard/DashboardBlocks.tsx` | Carte « Délais de validation » | « Notes moyennes » (aucune donnée de délai). |
@@ -1262,7 +1381,6 @@ attendue (maquette) et la raison.
 | Tableau de bord | idem | Carte demandes « dont 2 depuis plus de 48 h » | « dont {n} en attente depuis 2 jours ou plus » (règle de F7). |
 | Tableau de bord | idem | « Ce trimestre » : 4 barres (Sept. à Déc.) | 3 mois du trimestre civil. |
 | Tableau de bord | idem | Barres et légende « Prévues » / « Annulées » sans contour | Contour 1 px `#4A4A57` (seuil non textuel 3:1). |
-| Tableau de bord | idem | « Lire les retours » et carte « retours à valider » cliquables | « Bientôt » (écran des retours non livré). |
 | Tableau de bord (mobile) | `pages/foundation/dashboard/DashboardPage.tsx` | Pas de sélecteur de période | Sélecteur conservé (« Cette année » accessible sur téléphone) ; « Rencontres par statut » masqué comme la maquette. |
 | Tableau de bord | `pages/foundation/dashboard/DashboardBlocks.tsx` | « Le moment de la semaine » toujours | « Un moment marquant » si le retour a plus de 7 jours. |
 | Requêtes (W3-requetes) | `pages/foundation/donors/DonorRequestsPage.tsx` | Sur-ligne « E16 » | « Donateurs ». |
@@ -1270,3 +1388,10 @@ attendue (maquette) et la raison.
 | Requêtes | idem | « Samirath (Fondation M) » ; « Mécène depuis 2024 » | « Fondation M » ; rôle du donateur omis. |
 | Requêtes | idem | Bouton « Envoyer » grisé sans texte (blanc sur `#C9BFA8`, 1,8:1) | Bouton actif, message « Écrivez votre réponse avant de l'envoyer. ». |
 | Donateurs | `pages/foundation/donors/DonorsTab.tsx` | Aucune maquette | Onglet « Donateurs », création de compte, fiche d'accès et « Nouveau code » (gabarit de la fiche élève de F6). |
+| Rapport d'impact (W4-impact) | `pages/donor/ImpactPage.tsx` | Sur-ligne « Rapport d'impact · E17 » | Code d'écran retiré : « Rapport d'impact ». |
+| Rapport d'impact | idem | Encart « Ce que vous voyez » dans la barre latérale | Dans la page, au-dessus des retours (barre latérale commune à toutes les personas), texte de la décision 103. |
+| Rapport d'impact (mobile) | idem | En-tête sombre, sélecteur crème sur encre | Sélecteur clair de F8 (composant partagé `PeriodTabs`). |
+| Rapport d'impact | idem | Histogramme ; pastilles de secteur ; paires et noms | Retirés (décisions 100 et 102). |
+| Mes requêtes (W4-requetes) | `pages/donor/RequestsPage.tsx` | Sur-ligne « Mes requêtes · E18 » | « Mes requêtes ». |
+| Mes requêtes | `pages/donor/donorModel.ts` | « Envoyée » blanc sur `#EF7A0A` | Contraste 2,82:1 : encre sur orange (5,71:1). |
+| Mes requêtes | `pages/donor/RequestsPage.tsx` | Suivi à 3 étapes (Envoyée, En cours, Traitée) | 2 étapes (décision 105). |
