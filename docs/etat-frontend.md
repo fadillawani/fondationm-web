@@ -1,6 +1,6 @@
 # État du frontend — Fondation M
 
-Dernière mise à jour : 24 novembre 2026 — lot F2 (espace Fondation : navigation et validation des comptes).
+Dernière mise à jour : 24 novembre 2026 — lot F3 (espace intervenant : agenda, créneaux, demandes reçues).
 
 ## Avancement
 
@@ -10,10 +10,11 @@ Dernière mise à jour : 24 novembre 2026 — lot F2 (espace Fondation : navigat
 | F0.1 | Design de la maquette « Marché » appliqué (thème, composants, connexion, mise en page) | Terminé |
 | F1  | Inscription établissement et intervenant, pages « en attente » et « refusé », changement de mot de passe obligatoire | Terminé |
 | F2  | Espace Fondation : navigation, « Comptes à valider » (liste, détail, validation, refus motivé) | Terminé |
-| F3+ | Autres écrans métier (tableau de bord Fondation, rencontres, retours, donateurs…) | À faire  |
+| F3  | Espace intervenant : navigation, « Mon agenda » (calendrier, créneaux), « Demandes reçues » (accepter, refuser) | Terminé |
+| F4+ | Autres écrans métier (école, tableau de bord Fondation, rencontres, retours, donateurs…) | À faire  |
 
-Vérifications au moment de la livraison de F2 : `npm run build`, `npm run lint` et `npm test`
-(91 tests) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F3 : `npm run build`, `npm run lint` et `npm test`
+(114 tests) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -32,6 +33,37 @@ Vérifications au moment de la livraison de F2 : `npm run build`, `npm run lint`
   - Tests ajoutés : `/api/me` avec `profile: null` (FOUNDATION → `/fondation`), avec
     `rejectionReason: null` (SCHOOL PENDING → `/compte-en-attente`), réponse illisible affichée comme
     `UNEXPECTED_ERROR` et non comme panne réseau ; tests unitaires de `errors.ts` mis à jour. 74 tests.
+
+## Ce que F3 livre
+
+- **Navigation intervenant** (sous-titre « Espace intervenant ») : « Mon agenda », « Demandes reçues »
+  (pastille : demandes PENDING avec `myDecision` PENDING), « Mon impact » (« Bientôt », sans page). Carte
+  utilisateur : deux initiales de `fullName`, « métier · ville » (e-mail à défaut). Navigation basse :
+  4 entrées (« Mon impact » affichée désactivée, pas de « Plus » : la règle des 5 entrées n'est pas dépassée).
+- **`/intervenant`** redirige vers **`/intervenant/agenda`** ; `/intervenant/agenda` et `/intervenant/demandes`
+  sont réservées au rôle SPEAKER (gardes existantes).
+- **Données** : `GET /api/speaker/slots?includePast=false` et `GET /api/speaker/meetings` (sans filtre),
+  toutes les pages, une seule fois (`size=100` demandé ; la pagination suit le `totalPages` renvoyé si le
+  serveur plafonne la taille ; 25 pages au plus, avertissement au-delà). L'agenda, le badge et les onglets
+  partagent ces données ; elles sont rechargées (invalidation de `['speaker']`) après chaque action.
+- **`/intervenant/agenda`** :
+  - en-tête « Bonjour {prénom} », « Mon agenda » ; bandeau « {n} demandes d'écoles attendent votre
+    réponse » avec « Répondre » (si n > 0) ;
+  - PC / tablette (≥ 768 px) : calendrier mensuel (tableau, semaine du lundi, « Mois précédent / suivant »,
+    `?mois=AAAA-MM`), un bouton par élément (heure + état en texte, libellé ARIA complet), « + Créneau »
+    sur les jours à venir, légende ; panneau de détail à droite (≥ 1024 px) ;
+  - téléphone : liste des éléments à venir groupés par jour, bouton « Publier un créneau » (le jour se
+    choisit dans le formulaire), détail en plein écran avec « Retour » ;
+  - panneau : jour (éléments du jour et formulaire si le jour est à venir), formulaire « Publier un
+    créneau » (« De » / « À » au pas de 15 min, format « En classe / En ligne / Les deux »), créneau libre
+    (« Retirer ce créneau » avec confirmation dans un Modal), créneau demandé (demandes, ma réponse, lien
+    « Répondre »), rencontre (établissement, classe, horaire, format, lieu, mot de l'école, clôture et motif).
+- **`/intervenant/demandes`** : onglets « À traiter · n », « Acceptées », « Refusées ou annulées »,
+  « Toutes » (filtrés côté client, 20 par page, « Précédent / Suivant ») ; liste (créneau court, statut,
+  établissement, « classe · n élèves · ville », « n demandes sur ce créneau ») et détail (date de la
+  demande, « Dans votre zone », créneau, format souhaité, lieu, classe, nombre d'élèves, mot de l'école,
+  avertissement « créneau partagé ») ; « Accepter » / « Refuser » (motif obligatoire) ; bloc de résultat ;
+  mention de confidentialité. URL : `?onglet=a-traiter|acceptees|refusees|toutes`, `page=`, `demande={id}`.
 
 ## Ce que F2 livre
 
@@ -187,11 +219,40 @@ Vérifications au moment de la livraison de F2 : `npm run build`, `npm run lint`
 25. **Tests** : délai des attentes asynchrones de Testing Library porté à 4 s et délai par test à 15 s
     (`src/test/setup.ts`, `vite.config.ts`) : sous charge, la suite complète en parallèle dépassait
     ponctuellement 1 s au premier rendu d'un fichier.
+26. **Dates et fuseau** : affichage dans le fuseau du navigateur (`lib/dateTime.ts`, « Mardi 24 novembre,
+    10h00 – 11h30 ») ; les créneaux sont envoyés avec le décalage du navigateur
+    (`2026-11-25T10:00:00+01:00`). Les tests fixent `TZ=Africa/Lagos` (UTC+1, sans heure d'été) et la date
+    du jour (`vi.setSystemTime`).
+27. **Statuts de l'agenda** : un élément par créneau, rencontres rattachées par `slot.id`. Priorité :
+    Confirmé (une rencontre CONFIRMED) > Réalisé (COMPLETED) > Demandé (au moins une PENDING) > Libre
+    (créneau AVAILABLE) > Annulé ou refusé (seulement des rencontres REFUSED / CANCELLED). Un créneau libre
+    dont des demandes ont été refusées reste « Libre ». Chaque état a une couleur et un libellé texte.
+28. **Créneau côté client** : jour à venir, début à venir, fin après le début, durée de 15 min à 8 h, dans
+    la journée (débuts de 00:00 à 23:30, fins de 00:15 à 23:45, pas de 15 min). Les listes d'heures ne sont
+    pas filtrées selon le début : la règle de durée est signalée sous « À ».
+29. **Onglets des demandes** : « À traiter » = PENDING + `myDecision` PENDING ; « Acceptées » = PENDING +
+    `myDecision` VALIDATED, CONFIRMED, COMPLETED ; « Refusées ou annulées » = REFUSED, CANCELLED ;
+    « Toutes ». Tri par date du créneau.
+30. **Motif du refus d'une demande** : obligatoire, 1 à 500 caractères après retrait des espaces (« Un mot
+    pour expliquer ? » avec astérisque). Formulaire de motif commun avec le refus de compte (F2) :
+    `components/ui/ReasonForm.tsx`.
+31. **« Dans votre zone »** : même ville ET même pays que l'intervenant (`/api/me`), sans tenir compte des
+    majuscules ni des accents.
+32. **Erreurs** : `SLOT_OVERLAP` → « Ce créneau chevauche un de vos créneaux existants. » sous le formulaire ;
+    `SLOT_HAS_PENDING_MEETINGS` / `SLOT_NOT_AVAILABLE` → message dédié dans le panneau ; sur une demande,
+    `SLOT_PASSED` → « Ce créneau est déjà passé. », tout autre 409 → « Cette demande a déjà été traitée. »,
+    avec rechargement ; `fieldErrors` sous le champ (`startAt` / `endAt` → « De » / « À », `reason`).
+33. **Invite « Partager mon retour »** omise : l'information demanderait un appel supplémentaire
+    (`/api/speaker/feedbacks/awaiting`).
+34. **Navigation** : les compteurs sont fournis par `nav/badges.ts` (la mise en page n'importe plus de
+    page). Regroupement sous « Plus » seulement si la navigation basse dépasse 5 entrées (Fondation).
+35. **Tests** : `<dialog>` (`showModal` / `close`) simulé dans `src/test/setup.ts`, jsdom ne l'implémentant pas.
 
 ## Écarts
 
 - `--legacy-peer-deps` remplacé par l'exécution `npx` isolée (voir décision 3).
-- La navigation par rôle ne contient que « Accueil » : les entrées viendront avec les écrans métier.
+- La navigation des rôles école, donateur et élève ne contient que « Accueil » : les entrées viendront
+  avec leurs écrans.
 
 ## Écarts maquette / backend
 
@@ -207,6 +268,15 @@ Vérifications au moment de la livraison de F2 : `npm run build`, `npm run lint`
 | « Un e-mail de bienvenue lui a été envoyé » | Le backend n'envoie aucun e-mail | Phrase retirée |
 | Code d'erreur « compte déjà traité » | Non documenté (aucune réponse d'erreur dans le contrat) | Tout 409 traité comme « déjà traité » (décision 22). Code vraisemblable : `INVALID_STATUS_TRANSITION` (HTTP 409), non documenté |
 | Ordre de la liste des comptes | Non précisé (pas de paramètre de tri) | Ordre du serveur |
+| Motif du refus d'une demande « facultatif » (maquette) | `ReasonRequest.reason` : clé obligatoire mais `minLength: 0`, `maxLength: 500` | Obligatoire côté client (1 à 500 caractères) |
+| Règles d'un créneau (durée 15 min – 8 h, début à venir, pas de chevauchement) | Absentes de `CreateSlotRequest` (deux chaînes `startAt` / `endAt`) | Vérifiées côté client (décision 28) ; le serveur reste juge |
+| Codes `SLOT_OVERLAP`, `SLOT_NOT_AVAILABLE`, `SLOT_HAS_PENDING_MEETINGS`, `INVALID_STATUS_TRANSITION`, `SLOT_PASSED` | Réellement renvoyés (HTTP 409) mais absents du contrat | Messages dédiés (décision 32) |
+| Filière de la classe | Absente de `ClassInfo` (`title`, `studentCount`) | Non affichée |
+| « Dans votre zone » | Aucun champ | Calculé : ville et pays de l'école = ceux de l'intervenant |
+| Format du créneau dans une rencontre | `SpeakerMeetingResponse` ne donne que le format choisi (`format`) et `place` | Format choisi et lieu affichés |
+| Invite « Partager mon retour » | Pas d'indicateur dans les rencontres ; seulement `/api/speaker/feedbacks/awaiting` | Omise (décision 33) |
+| Agenda d'un mois donné | Pas de filtre par période sur les créneaux ni sur les rencontres | Toutes les pages chargées une fois (point ouvert 9) |
+| Créneaux libres passés | `includePast=false` par défaut | Non chargés ; les rencontres passées restent visibles |
 | Code d'erreur « e-mail déjà utilisé » | Non documenté (aucun 409 ni code dans le contrat) | Règle de la décision 16. Code réellement observé : `EMAIL_ALREADY_USED` (HTTP 409, message « Cette adresse e-mail est déjà utilisée. ») |
 
 ## Points ouverts
@@ -232,3 +302,12 @@ Vérifications au moment de la livraison de F2 : `npm run build`, `npm run lint`
    d'erreur de la validation et du refus (404 d'un compte inconnu, 400 du motif).
 8. **Mise à jour du badge** : seulement après une action dans cet écran ou un rechargement ; pas de
    rafraîchissement périodique des comptes en attente.
+9. **Pas de filtre par période ni par décision** sur `GET /api/speaker/slots` et `GET /api/speaker/meetings` :
+   toutes les pages sont chargées (`size=100` demandé, 25 pages au plus, avertissement « tous les éléments
+   n'ont pas pu être affichés » au-delà). Des paramètres `from` / `to` et `myDecision` côté backend
+   éviteraient ce parcours.
+10. **Taille de page maximale non documentée** : le frontend demande `size=100` et suit le `totalPages`
+    renvoyé ; à confirmer côté backend.
+11. **Rafraîchissement** : pas de rechargement périodique ; une décision de la Fondation ou une nouvelle
+    demande n'apparaît qu'après une action ou un rechargement de la page.
+12. **Codes d'erreur des créneaux et rencontres** (décision 32) à documenter dans le contrat.

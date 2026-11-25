@@ -74,6 +74,75 @@ export const foundationMe = {
   mustChangePassword: false,
 } as const
 
+/** Intervenant validé avec un profil complet (ville et pays pour la zone). */
+export const speakerFullMe = makeMe({
+  email: 'intervenante@pro.test',
+  role: 'SPEAKER',
+  profile: {
+    type: 'SPEAKER',
+    fullName: 'Awa Diallo',
+    jobTitle: 'Ingénieure réseaux',
+    city: 'Dakar',
+    country: 'Sénégal',
+    sector: 'DIGITAL',
+  },
+})
+
+/** Liste paginée simulée : lit `page` et `size` de la requête (le serveur peut plafonner `size`). */
+export function pagedHandler(items: () => readonly unknown[], maxSize = 100) {
+  return (request: Request): Response => {
+    const query = new URL(request.url).searchParams
+    const page = Number(query.get('page') ?? '0')
+    const size = Math.min(Number(query.get('size') ?? '20'), maxSize)
+    const all = items()
+    return jsonResponse(200, {
+      content: all.slice(page * size, page * size + size),
+      page,
+      size,
+      totalElements: all.length,
+      totalPages: Math.ceil(all.length / size),
+    })
+  }
+}
+
+export type SlotJson = Record<string, unknown> & { id: string }
+export type MeetingJson = Record<string, unknown> & { id: string; status: string }
+
+export function slotJson(overrides: Partial<SlotJson> = {}): SlotJson {
+  return {
+    id: 'c0000000-0000-4000-8000-000000000001',
+    startAt: '2026-11-26T10:00:00+01:00',
+    endAt: '2026-11-26T11:30:00+01:00',
+    status: 'AVAILABLE',
+    createdAt: '2026-11-20T09:00:00+01:00',
+    formats: 'BOTH',
+    ...overrides,
+  }
+}
+
+export function meetingJson(overrides: Partial<MeetingJson> = {}): MeetingJson {
+  return {
+    id: 'd0000000-0000-4000-8000-000000000001',
+    status: 'PENDING',
+    myDecision: 'PENDING',
+    school: { name: 'Lycée des Tisserands', city: 'Dakar', country: 'Sénégal' },
+    schoolClass: { title: 'Terminale S2', studentCount: 32 },
+    slot: { id: 'c0000000-0000-4000-8000-000000000002', startAt: '2026-11-27T14:00:00+01:00', endAt: '2026-11-27T15:00:00+01:00' },
+    closedBy: null,
+    reason: null,
+    createdAt: '2026-11-22T10:00:00+01:00',
+    updatedAt: null,
+    confirmedAt: null,
+    refusedAt: null,
+    completedAt: null,
+    cancelledAt: null,
+    format: 'IN_PERSON',
+    place: null,
+    message: null,
+    ...overrides,
+  }
+}
+
 type AccountJson = Record<string, unknown> & { id: string; role: string; status: string }
 
 /** Comptes simulés de GET /api/foundation/accounts, filtrés par rôle et statut puis paginés. */

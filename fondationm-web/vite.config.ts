@@ -25,6 +25,8 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     env: {
       VITE_API_URL: 'http://api.test',
+      // Fuseau fixe (UTC+1, sans heure d'été) : affichage et décalage ISO vérifiables.
+      TZ: 'Africa/Lagos',
     },
     testTimeout: 15_000,
     restoreMocks: true,

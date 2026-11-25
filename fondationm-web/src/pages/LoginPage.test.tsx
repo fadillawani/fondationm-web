@@ -10,6 +10,7 @@ import {
   jsonResponse,
   makeMe,
   mockApi,
+  pagedHandler,
   renderApp,
   speakerMe,
   tokenResponse,
@@ -37,13 +38,16 @@ describe('Connexion', () => {
     mockApi({
       'POST /api/auth/login': tokenResponse,
       'GET /api/me': () => jsonResponse(200, speakerMe),
+      'GET /api/speaker/slots': pagedHandler(() => []),
+      'GET /api/speaker/meetings': pagedHandler(() => []),
     })
     const { router, user } = renderApp('/connexion')
 
     await fillLoginForm(user)
 
-    expect(await screen.findByRole('heading', { name: 'Bonjour Awa Diallo !' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/intervenant')
+    // L'accueil de l'intervenant redirige vers son agenda (lot F3).
+    expect(await screen.findByRole('heading', { name: 'Mon agenda' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/intervenant/agenda')
   })
 
   it('envoie un compte PENDING sur la page d’attente', async () => {

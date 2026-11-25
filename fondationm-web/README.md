@@ -85,6 +85,8 @@ src/
     register/         choix du type de compte, inscription établissement et intervenant (schémas Zod)
     status/           frise et récapitulatif de la page d'attente
     foundation/       espace Fondation : comptes à valider (liste, détail, validation, refus)
+    speaker/          espace intervenant : agenda, créneaux, demandes reçues
+  nav/                compteurs de la navigation (badges)
   routes/             définition des routes et gardes
   lib/                utilitaires (cn, QueryClient, données de référence, dates, erreurs de formulaire)
   styles/theme.css    jetons de design (couleurs, rayons, ombres, espacements, polices)
@@ -104,7 +106,10 @@ src/
 | `/mot-de-passe-obligatoire` | connecté, `mustChangePassword` | Changement de mot de passe obligatoire |
 | `/fondation` | connecté, validé, rôle FOUNDATION | Redirige vers `/fondation/comptes` |
 | `/fondation/comptes` | connecté, validé, rôle FOUNDATION | Comptes à valider (`?onglet=`, `type=`, `decision=`, `page=`, `compte=`) |
-| `/ecole`, `/intervenant`, `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
+| `/intervenant` | connecté, validé, rôle SPEAKER | Redirige vers `/intervenant/agenda` |
+| `/intervenant/agenda` | connecté, validé, rôle SPEAKER | Mon agenda (`?mois=AAAA-MM`) |
+| `/intervenant/demandes` | connecté, validé, rôle SPEAKER | Demandes reçues (`?onglet=`, `page=`, `demande=`) |
+| `/ecole`, `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
 
 ## Règles de session
 

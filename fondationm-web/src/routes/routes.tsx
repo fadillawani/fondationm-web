@@ -4,6 +4,8 @@ import { PATHS, ROLE_HOME } from '../auth/roles'
 import { AppLayout } from '../components/layout/AppLayout'
 import { RootLayout } from '../components/layout/RootLayout'
 import { AccountsPage } from '../pages/foundation/AccountsPage'
+import { AgendaPage } from '../pages/speaker/AgendaPage'
+import { RequestsPage } from '../pages/speaker/RequestsPage'
 import { HomePage } from '../pages/HomePage'
 import { LoginPage } from '../pages/LoginPage'
 import { MustChangePasswordPage } from '../pages/MustChangePasswordPage'
@@ -23,6 +25,13 @@ function rolePages(role: Role): RouteObject[] {
       // Le tableau de bord viendra plus tard : l'accueil de la Fondation ouvre les comptes à valider.
       { path: ROLE_HOME.FOUNDATION, element: <Navigate to={PATHS.foundationAccounts} replace /> },
       { path: PATHS.foundationAccounts, element: <AccountsPage /> },
+    ]
+  }
+  if (role === 'SPEAKER') {
+    return [
+      { path: ROLE_HOME.SPEAKER, element: <Navigate to={PATHS.speakerAgenda} replace /> },
+      { path: PATHS.speakerAgenda, element: <AgendaPage /> },
+      { path: PATHS.speakerRequests, element: <RequestsPage /> },
     ]
   }
   return [{ path: ROLE_HOME[role], element: <HomePage /> }]
