@@ -40,9 +40,14 @@ export function useMe() {
   return useQuery(meQuery)
 }
 
+/**
+ * Termine la session : le jeton est effacé tout de suite, les requêtes en cours sont annulées.
+ * Le cache est vidé par RequireAuth quand l'espace connecté se démonte (voir routes/guards.tsx) :
+ * le vider avant aurait fait relancer, sans jeton, les requêtes des pages encore affichées.
+ */
 export function endSession(queryClient: QueryClient): void {
   tokenStorage.clear()
-  queryClient.clear()
+  void queryClient.cancelQueries()
 }
 
 function storeToken(token: Schemas['TokenResponse']): void {

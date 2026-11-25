@@ -86,6 +86,7 @@ src/
     status/           frise et récapitulatif de la page d'attente
     foundation/       espace Fondation : comptes à valider (liste, détail, validation, refus)
     speaker/          espace intervenant : agenda, créneaux, demandes reçues
+    school/           espace établissement : annuaire, carte du réseau, demande de rencontre
   nav/                compteurs de la navigation (badges)
   routes/             définition des routes et gardes
   lib/                utilitaires (cn, QueryClient, données de référence, dates, erreurs de formulaire)
@@ -109,7 +110,10 @@ src/
 | `/intervenant` | connecté, validé, rôle SPEAKER | Redirige vers `/intervenant/agenda` |
 | `/intervenant/agenda` | connecté, validé, rôle SPEAKER | Mon agenda (`?mois=AAAA-MM`) |
 | `/intervenant/demandes` | connecté, validé, rôle SPEAKER | Demandes reçues (`?onglet=`, `page=`, `demande=`) |
-| `/ecole`, `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
+| `/ecole` | connecté, validé, rôle SCHOOL | Redirige vers `/ecole/intervenants` |
+| `/ecole/intervenants` | connecté, validé, rôle SCHOOL | Intervenants disponibles (`?zone=`, `secteur=`, `format=`, `q=`) |
+| `/ecole/intervenants/{id}/demande` | connecté, validé, rôle SCHOOL | Demander une rencontre |
+| `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
 
 ## Règles de session
 

@@ -54,8 +54,8 @@ describe('Espace intervenant — navigation', () => {
     mockApi({ 'GET /api/me': () => jsonResponse(200, makeMe()) })
     const { router } = renderApp('/intervenant/agenda', { token: true })
 
-    expect(await screen.findByRole('heading', { name: 'Bonjour Lycée des Tisserands !' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/ecole')
+    expect(await screen.findByRole('heading', { name: 'Intervenants disponibles' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ecole/intervenants')
   })
 })
 

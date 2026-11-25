@@ -31,8 +31,8 @@ describe('Gardes de routes', () => {
     mockApi({ 'GET /api/me': () => jsonResponse(200, makeMe()) })
     const { router } = renderApp('/compte-en-attente', { token: true })
 
-    expect(await screen.findByRole('heading', { name: /^Bonjour/ })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/ecole')
+    expect(await screen.findByRole('heading', { name: 'Intervenants disponibles' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ecole/intervenants')
   })
 
   it('déconnecte et affiche « Session expirée » sur un 401', async () => {
@@ -65,7 +65,7 @@ describe('Gardes de routes', () => {
       'GET /api/school/dashboard': () => errorResponse(403, 'PASSWORD_CHANGE_REQUIRED'),
     })
     const { router } = renderApp('/ecole', { token: true })
-    await screen.findByRole('heading', { name: /^Bonjour/ })
+    await screen.findByRole('heading', { name: 'Intervenants disponibles' })
 
     me = makeMe({ mustChangePassword: true })
     await act(() => api.GET('/api/school/dashboard'))
@@ -83,7 +83,7 @@ describe('Gardes de routes', () => {
       'GET /api/school/dashboard': () => errorResponse(403, 'ACCOUNT_NOT_VALIDATED'),
     })
     const { router } = renderApp('/ecole', { token: true })
-    await screen.findByRole('heading', { name: /^Bonjour/ })
+    await screen.findByRole('heading', { name: 'Intervenants disponibles' })
 
     me = makeMe({ status: 'PENDING' })
     await act(() => api.GET('/api/school/dashboard'))

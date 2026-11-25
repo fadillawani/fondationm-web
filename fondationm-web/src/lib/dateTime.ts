@@ -12,6 +12,10 @@ const WEEKDAY_DAY_MONTH_YEAR = new Intl.DateTimeFormat('fr-FR', {
 })
 const SHORT_DAY = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
 const MONTH_YEAR = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' })
+const WEEKDAY_SHORT = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' })
+const MONTH_SHORT = new Intl.DateTimeFormat('fr-FR', { month: 'short' })
+const WEEKDAY_LONG = new Intl.DateTimeFormat('fr-FR', { weekday: 'long' })
+const DAY_MONTH = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' })
 
 export const MINUTE_MS = 60_000
 
@@ -45,6 +49,28 @@ export function formatDayWithYear(date: Date): string {
 /** « Mar. 24 nov. ». */
 export function formatShortDay(date: Date): string {
   return capitalize(SHORT_DAY.format(date))
+}
+
+/** « Lun 23 nov » (sans points d'abréviation). */
+export function formatCompactDay(date: Date): string {
+  const weekday = WEEKDAY_SHORT.format(date).replace('.', '')
+  const month = MONTH_SHORT.format(date).replace('.', '')
+  return `${capitalize(weekday)} ${date.getDate()} ${month}`
+}
+
+/** « Lundi ». */
+export function formatWeekday(date: Date): string {
+  return capitalize(WEEKDAY_LONG.format(date))
+}
+
+/** « 23 novembre ». */
+export function formatDayMonth(date: Date): string {
+  return DAY_MONTH.format(date)
+}
+
+/** « lundi 23 novembre » (dans une phrase). */
+export function formatDayInline(date: Date): string {
+  return WEEKDAY_DAY_MONTH.format(date)
 }
 
 /** « Novembre 2026 ». */

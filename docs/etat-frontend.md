@@ -1,6 +1,6 @@
 # État du frontend — Fondation M
 
-Dernière mise à jour : 24 novembre 2026 — lot F3 (espace intervenant : agenda, créneaux, demandes reçues).
+Dernière mise à jour : 24 novembre 2026 — lot F4 (espace établissement : intervenants et demande de rencontre).
 
 ## Avancement
 
@@ -11,10 +11,11 @@ Dernière mise à jour : 24 novembre 2026 — lot F3 (espace intervenant : agend
 | F1  | Inscription établissement et intervenant, pages « en attente » et « refusé », changement de mot de passe obligatoire | Terminé |
 | F2  | Espace Fondation : navigation, « Comptes à valider » (liste, détail, validation, refus motivé) | Terminé |
 | F3  | Espace intervenant : navigation, « Mon agenda » (calendrier, créneaux), « Demandes reçues » (accepter, refuser) | Terminé |
-| F4+ | Autres écrans métier (école, tableau de bord Fondation, rencontres, retours, donateurs…) | À faire  |
+| F4  | Espace établissement : « Intervenants disponibles » (annuaire, carte du réseau), « Demander une rencontre » ; thèmes de barre latérale par persona | Terminé |
+| F5+ | Autres écrans métier (mes rencontres, mon établissement, tableau de bord Fondation, retours, donateurs…) | À faire  |
 
-Vérifications au moment de la livraison de F3 : `npm run build`, `npm run lint` et `npm test`
-(114 tests) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F4 : `npm run build`, `npm run lint` et `npm test`
+(139 tests) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -33,6 +34,40 @@ Vérifications au moment de la livraison de F3 : `npm run build`, `npm run lint`
   - Tests ajoutés : `/api/me` avec `profile: null` (FOUNDATION → `/fondation`), avec
     `rejectionReason: null` (SCHOOL PENDING → `/compte-en-attente`), réponse illisible affichée comme
     `UNEXPECTED_ERROR` et non comme panne réseau ; tests unitaires de `errors.ts` mis à jour. 74 tests.
+
+- **24/11/2026 — déconnexion : requêtes relancées sans jeton.** `endSession` vidait le cache TanStack
+  Query avant que les pages connectées soient démontées : leurs requêtes se reconstruisaient et partaient
+  sans jeton (avec le vrai serveur : 401, puis « Session expirée » au lieu d'une déconnexion simple).
+  Décelé par le test « efface le jeton et le cache à la déconnexion » une fois `/ecole` devenue une vraie
+  page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
+  quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
+  déconnexion depuis l'annuaire.
+
+## Ce que F4 livre
+
+- **Thèmes de barre latérale par persona** (`components/layout/roleTheme.ts`, une seule table) appliqués
+  à toutes les personas, F2 et F3 compris ; navigation basse de la même couleur que la barre latérale.
+- **Navigation école** (sous-titre « Espace établissement ») : « Intervenants », « Mes rencontres »,
+  « Retours d'expérience », « Mon établissement » (« Bientôt », sans page). Carte utilisateur : initiales et
+  nom de l'établissement, « Établissement · {ville} ». Navigation basse : 5 entrées, pas de « Plus ».
+- **`/ecole`** redirige vers **`/ecole/intervenants`** ; `/ecole/intervenants` et
+  `/ecole/intervenants/{id}/demande` sont réservées au rôle SCHOOL.
+- **`/ecole/intervenants`** (« Intervenants disponibles ») :
+  - recherche (`q`), filtres « Zone » (select), « Secteur » (pastilles `aria-pressed`), « Format »
+    (select), dans l'URL : `?zone=ma-zone|toutes|{ville}&secteur={SECTOR}&format=IN_PERSON|ONLINE&q=` ;
+    sur téléphone, boutons-filtres qui ouvrent une feuille (Modal) ;
+  - bandeau `role="status"` du dernier refus par un intervenant (14 jours), « Voir la demande » « Bientôt » ;
+  - « Le réseau près de chez vous » : carte SVG de la maquette (cercles par ville, ville choisie en
+    terracotta avec anneau), « {n} bénévoles au Sénégal », légende, panneau de la ville (jusqu'à
+    4 personnes, « et {n} autres personnes »), pastilles « Choisir une ville » (villes hors carte comprises) ;
+  - sections « À {ville} · {n} intervenants » puis « Autres zones · disponibles en ligne » ; cartes :
+    avatar et libellé aux couleurs du secteur, nom, métier, 3 compétences, « Prochain créneau · Lun 30 nov ·
+    9h30 », « {n} créneaux libres », « Demander une rencontre ».
+- **`/ecole/intervenants/{id}/demande`** (« Demander une rencontre ») : fil d'Ariane (PC) ou « Retour aux
+  intervenants » (téléphone), carte « Vous invitez » (citation = `motivation`), 4 blocs numérotés
+  (« Quand ? », « Pour quelle classe ? » avec « Ajouter une classe », « Présentez vos élèves » avec le
+  format, « Vérifiez votre demande » mis à jour en direct), « Envoyer la demande » / « Annuler »,
+  écran « Demande envoyée ».
 
 ## Ce que F3 livre
 
@@ -247,12 +282,56 @@ Vérifications au moment de la livraison de F3 : `npm run build`, `npm run lint`
 34. **Navigation** : les compteurs sont fournis par `nav/badges.ts` (la mise en page n'importe plus de
     page). Regroupement sous « Plus » seulement si la navigation basse dépasse 5 entrées (Fondation).
 35. **Tests** : `<dialog>` (`showModal` / `close`) simulé dans `src/test/setup.ts`, jsdom ne l'implémentant pas.
+36. **Thèmes par persona** (`components/layout/roleTheme.ts`) : barre latérale, navigation basse, lien
+    actif, pastille de compteur, carte utilisateur et avatar. Contrastes vérifiés (texte ≥ 4,5:1) :
+    - École : crème sur indigo 9,24 ; actif blanc sur terracotta 5,22 ; pastille encre sur orange 5,71 ;
+      carte crème / blanc sur encre 13,14 / 16,08 ; avatar indigo sur crème 9,24.
+    - Intervenant : encre sur orange 5,71 ; actif crème sur encre 13,14 ; pastille encre sur blanc 16,08.
+    - Fondation : blanc sur terracotta 5,22 ; actif 13,14 ; pastille encre sur crème 13,14 ; carte blanc /
+      crème sur `#8F3720` 7,68 / 6,27 ; **avatar terracotta `#B8492A` sur crème `#FDE7A6` : 4,26 (échec,
+      couleur conservée, voir point ouvert 16)**.
+    - Donateur : blanc sur vert 6,14 ; carte blanc / crème sur `#3B5221` 8,70 / 7,11 ; avatar vert sur crème 5,01.
+    - Élève : encre sur jaune 7,50 ; actif 13,14 ; carte 13,14.
+    Les entrées « Bientôt » gardent la couleur du texte (plus d'opacité réduite, qui faisait chuter le contraste).
+37. **Couleurs par secteur** (`pages/school/sectorStyle.ts`) : contrastes tous ≥ 4,5:1 (avatars 5,01 à
+    9,24 ; libellés sur blanc 5,65 à 11,31 et sur `#F7F3EA` ≥ 5,10). Les 5 secteurs sans couleur dans la
+    maquette (BTP et industrie, Commerce, Éducation, Arts et médias, Autre) : avatar encre / crème, libellé encre.
+38. **Zones de l'annuaire** : « ma zone » = deux requêtes, `city` + `country` de l'école, puis
+    `format=ONLINE` sans ville (intervenants de ma ville exclus côté client, comparaison sans casse ni
+    accents) ; la seconde section disparaît si « Format » vaut « En classe ». « Toutes les zones » : une
+    liste sans filtre de ville ; une ville choisie : une liste filtrée par cette ville (et son pays, pris
+    dans les statistiques). Toutes les pages sont chargées (`size=100`, 25 pages au plus). Sans ville
+    d'école connue, « Toutes les zones » par défaut.
+39. **Un seul créneau par carte** (`nextSlotStartAt` + `availableSlotsCount`), sans format : l'annuaire ne
+    renvoie ni la liste des créneaux ni leurs formats (écart ; aucun appel par intervenant).
+40. **Classes** : « Ajouter une classe » dans l'étape 2 (intitulé 1–100, filière 1–100, effectif 1–500 ;
+    `POST /api/school/classes`), classe créée sélectionnée automatiquement. Ce n'est pas un `<form>`
+    (imbriqué dans le formulaire de demande) : Entrée dans ses champs ajoute la classe.
+41. **Formulaire de demande** : créneau et classe obligatoires ; format imposé par le créneau
+    (IN_PERSON / ONLINE) ou à choisir (BOTH, pastilles « En classe / En ligne », sans valeur par défaut),
+    toujours envoyé ; lieu obligatoire « En classe » (1–150), facultatif en ligne ; message facultatif
+    (1000 max). Lieu et message vides ne sont pas envoyés (`minLength: 1` du contrat).
+42. **Bandeau de refus** : rencontre REFUSED la plus récente avec `closedBy=SPEAKER` et `refusedAt` de
+    14 jours au plus (`GET /api/school/meetings?status=REFUSED`, toutes les pages). Pas de mémoire « déjà vu ».
+43. **Erreurs de la demande, par code quel que soit le statut HTTP** : `SLOT_NOT_AVAILABLE`, `SLOT_PASSED`
+    (message dédié, sélection retirée, créneaux rechargés), `CLASS_SLOT_OVERLAP`, `CLASS_FULL` (messages
+    dédiés), `STUDENT_COUNT_TOO_LOW` (message du serveur, seuil inconnu) ; tout autre code : message du
+    serveur ; `fieldErrors` sous les champs (`slotId`, `classId`, `format`, `place`, `message`).
+44. **Carte** : SVG de la maquette repris tel quel (`viewBox="-24 -6 410 284"`, polygones, textes, table des
+    8 villes dans `pages/school/mapCities.ts`). Rayon `min(21, 7,5 + 2,8·√n)` ; nombre en 14 / 11 / 10
+    selon le rayon ; étiquettes 900 / 12 (Dakar, Saint-Louis) ou 800 / 11, agrandies à 15 / 14 sous 768 px.
+    Comptes tirés de `byCity` (Sénégal ou pays vide) ; villes absentes de la table : pastilles seulement.
+    La carte est une image (`role="img"`, libellé listant les villes) ; le choix de ville passe par les pastilles.
+45. **Tests** : `mockApi` répond par défaut (listes vides) à l'annuaire, aux statistiques et aux rencontres
+    de l'école, pour les tests de gardes qui aboutissent sur `/ecole` ; les tests de l'école les remplacent.
+46. **Fin de session** : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
+    quand l'espace connecté se démonte (voir « Corrections »).
 
 ## Écarts
 
 - `--legacy-peer-deps` remplacé par l'exécution `npx` isolée (voir décision 3).
-- La navigation des rôles école, donateur et élève ne contient que « Accueil » : les entrées viendront
-  avec leurs écrans.
+- La navigation des rôles donateur et élève ne contient que « Accueil » : les entrées viendront avec
+  leurs écrans.
 
 ## Écarts maquette / backend
 
@@ -277,6 +356,18 @@ Vérifications au moment de la livraison de F3 : `npm run build`, `npm run lint`
 | Invite « Partager mon retour » | Pas d'indicateur dans les rencontres ; seulement `/api/speaker/feedbacks/awaiting` | Omise (décision 33) |
 | Agenda d'un mois donné | Pas de filtre par période sur les créneaux ni sur les rencontres | Toutes les pages chargées une fois (point ouvert 9) |
 | Créneaux libres passés | `includePast=false` par défaut | Non chargés ; les rencontres passées restent visibles |
+| Filtre « Date » de l'annuaire (téléphone) | Aucun filtre par date sur `GET /api/school/speakers` | Bouton omis |
+| « Ma zone d'abord » | Aucun tri documenté | Deux requêtes (décision 38) |
+| « Prochains créneaux · {format} » (2 créneaux) sur chaque carte | L'annuaire ne renvoie que `nextSlotStartAt` et `availableSlotsCount` | Un créneau, sans format (décision 39). **Backend : prochains créneaux et formats dans l'annuaire.** |
+| Surtitre « Disponibles surtout en ligne » du panneau de ville | Aucun format dans les statistiques ni dans l'annuaire | Omis ; « Votre zone » ou « Autre zone · en ligne possible » |
+| Position des villes sur la carte | Aucune coordonnée dans `CityCount` | Table de la maquette (8 villes) ; autres villes en pastilles seulement |
+| Citation de présentation de l'intervenant | `motivation` | Affichée si renseignée |
+| Prénom et nom du référent (carte utilisateur) | Absents (déjà noté) | Initiales et nom de l'établissement |
+| Lien « Voir la demande » du bandeau de refus | « Mes rencontres » pas encore livré | Affiché désactivé, « Bientôt » |
+| Classe : intitulé | `CreateClassRequest.title` accepte une chaîne vide (`minLength: 0`) | Obligatoire côté client (1–100) |
+| Classe : filière | `fieldOfStudy` existe côté école (absent de `ClassInfo` côté intervenant) | Demandée à la création, non affichée dans le choix |
+| Codes d'erreur de `POST /api/school/meetings` | Aucun dans le contrat ; statut HTTP non garanti | Traités par code (décision 43) |
+| Libellé « SÉNÉGAL » de la carte (`#B8AE98` sur `#F7F3EA`) | — | Contraste 1,99:1, couleur conservée (point ouvert 16) |
 | Code d'erreur « e-mail déjà utilisé » | Non documenté (aucun 409 ni code dans le contrat) | Règle de la décision 16. Code réellement observé : `EMAIL_ALREADY_USED` (HTTP 409, message « Cette adresse e-mail est déjà utilisée. ») |
 
 ## Points ouverts
@@ -311,3 +402,20 @@ Vérifications au moment de la livraison de F3 : `npm run build`, `npm run lint`
 11. **Rafraîchissement** : pas de rechargement périodique ; une décision de la Fondation ou une nouvelle
     demande n'apparaît qu'après une action ou un rechargement de la page.
 12. **Codes d'erreur des créneaux et rencontres** (décision 32) à documenter dans le contrat.
+13. **`format=ONLINE` et les créneaux BOTH (non vérifié).** Aucun compte école de test n'était disponible
+    pour un vrai appel. Vérification : se connecter avec un compte école validé, puis
+    `GET /api/school/speakers?format=ONLINE` avec `Authorization: Bearer {jeton}` ; un intervenant dont les
+    créneaux sont tous BOTH doit y figurer. S'il manque, la section « Autres zones · disponibles en ligne »
+    l'omet à tort : à corriger côté backend (ou appeler aussi sans filtre de format).
+14. **Annuaire** : pas de tri, pas de prochains créneaux ni de formats par intervenant, pas de filtre par
+    date, un seul secteur par requête ; taille de page maximale non documentée (100 demandé).
+15. **Codes d'erreur de la demande** à documenter (`SLOT_NOT_AVAILABLE`, `SLOT_PASSED`,
+    `CLASS_SLOT_OVERLAP`, `CLASS_FULL`, `STUDENT_COUNT_TOO_LOW`, statut HTTP et seuil d'effectif) ; le sens
+    exact de `CLASS_FULL` est supposé (« la classe ne peut plus recevoir de demande »).
+16. **Contrastes en échec, couleurs conservées comme demandé** : avatar de la carte Fondation
+    (terracotta sur crème, 4,26:1) et libellé décoratif « SÉNÉGAL » de la carte (1,99:1).
+17. **Comparaison maquette des bandeaux d'en-tête et pastilles (intervenant, Fondation)** : la maquette
+    visuelle n'est pas dans le dépôt ; seuls les éléments décrits dans les cahiers des charges ont pu être
+    vérifiés. Écarts connus : l'en-tête mobile est le même pour toutes les personas (barre blanche, logo
+    terracotta, rôle) ; les couleurs des états de l'agenda (F3) et des onglets en pastilles (F2, F3 : fond
+    encre, texte blanc) viennent des cahiers des charges, sans maquette de référence pour les autres détails.

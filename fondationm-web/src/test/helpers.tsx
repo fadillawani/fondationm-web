@@ -213,10 +213,24 @@ export function speakerAccount(overrides: Partial<AccountJson> = {}): AccountJso
   }
 }
 
+function emptyPage(): Response {
+  return jsonResponse(200, { content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 })
+}
+
+/**
+ * Accueil de l'école (/ecole → /ecole/intervenants) : réponses vides par défaut, pour que les tests
+ * qui y aboutissent (gardes, redirections) n'aient pas à simuler l'annuaire. Un test peut les remplacer.
+ */
+const SCHOOL_HOME_DEFAULTS: Record<string, Handler> = {
+  'GET /api/school/speakers': emptyPage,
+  'GET /api/school/meetings': emptyPage,
+  'GET /api/school/speakers/stats': () => jsonResponse(200, { total: 0, byCity: [], bySector: [] }),
+}
+
 export function mockApi(handlers: Record<string, Handler>) {
   const fetchMock = vi.fn<(request: Request, init?: RequestInit) => Promise<Response>>(async (request, init) => {
     const key = `${request.method} ${new URL(request.url).pathname}`
-    const handler = handlers[key]
+    const handler = handlers[key] ?? SCHOOL_HOME_DEFAULTS[key]
     if (handler === undefined) throw new Error(`Appel non simulé : ${key}`)
     return handler(request, init)
   })

@@ -38,8 +38,8 @@ describe('Changement de mot de passe obligatoire', () => {
 
     await fillForm(user)
 
-    expect(await screen.findByRole('heading', { name: 'Bonjour Lycée des Tisserands !' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/ecole')
+    expect(await screen.findByRole('heading', { name: 'Intervenants disponibles' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ecole/intervenants')
     expect(bodies).toEqual([{ currentPassword: FAKE_PASSWORD, newPassword: FAKE_NEW_PASSWORD }])
     expect(tokenStorage.get()).toBe(FAKE_NEW_TOKEN)
 
@@ -82,7 +82,7 @@ describe('Changement de mot de passe obligatoire', () => {
     mockApi({ 'GET /api/me': () => jsonResponse(200, makeMe()) })
     const { router } = renderApp('/mot-de-passe-obligatoire', { token: true })
 
-    expect(await screen.findByRole('heading', { name: 'Bonjour Lycée des Tisserands !' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/ecole')
+    expect(await screen.findByRole('heading', { name: 'Intervenants disponibles' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ecole/intervenants')
   })
 })

@@ -4,8 +4,8 @@ import { useCurrentUser } from '../../auth/currentUserContext'
 import { useLogout } from '../../auth/hooks'
 import { ROLE_LABEL, ROLE_TAGLINE, accountCard, navItemsFor, type NavIcon, type NavItem } from '../../auth/roles'
 import { cn } from '../../lib/cn'
-import { useNavBadges } from '../../nav/badges'
 import { initialsOf } from '../../lib/initials'
+import { useNavBadges } from '../../nav/badges'
 import {
   AccountsIcon,
   DashboardIcon,
@@ -18,6 +18,7 @@ import {
   RequestsIcon,
 } from './icons'
 import { Logo } from './Logo'
+import { ROLE_THEME, type RoleTheme } from './roleTheme'
 
 const ICONS: Record<NavIcon, ComponentType<{ className?: string }>> = {
   home: HomeIcon,
@@ -30,23 +31,17 @@ const ICONS: Record<NavIcon, ComponentType<{ className?: string }>> = {
 }
 
 const SIDEBAR_ITEM =
-  'flex min-h-touch items-center gap-3 rounded-button px-4 font-extrabold transition-colors focus-visible:outline-cream'
+  'flex min-h-touch items-center gap-3 rounded-button px-4 font-extrabold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2'
 
-function sidebarLinkClass({ isActive }: { isActive: boolean }): string {
-  return cn(SIDEBAR_ITEM, isActive ? 'bg-indigo text-cream' : 'text-white hover:bg-white/10')
-}
+const BOTTOM_ITEM =
+  'relative flex min-h-touch flex-1 flex-col items-center justify-center gap-0.5 rounded-button px-1 py-2 text-center text-xs font-extrabold focus-visible:outline-2 focus-visible:-outline-offset-2'
 
-function bottomLinkClass({ isActive }: { isActive: boolean }): string {
-  return cn(
-    'relative flex min-h-touch flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-center text-xs font-extrabold',
-    isActive ? 'text-indigo' : 'text-muted',
-  )
-}
-
-function CountBadge({ count, className }: { count: number | undefined; className?: string }) {
+function CountBadge({ count, theme, className }: { count: number | undefined; theme: RoleTheme; className?: string }) {
   if (count === undefined || count === 0) return null
   return (
-    <span className={cn('inline-flex min-w-6 items-center justify-center rounded-pill bg-orange px-1.5 text-xs font-black text-ink', className)}>
+    <span
+      className={cn('inline-flex min-w-6 items-center justify-center rounded-pill px-1.5 text-xs font-black', theme.badge, className)}
+    >
       <span aria-hidden="true">{count}</span>
       <span className="sr-only">{`${count} en attente`}</span>
     </span>
@@ -55,14 +50,14 @@ function CountBadge({ count, className }: { count: number | undefined; className
 
 function SoonPill({ className }: { className?: string }) {
   return (
-    <span className={cn('rounded-pill bg-white/15 px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.06em]', className)}>
+    <span className={cn('rounded-pill px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.06em]', className)}>
       Bientôt
     </span>
   )
 }
 
 /** Fenêtre « Plus » de la navigation basse : entrées désactivées. */
-function MoreMenu({ items }: { items: NavItem[] }) {
+function MoreMenu({ items, theme }: { items: NavItem[]; theme: RoleTheme }) {
   const [open, setOpen] = useState(false)
   const menuId = useId()
   useEffect(() => {
@@ -81,7 +76,7 @@ function MoreMenu({ items }: { items: NavItem[] }) {
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((value) => !value)}
-        className={bottomLinkClass({ isActive: open })}
+        className={cn(BOTTOM_ITEM, theme.focus, open ? theme.active : theme.hover)}
       >
         <MoreIcon className="size-6" />
         Plus
@@ -89,16 +84,13 @@ function MoreMenu({ items }: { items: NavItem[] }) {
       <div
         id={menuId}
         hidden={!open}
-        className="absolute inset-x-3 bottom-full mb-2 rounded-block border-2 border-line bg-surface p-3 shadow-raised"
+        className="absolute inset-x-3 bottom-full mb-2 rounded-block border-2 border-line bg-surface p-3 text-ink shadow-raised"
       >
         <ul aria-label="Autres rubriques" className="flex flex-col gap-1">
           {items.map((item) => {
             const Icon = ICONS[item.icon]
             return (
-              <li
-                key={item.label}
-                className="flex min-h-touch items-center gap-3 rounded-button px-3 font-extrabold text-muted"
-              >
+              <li key={item.label} className="flex min-h-touch items-center gap-3 rounded-button px-3 font-extrabold text-muted">
                 <Icon className="size-5" />
                 <span className="flex-1">{item.label}</span>
                 <SoonPill className="bg-line text-muted" />
@@ -114,6 +106,7 @@ function MoreMenu({ items }: { items: NavItem[] }) {
 export function AppLayout() {
   const user = useCurrentUser()
   const logout = useLogout()
+  const theme = ROLE_THEME[user.role]
   const items = navItemsFor(user.role)
   const badges = useNavBadges(user.role)
   const badgeCount = (item: NavItem) => (item.badge === undefined ? undefined : badges[item.badge])
@@ -123,6 +116,10 @@ export function AppLayout() {
   // sont regroupées sous « Plus ».
   const groupDisabled = items.length + 1 > 5
   const card = accountCard(user)
+  const sidebarLink = ({ isActive }: { isActive: boolean }) =>
+    cn(SIDEBAR_ITEM, theme.focus, isActive ? theme.active : theme.hover)
+  const bottomLink = ({ isActive }: { isActive: boolean }) =>
+    cn(BOTTOM_ITEM, theme.focus, isActive ? theme.active : theme.hover)
 
   return (
     <div className="min-h-dvh bg-canvas lg:flex">
@@ -133,50 +130,59 @@ export function AppLayout() {
         Aller au contenu
       </a>
 
-      <aside className="hidden lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-sidebar lg:shrink-0 lg:flex-col lg:gap-8 lg:overflow-y-auto lg:bg-terra-dark lg:px-5 lg:py-8">
-        <Logo className="px-4 text-cream" subtitle={ROLE_TAGLINE[user.role]} />
+      <aside
+        className={cn(
+          'hidden lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-sidebar lg:shrink-0 lg:flex-col lg:gap-8 lg:overflow-y-auto lg:px-5 lg:py-8',
+          theme.surface,
+        )}
+      >
+        <Logo className="px-4" subtitle={ROLE_TAGLINE[user.role]} />
         <nav aria-label="Navigation principale" className="flex-1">
           <ul className="flex flex-col gap-1.5">
             {items.map((item) => {
               const Icon = ICONS[item.icon]
               if (item.to === undefined) {
                 return (
-                  <li
-                    key={item.label}
-                        className={cn(SIDEBAR_ITEM, 'cursor-not-allowed text-white/60')}
-                  >
+                  <li key={item.label} className={cn(SIDEBAR_ITEM, 'cursor-not-allowed')}>
                     <Icon className="size-5" />
                     <span className="flex-1">{item.label}</span>
-                    <SoonPill className="text-white/80" />
+                    <SoonPill className={theme.soon} />
                   </li>
                 )
               }
               return (
                 <li key={item.label}>
-                  <NavLink to={item.to} className={sidebarLinkClass}>
+                  <NavLink to={item.to} className={sidebarLink}>
                     <Icon className="size-5" />
                     <span className="flex-1">{item.label}</span>{' '}
-                    <CountBadge count={badgeCount(item)} />
+                    <CountBadge count={badgeCount(item)} theme={theme} />
                   </NavLink>
                 </li>
               )
             })}
           </ul>
         </nav>
-        <div className="flex flex-col gap-2 border-t border-white/20 pt-5">
-          <div className="flex items-center gap-3 px-2">
+        <div className={cn('flex flex-col gap-2 rounded-block p-3', theme.card)}>
+          <div className="flex items-center gap-3">
             <span
               aria-hidden="true"
-              className="inline-flex size-10 shrink-0 items-center justify-center rounded-pill bg-cream font-display text-lg text-terra-dark"
+              className={cn(
+                'inline-flex size-10 shrink-0 items-center justify-center rounded-pill font-display text-lg',
+                theme.avatar,
+              )}
             >
               {initialsOf(card.name, card.initials)}
             </span>
             <div className="min-w-0">
-              <p className="truncate font-extrabold text-white">{card.name}</p>
-              <p className="truncate text-sm font-bold text-cream">{card.detail || ROLE_LABEL[user.role]}</p>
+              <p className={cn('truncate font-extrabold', theme.cardName)}>{card.name}</p>
+              <p className={cn('truncate text-sm font-bold', theme.cardDetail)}>{card.detail || ROLE_LABEL[user.role]}</p>
             </div>
           </div>
-          <button type="button" onClick={logout} className={cn(SIDEBAR_ITEM, 'text-white hover:bg-white/10')}>
+          <button
+            type="button"
+            onClick={logout}
+            className={cn(SIDEBAR_ITEM, 'px-2 hover:bg-white/10 focus-visible:outline-cream', theme.cardName)}
+          >
             <LogoutIcon className="size-5" />
             Se déconnecter
           </button>
@@ -195,17 +201,14 @@ export function AppLayout() {
 
       <nav
         aria-label="Navigation principale"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className={cn('fixed inset-x-0 bottom-0 z-40 px-1 pb-[env(safe-area-inset-bottom)] pt-1 lg:hidden', theme.surface)}
       >
-        <ul className="relative flex">
+        <ul className="relative flex gap-1">
           {(groupDisabled ? activeItems : items).map((item) => {
             const Icon = ICONS[item.icon]
             if (item.to === undefined) {
               return (
-                <li
-                  key={item.label}
-                  className={cn(bottomLinkClass({ isActive: false }), 'cursor-not-allowed opacity-70')}
-                >
+                <li key={item.label} className={cn(BOTTOM_ITEM, 'cursor-not-allowed')}>
                   <Icon className="size-6" />
                   {item.label}
                   <span className="text-[10px] font-black uppercase">Bientôt</span>
@@ -214,19 +217,19 @@ export function AppLayout() {
             }
             return (
               <li key={item.label} className="flex flex-1">
-                <NavLink to={item.to} className={bottomLinkClass}>
+                <NavLink to={item.to} className={bottomLink}>
                   <span className="relative">
                     <Icon className="size-6" />
-                    <CountBadge count={badgeCount(item)} className="absolute -right-4 -top-2" />
+                    <CountBadge count={badgeCount(item)} theme={theme} className="absolute -right-4 -top-2" />
                   </span>{' '}
                   {item.label}
                 </NavLink>
               </li>
             )
           })}
-          {groupDisabled && disabledItems.length > 0 && <MoreMenu items={disabledItems} />}
+          {groupDisabled && disabledItems.length > 0 && <MoreMenu items={disabledItems} theme={theme} />}
           <li className="flex flex-1">
-            <button type="button" onClick={logout} className={bottomLinkClass({ isActive: false })}>
+            <button type="button" onClick={logout} className={bottomLink({ isActive: false })}>
               <LogoutIcon className="size-6" />
               Déconnexion
             </button>

@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import type { ReactNode } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, type ReactNode } from 'react'
 import { Navigate, Outlet } from 'react-router'
 import { errorMessage } from '../api/errors'
 import type { Role } from '../auth/currentUser'
@@ -19,6 +19,16 @@ export function GuestOnly({ children }: { children: ReactNode }) {
 export function RequireAuth() {
   const token = tokenStorage.get()
   const me = useQuery({ ...meQuery, enabled: token !== null })
+  const queryClient = useQueryClient()
+
+  // Fin de session : le cache est vidé une fois l'espace connecté démonté, quand plus aucune page
+  // ne peut relancer ses requêtes (sans jeton).
+  useEffect(
+    () => () => {
+      if (tokenStorage.get() === null) queryClient.clear()
+    },
+    [queryClient],
+  )
 
   if (token === null) return <Navigate to={PATHS.login} replace />
 
