@@ -1,0 +1,158 @@
+import { screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { onApiEvent, type ApiEvent } from '../api/events'
+import { tokenStorage } from '../auth/tokenStorage'
+import {
+  FAKE_TOKEN,
+  errorResponse,
+  fillLoginForm,
+  jsonResponse,
+  makeMe,
+  mockApi,
+  renderApp,
+  speakerMe,
+  tokenResponse,
+} from '../test/helpers'
+
+describe('Connexion', () => {
+  it('connecte un référent d’établissement et l’envoie sur son accueil', async () => {
+    const fetchMock = mockApi({
+      'POST /api/auth/login': tokenResponse,
+      'GET /api/me': () => jsonResponse(200, makeMe()),
+    })
+    const { router, user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByRole('heading', { name: 'Bonjour Lycée des Tisserands !' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ecole')
+    expect(tokenStorage.get()).toBe(FAKE_TOKEN)
+
+    const meRequest = fetchMock.mock.calls.map(([request]) => request).find((r) => r.url.endsWith('/api/me'))
+    expect(meRequest?.headers.get('Authorization')).toBe(`Bearer ${FAKE_TOKEN}`)
+  })
+
+  it('connecte un intervenant et l’envoie sur son accueil', async () => {
+    mockApi({
+      'POST /api/auth/login': tokenResponse,
+      'GET /api/me': () => jsonResponse(200, speakerMe),
+    })
+    const { router, user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByRole('heading', { name: 'Bonjour Awa Diallo !' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/intervenant')
+  })
+
+  it('envoie un compte PENDING sur la page d’attente', async () => {
+    mockApi({
+      'POST /api/auth/login': tokenResponse,
+      'GET /api/me': () => jsonResponse(200, makeMe({ status: 'PENDING' })),
+    })
+    const { router, user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByRole('heading', { name: 'Merci Lycée des Tisserands, votre demande est bien arrivée' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/compte-en-attente')
+  })
+
+  it('envoie un compte REJECTED sur la page de refus avec le motif', async () => {
+    mockApi({
+      'POST /api/auth/login': tokenResponse,
+      'GET /api/me': () =>
+        jsonResponse(200, makeMe({ status: 'REJECTED', rejectionReason: 'Établissement hors zone.' })),
+    })
+    const { user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByRole('heading', { name: 'Votre demande n’a pas pu être acceptée' })).toBeInTheDocument()
+    expect(screen.getByText('Établissement hors zone.')).toBeInTheDocument()
+  })
+
+  it('envoie un compte avec mustChangePassword sur la page de changement obligatoire', async () => {
+    mockApi({
+      'POST /api/auth/login': tokenResponse,
+      'GET /api/me': () => jsonResponse(200, makeMe({ mustChangePassword: true })),
+    })
+    const { router, user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Choisissez votre mot de passe' }),
+    ).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/mot-de-passe-obligatoire')
+  })
+
+  it('affiche le délai d’attente en cas de RATE_LIMITED', async () => {
+    mockApi({
+      'POST /api/auth/login': () => errorResponse(429, 'RATE_LIMITED', { 'Retry-After': '30' }),
+    })
+    const { user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Trop de tentatives, réessayez dans 30 secondes.')
+    expect(tokenStorage.get()).toBeNull()
+  })
+
+  it('affiche une erreur de formulaire sur INVALID_CREDENTIALS sans déconnexion automatique', async () => {
+    mockApi({ 'POST /api/auth/login': () => errorResponse(401, 'INVALID_CREDENTIALS') })
+    const events: ApiEvent[] = []
+    const unsubscribe = onApiEvent((event) => events.push(event))
+    const { router, user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('E-mail ou mot de passe incorrect.')
+    expect(events).toEqual([])
+    expect(router.state.location.state).toBeNull()
+    expect(screen.queryByText(/Session expirée/)).not.toBeInTheDocument()
+    unsubscribe()
+  })
+
+  it('affiche les fieldErrors sous les champs concernés', async () => {
+    mockApi({
+      'POST /api/auth/login': () =>
+        jsonResponse(400, {
+          code: 'VALIDATION_ERROR',
+          message: 'Requête invalide',
+          fieldErrors: [{ field: 'email', message: 'Ce domaine e-mail est refusé.' }],
+        }),
+    })
+    const { user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByLabelText(/^E-mail/)).toHaveAccessibleDescription(
+      'Ce domaine e-mail est refusé.',
+    )
+    expect(screen.getByLabelText(/^E-mail/)).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('signale un serveur injoignable et propose de réessayer', async () => {
+    mockApi({
+      'POST /api/auth/login': () => Promise.reject(new TypeError('Failed to fetch')),
+    })
+    const { user } = renderApp('/connexion')
+
+    await fillLoginForm(user)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Impossible de joindre le serveur.')
+    expect(screen.getByRole('button', { name: 'Réessayer' })).toBeInTheDocument()
+  })
+
+  it('valide les champs avant tout appel réseau', async () => {
+    const fetchMock = mockApi({})
+    const { user } = renderApp('/connexion')
+
+    await user.click(screen.getByRole('button', { name: 'Se connecter' }))
+
+    expect(await screen.findByText('Indiquez votre adresse e-mail.')).toBeInTheDocument()
+    expect(screen.getByText('Indiquez votre mot de passe.')).toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+})

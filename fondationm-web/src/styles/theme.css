@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+
+/*
+ * Jetons de design « Marché », extraits de la maquette.
+ * Contrastes vérifiés (texte ≥ 4,5:1) : voir docs/etat-frontend.md.
+ * cream-soft remplace cream pour le texte posé sur terra (cream sur terra : 4,26:1).
+ * Les teintes *-tint sont dérivées de la palette pour les fonds d'alerte et de badge.
+ */
+@theme {
+  --font-display: 'Lilita One', 'Trebuchet MS', system-ui, sans-serif;
+  --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+
+  --color-canvas: #f7f3ea;
+  --color-surface: #ffffff;
+  --color-ink: #1b1f3b;
+  --color-muted: #4a4a57;
+  --color-line: #e6decb;
+
+  --color-terra: #b8492a;
+  --color-terra-dark: #8f3720;
+  --color-terra-tint: #fbe4dc;
+  --color-indigo: #2b337a;
+  --color-indigo-tint: #e3e5f5;
+  --color-cream: #fde7a6;
+  --color-cream-soft: #fff0c4;
+  --color-yellow: #e5a60a;
+  --color-green: #4e6a2c;
+  --color-green-tint: #e8efdc;
+  --color-red: #b81c1f;
+  --color-red-tint: #fbe3e3;
+  --color-orange: #ef7a0a;
+
+  --radius-field: 12px;
+  --radius-button: 16px;
+  --radius-block: 20px;
+  --radius-card: 28px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgb(27 31 59 / 0.05), 0 12px 32px rgb(27 31 59 / 0.08);
+  --shadow-raised: 0 12px 40px rgb(27 31 59 / 0.2);
+
+  --spacing-touch: 2.75rem;
+  --spacing-sidebar: 16rem;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-indigo);
+    outline-offset: 2px;
+  }
+
+  dialog::backdrop {
+    background-color: rgb(27 31 59 / 0.5);
+  }
+}
