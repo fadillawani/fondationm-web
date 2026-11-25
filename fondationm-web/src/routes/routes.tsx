@@ -16,7 +16,7 @@ import { AgendaPage } from '../pages/speaker/AgendaPage'
 import { ImpactPage as DonorImpactPage } from '../pages/donor/ImpactPage'
 import { RequestsPage as DonorRequestsOwnPage } from '../pages/donor/RequestsPage'
 import { RequestsPage } from '../pages/speaker/RequestsPage'
-import { HomePage } from '../pages/HomePage'
+import { StudentHomePage } from '../pages/student/StudentHomePage'
 import { MeetingRequestPage } from '../pages/school/MeetingRequestPage'
 import { EstablishmentPage } from '../pages/school/establishment/EstablishmentPage'
 import { MeetingsPage } from '../pages/school/MeetingsPage'
@@ -76,7 +76,8 @@ function rolePages(role: Role): RouteObject[] {
       { path: PATHS.donorRequests, element: <DonorRequestsOwnPage /> },
     ]
   }
-  return [{ path: ROLE_HOME[role], element: <HomePage /> }]
+  // Élève (F11) : l'accueil provisoire est remplacé par « Mon espace ».
+  return [{ path: ROLE_HOME.STUDENT, element: <StudentHomePage /> }]
 }
 
 export const routes: RouteObject[] = [

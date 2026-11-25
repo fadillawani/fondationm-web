@@ -83,7 +83,7 @@ src/
   components/layout/  mises en page (barre latérale ≥ 1024 px, navigation basse blanche sur mobile,
                       en-tête de page PageTitle, menu du compte UserMenu, thèmes par persona roleTheme)
   components/calendar/ calendrier mensuel accessible partagé (MonthTable)
-  pages/              connexion, accueils provisoires, compte en attente / refusé, mot de passe, 404
+  pages/              connexion, compte en attente / refusé, mot de passe, 404, puis un dossier par espace
     register/         choix du type de compte, inscription établissement et intervenant (schémas Zod)
     status/           frise et récapitulatif de la page d'attente
     foundation/       espace Fondation : comptes à valider (liste, détail, validation, refus)
@@ -91,6 +91,7 @@ src/
     school/           espace établissement : annuaire, carte du réseau, demande de rencontre, mes rencontres,
                       liste des retours d'expérience (feedbacks/)
     donor/            espace donateur : rapport d'impact, retours publiés, mes requêtes
+    student/          espace élève : les rencontres de ma classe (lecture seule)
     feedback/         retours d'expérience de l'école et de l'intervenant : format du commentaire (feedbackFormat),
                       règles du formulaire, brouillon de l'onglet, formulaire et lecture partagés
   nav/                compteurs de la navigation (badges)
@@ -137,7 +138,7 @@ src/
 | `/donateur` | connecté, validé, rôle DONOR | Redirige vers `/donateur/impact` |
 | `/donateur/impact` | connecté, validé, rôle DONOR | Rapport d'impact (`?periode=trimestre\|annee`, `filtre=ecoles\|intervenants`, `retour={id}`) |
 | `/donateur/requetes` | connecté, validé, rôle DONOR | Mes requêtes (`?requete={id}`, `vue=nouvelle`, `objet=`) |
-| `/eleve` | connecté, validé, rôle STUDENT | Accueil provisoire |
+| `/eleve` | connecté, validé, rôle STUDENT | Mon espace : les rencontres de ma classe (`?rencontre={id}`) |
 
 ## Règles de session
 

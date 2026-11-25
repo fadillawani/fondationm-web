@@ -147,12 +147,14 @@ export function AppLayout() {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0">
+      {/* Sans entrée mobile (élève), pas de navigation basse ni de marge réservée. */}
+      <div className={cn('flex min-w-0 flex-1 flex-col lg:pb-0', mobileItems.length > 0 && 'pb-24')}>
         <main id="contenu" tabIndex={-1} className="mx-auto w-full max-w-[1180px] flex-1 px-4 pb-6 pt-[18px] lg:px-8 lg:pb-10 lg:pt-7">
           <Outlet />
         </main>
       </div>
 
+      {mobileItems.length > 0 && (
       <nav
         aria-label="Navigation principale"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface px-2 pb-[max(22px,env(safe-area-inset-bottom))] pt-2 lg:hidden"
@@ -189,6 +191,7 @@ export function AppLayout() {
           })}
         </ul>
       </nav>
+      )}
     </div>
   )
 }

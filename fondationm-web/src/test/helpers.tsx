@@ -236,6 +236,8 @@ const SCHOOL_HOME_DEFAULTS: Record<string, Handler> = {
   'GET /api/donor/impact': () => jsonResponse(200, {}),
   'GET /api/donor/feedbacks': emptyPage,
   'GET /api/donor/requests': emptyPage,
+  // Espace élève (F11) : aucune rencontre par défaut.
+  'GET /api/student/meetings': emptyPage,
 }
 
 export function mockApi(handlers: Record<string, Handler>) {

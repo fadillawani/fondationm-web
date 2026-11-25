@@ -18,7 +18,7 @@ import {
 const studentMe = makeMe({
   email: 'khadija.ba.sor@eleve.fondationm.sn',
   role: 'STUDENT',
-  profile: { type: 'STUDENT', name: 'Khadija Ba' },
+  profile: { type: 'STUDENT', firstName: 'Khadija', lastName: 'Ba', classId: 'c1100000-0000-4000-8000-000000000001', classTitle: 'Terminale S2' },
 })
 
 const speakerHandlers = {
@@ -100,7 +100,7 @@ describe('Connexions par persona', () => {
     await user.type(screen.getByLabelText(/^Code d’accès ou mot de passe/), FAKE_PASSWORD)
     await user.click(screen.getByRole('button', { name: 'Entrer' }))
 
-    expect(await screen.findByRole('heading', { name: /^Bonjour/ })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Salut Khadija !' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/eleve')
     expect(bodies).toEqual([{ email: 'khadija.ba.sor@eleve.fondationm.sn', password: FAKE_PASSWORD }])
   })

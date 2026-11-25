@@ -26,7 +26,19 @@ export interface SpeakerDetails {
   charterAcceptedAt: string | null
 }
 
+/** Profil élève (`StudentProfileResponse`) : aucun nom d'établissement dans le contrat. */
+export interface StudentDetails {
+  kind: 'student'
+  firstName: string
+  lastName: string
+  classId: string | null
+  classTitle: string
+}
+
 export type ProfileDetails = SchoolDetails | SpeakerDetails
+
+/** Profil de l'utilisateur connecté : école, intervenant ou élève. */
+export type UserDetails = ProfileDetails | StudentDetails
 
 /** Nom affiché tiré d'un profil (école, intervenant, élève, donateur) ; null si aucun nom. */
 export function profileName(profile: WireRecord | null): string | null {
@@ -49,6 +61,16 @@ export function readSchoolDetails(profile: WireRecord): SchoolDetails {
     referentRole: text(profile, 'referentRole') ?? '',
     phone: text(profile, 'phone') ?? '',
     charterAcceptedAt: text(profile, 'charterAcceptedAt'),
+  }
+}
+
+export function readStudentDetails(profile: WireRecord): StudentDetails {
+  return {
+    kind: 'student',
+    firstName: text(profile, 'firstName') ?? '',
+    lastName: text(profile, 'lastName') ?? '',
+    classId: text(profile, 'classId'),
+    classTitle: text(profile, 'classTitle') ?? '',
   }
 }
 

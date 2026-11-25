@@ -1,5 +1,5 @@
 # État du frontend — Fondation M
-Dernière mise à jour : 25 novembre 2026 — lot F10 (espace donateur : rapport d'impact, mes requêtes, connexion).
+Dernière mise à jour : 25 novembre 2026 — lot F11 (espace élève : « Les rencontres de ma classe », connexion élève vérifiée).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 ## Avancement
@@ -21,14 +21,15 @@ Dernière mise à jour : 25 novembre 2026 — lot F10 (espace donateur : rapport
 | F8  | Fondation : « Tableau de bord » (À faire, indicateurs, rencontres par mois et statut) et « Requêtes donateurs » (réponses, comptes donateurs) | Terminé |
 | F9  | Retours d'expérience : formulaires école (W1-E6) et intervenant (W2-E10), « Mon impact » réduit, validation par la Fondation (W3-retours) | Terminé |
 | F10 | Espace donateur : « Rapport d'impact » (W4-impact), « Mes requêtes » (W4-requetes), connexion alignée (W4-connexion) | Terminé |
-| F11+ | Autres écrans métier (« Mon impact » complet, espace élève…) | À faire  |
+| F11 | Espace élève : « Mon espace » (W5-E19, mobile déduit), connexion élève vérifiée (W5-E1) ; accueil provisoire retiré | Terminé |
+| F12+ | Autres écrans (« Mon impact » complet de l'intervenant…) | À faire  |
 
-Vérifications au moment de la livraison de F10 : `npm run build`, `npm run lint` et `npm test`
-(333 tests dans 41 fichiers, deux passages ; tests de F8 inchangés après le déménagement des périodes) passent sans
-erreur ni avertissement.
+Vérifications au moment de la livraison de F11 : `npm run build`, `npm run lint` et `npm test`
+(354 tests dans 43 fichiers, deux passages) passent sans erreur ni avertissement.
 
 Les sections « Ce que Fn livre » décrivent chaque lot à sa livraison. Les entrées et boutons « Bientôt » qu'elles citent
-sont tous devenus des liens depuis (F5 à F10) : il n'en reste aucun dans l'application (décision 106).
+sont tous devenus des liens depuis (F5 à F10) : il n'en reste aucun dans l'application (décision 106). Les accueils
+provisoires de F0 ont tous été remplacés (le dernier, celui de l'élève, en F11).
 
 ## Corrections
 
@@ -55,6 +56,45 @@ sont tous devenus des liens depuis (F5 à F10) : il n'en reste aucun dans l'appl
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F11 livre — espace élève (W5-E19, W5-E1)
+
+- **Navigation élève** : barre latérale « Espace élève » avec une seule entrée, « Les rencontres de ma classe » (`/eleve`) ;
+  **pas de navigation basse sur mobile** (une seule entrée), l'avatar de l'en-tête ouvre le menu « Se déconnecter » ;
+  carte utilisateur « {Prénom Nom} » + « {classe} » (« Élève » sans classe), sans établissement ni e-mail.
+  L'accueil provisoire (`pages/HomePage.tsx`) est supprimé.
+- **`/eleve`** (« Mon espace ») : sur-ligne « Mon espace », « Salut {prénom} ! » (« Salut ! » sans prénom) et phrase
+  d'accroche : « {Aujourd'hui / Demain / Dans n jours / Le mardi 8 décembre}, ta classe rencontre {Nom}, {métier}. Une
+  belle occasion de découvrir son métier. » (sans métier : « … {Nom}. Une belle occasion de découvrir un métier. ») ;
+  « Pas de nouvelle rencontre prévue pour l'instant. Retrouve ici celles que ta classe a déjà vécues. » ; « Les rencontres
+  de ta classe apparaîtront ici dès qu'elles seront confirmées. ».
+  - **« À venir »** : rencontres CONFIRMED futures (la plus proche d'abord), puis celles dont le créneau est passé
+    (« Hier », « Il y a n jours ») ; **« Déjà vécues »** : COMPLETED, la plus récente d'abord. Lignes : pavé « 17 NOV. »,
+    nom, « {métier} · 10h00 », libellé relatif (« Aujourd'hui », « Demain », « Dans n jours » de 2 à 13, date seule ensuite,
+    « Vécue avec ta classe »). Vide : « Les prochaines rencontres apparaîtront ici dès qu'elles seront confirmées. ».
+  - **Détail** (`?rencontre={id}`) : pastille « Confirmée » / « Réalisée », « Demain · Mercredi 25 novembre »,
+    « 10h00 – 11h30 · En classe · Salle 4 » (« En ligne » tel quel si le serveur le renvoie, lieu omis s'il est `null`),
+    initiales, nom, « {métier} · {ville}, {pays} », structure si présente, « Ses compétences », encart (« Pour te
+    préparer », « En attente de confirmation » pour une rencontre confirmée au créneau passé, « Ce que tu as vécu »), « Pas
+    de contact direct avec l'intervenant : tout passe par ton établissement et la Fondation M. ».
+  - **« Bon à savoir »** (dans la page) : « Ici, tu consultes seulement. Une question pour un intervenant ? Pose-la pendant
+    la rencontre ou passe par ton référent orientation. » + « Si une rencontre est annulée, elle n'apparaît plus ici. ».
+  - Élève sans classe et liste vide : « Ton compte n'est rattaché à aucune classe pour l'instant. Parles-en à ton
+    référent orientation. ». Erreur : « Réessayer ». Mobile (sans maquette) : liste, puis détail plein écran (« Retour à la
+    liste »).
+- **Connexion `/connexion/eleve`** (F5.2) vérifiée, conforme à W5-E1 PC et mobile ; l'aide « Première connexion ? Tu
+  choisiras ton mot de passe juste après. » est gardée en attendant la vérification de `mustChangePassword` (point 24).
+
+### Fichiers de F11
+
+- **Nouveaux** : `src/pages/student/` (`StudentHomePage.tsx`, `studentData.ts`, `studentModel.ts` ; tests
+  `StudentHomePage.test.tsx`, `studentModel.test.ts`), `src/test/studentFixtures.ts`.
+- **Supprimé** : `src/pages/HomePage.tsx` (accueil provisoire).
+- **Modifiés** : `src/auth/roles.ts` (navigation élève, « Espace élève », carte utilisateur), `src/auth/currentUser.ts` et
+  `src/lib/profiles.ts` (profil élève `StudentDetails`, type `UserDetails` ; `ProfileDetails` des comptes inchangé),
+  `src/components/layout/AppLayout.tsx` (pas de navigation basse sans entrée mobile), `src/routes/routes.tsx`,
+  `src/test/helpers.tsx` (réponse élève par défaut), `src/pages/login/LoginPages.test.tsx` (profil élève, « Salut Khadija ! »),
+  `docs/etat-frontend.md`, `fondationm-web/README.md`.
 
 ## Ce que F10 livre — espace donateur (W4-impact, W4-requetes, W4-connexion)
 
@@ -1067,7 +1107,7 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
      `?objet=` ; garde de sortie sur un formulaire modifié.
 106. **Navigation donateur** : deux entrées, pastille = requêtes OPEN (requête partagée avec la page) ; `/donateur` →
      `/donateur/impact` ; carte = nom + e-mail ; « Espace donateur ». Plus aucune entrée « Bientôt » dans les
-     navigations (l'élève n'a que « Accueil »).
+     navigations (l'élève n'avait alors que « Accueil », remplacé en F11 : décision 112).
 107. **Périodes partagées** : `lib/period.ts` (`PeriodKind`, `periodBounds`, `periodQuery`, `periodPhrase`,
      `periodFromParam`) et `components/ui/PeriodTabs.tsx` servent F8 et F10 ; `dashboardModel.ts` les réexporte.
 108. **Connexion donateur** : « Utilisez l'accès remis par la Fondation M. », pour ne pas promettre un e-mail que le
@@ -1077,11 +1117,42 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
      6,14 ; bulle Fondation blanc sur `#2B337A` 11,31 ; bulle « Vous » et pastille d'auteur encre sur `#F7F3EA` 14,52 ;
      gris `#4A4A57` sur `#F7F3EA` 7,87 et sur blanc 8,72 ; « Ce que vous voyez » encre sur `#FDE7A6` 13,14 ; succès
      `#4E6A2C` sur `#E8EFDC` 5,21 ; erreur `#B81C1F` sur `#FBE3E3` 5,33 ; lien indigo sur blanc 11,31. Aucun échec retenu.
+110. **Rencontres de l'élève** : `GET /api/student/meetings`, toutes les pages, sans filtre de statut ; seuls CONFIRMED et
+     COMPLETED sont lus (l'énumération du schéma en déclare 5, la description 2 : tout autre statut est ignoré) ; une
+     rencontre sans `id` ou sans début lisible est ignorée.
+111. **Libellés et phrase d'accroche de l'élève** : écart en jours de calendrier dans le fuseau du navigateur (`useNow`) ;
+     « Aujourd'hui », « Demain », « Dans {n} jours » (2 à 13), date seule (« Lun 14 déc ») à partir de 14 jours ; « Hier »,
+     « Il y a {n} jours » pour une rencontre confirmée au créneau passé ; « Vécue avec ta classe ». Textes neutres en genre,
+     sans promesse (ni « Prête », ni « Prêt·e », ni « fort en maths »).
+112. **Navigation élève** : une entrée (`mobile: false`) ; la navigation basse n'est pas rendue quand aucune entrée n'est
+     destinée au mobile, ce qui ne concerne que l'élève (les autres rôles gardent 2 à 5 entrées) ; « Espace élève » ;
+     carte = nom + classe (« Élève » sans classe), sans établissement (absent du profil) ni e-mail généré.
+113. **Intervenant vu par l'élève** : `jobTitle` et `organization` affichés seulement s'ils sont présents (déclarés par le
+     schéma de `SpeakerView`, pas par sa description) ; `motivation` n'est pas lue (texte écrit pour la Fondation) ; ni
+     secteur ni « parcours » (absents).
+114. **Tri et sélection de l'élève** : « À venir » = CONFIRMED futures par date croissante, puis CONFIRMED au créneau passé
+     (fin, sinon début, avant maintenant), la plus récente d'abord ; « Déjà vécues » = COMPLETED par date décroissante.
+     `?rencontre={id}` ; identifiant inconnu → la future la plus proche, sinon la plus récente.
+115. **Encarts de l'élève** (textes fixes) : « Pour te préparer » (« Note deux questions avant la rencontre. Par exemple :
+     à quoi ressemble une journée de travail ? Quelles études faut-il suivre ? »), « En attente de confirmation » (« Cette
+     rencontre était prévue le {date}. La Fondation M doit encore confirmer qu'elle a bien eu lieu. »), « Ce que tu as
+     vécu » (« Ta classe a rencontré {Nom}. Si ce métier t'a plu, parles-en à ton référent orientation : il peut t'aider à
+     regarder les études possibles. ») ; « Bon à savoir » dans la page, avec « Si une rencontre est annulée, elle
+     n'apparaît plus ici. ».
+116. **Lieu de la rencontre de l'élève** : `placeLabel` de F6.1 (« En classe · {lieu} », « En classe ») ; une rencontre
+     ONLINE renvoyée par le serveur est affichée « En ligne » telle quelle.
+117. **Élève sans classe** (`classId` absent) : l'appel est fait quand même ; message dédié seulement si la liste est vide.
+118. **Contrastes de F11** (calculés) : pastilles « Confirmée » et libellés à venir encre sur `#E5A60A` 7,50 ; « Vécue »
+     encre sur `#EDE6D6` 12,94 ; en-têtes crème sur encre 13,14 et crème sur indigo 9,24 ; « Réalisée » et encarts encre
+     sur `#FDE7A6` 13,14 ; compétences encre sur `#F7F3EA` 14,52 ; gris sur `#F7F3EA` 7,87 et sur blanc 8,72 ; bordure de
+     sélection encre sur blanc 16,08 (la bordure jaune de la maquette, 2,14:1, est sous le seuil non textuel de 3:1).
+119. **Profil élève** : `StudentDetails` (prénom, nom, `classId`, classe) dans un type `UserDetails` réservé à
+     l'utilisateur connecté ; `ProfileDetails` (comptes à valider, F2) inchangé. Accueil provisoire supprimé.
 
 ## Écarts
 
 - `--legacy-peer-deps` remplacé par l'exécution `npx` isolée (voir décision 3).
-- La navigation de l'élève ne contient que « Accueil » : les entrées viendront avec ses écrans.
+- L'élève n'a pas de navigation basse sur mobile (une seule entrée, décision 112).
 
 ## Écarts maquette / backend
 
@@ -1132,7 +1203,7 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | Lignes des listes mobiles (W1-E5) | Maquette mobile : « Mar 17 nov. · {classe} » sans l'heure | Même format que le PC, heure comprise |
 | Déconnexion | Absente de la maquette (barre latérale et navigation basse) | PC : lien sous la carte ; mobile : avatar de l'en-tête → menu « Se déconnecter » |
 | Avatar d'en-tête mobile | Absent de la maquette sur W3-comptes, W2-E9, W1-E4, W1-E5 (bouton « + ») | Ajouté sur ces pages pour la déconnexion |
-| Entrées de navigation sans écran | La maquette les montre actives, avec pastilles | Plus aucune depuis F10 (toutes les entrées ont leur écran ; l'élève n'a que « Accueil ») |
+| Entrées de navigation sans écran | La maquette les montre actives, avec pastilles | Plus aucune : toutes les entrées ont leur écran depuis F11 |
 | Pastilles de la navigation basse | Absentes de la maquette mobile | Conservées (`#B8492A`/blanc) |
 | « Requêtes donateurs » (Fondation) sur mobile | Absente de la navigation basse de la maquette (5 entrées) | Absente aussi |
 | Carte utilisateur école / Fondation | Maquette : nom du référent, « Samirath · Chargée de programme » | Établissement + ville ; « Fondation M » + « Équipe du programme » (données absentes) |
@@ -1168,6 +1239,13 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | « n'a pas encore ouvert votre requête » | Aucun statut de lecture | « n'a pas encore répondu » |
 | « Cet avis apparaîtra ici dès qu'il aura été validé » | Seuls les retours publiés sont transmis | Retiré |
 | Requête envoyée deux fois (réponse perdue) | Aucune clé d'idempotence ni code d'erreur documenté | Relecture prudente (décision 104, point ouvert 56) |
+| Secteur et pastille de couleur de l'intervenant (W5-E19) | Absent de `SpeakerView` | Retirés |
+| « Son parcours » (W5-E19) | Absent ; `motivation` existe mais est écrite pour la Fondation | Retiré ; `motivation` non lue (décision 113, point ouvert 58) |
+| Métier « Ingénieure data » (W5-E19) | `jobTitle` déclaré par le schéma, pas par la description | Affiché s'il est présent (point ouvert 58) |
+| « Terminale S2 · Lycée de Sor » (carte utilisateur élève) | `StudentProfileResponse` sans établissement | « Terminale S2 » (point ouvert 62) |
+| « En ligne, en salle informatique » (W5-E19) | Rencontres en classe (F6.1) ; `format` peut encore valoir ONLINE | « En classe · {lieu} » ; ONLINE affiché tel quel (décision 116) |
+| Rencontre annulée de la classe | Jamais renvoyée (CONFIRMED et COMPLETED seulement) | Disparaît ; phrase dans « Bon à savoir » (point ouvert 60) |
+| « Prête à découvrir son métier ? », « Faut-il être fort en maths » | — | Phrases neutres en genre (décisions 111 et 115) |
 
 ## Points ouverts
 
@@ -1234,7 +1312,10 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     `lastLoginAt` ou `mustChangePassword` permettrait « Connecté·e » / « Code remis, pas encore connecté·e ».**
 24. **Changement de mot de passe imposé à un élève créé par l'école (à vérifier)** : `MeResponse` expose déjà
     `mustChangePassword` dans `openapi.json`. Vérification : se connecter avec un élève fraîchement créé, `GET /api/me`,
-    lire `mustChangePassword`. Si `true`, remplacer `ACCESS_NOTE` (une ligne, `establishmentText.ts`).
+    lire `mustChangePassword`. Si `true`, remplacer `ACCESS_NOTE` (une ligne, `establishmentText.ts`). **Depuis F11** : la
+    connexion élève garde l'aide « Première connexion ? Tu choisiras ton mot de passe juste après. » ; à vérifier avec un
+    vrai compte élève créé par une école. Si le serveur n'impose pas le changement, il faudra retirer cette phrase
+    (`pages/login/LoginForm.tsx`).
 25. **« Voir ce que l'élève verra » / « Vue élève »** omis jusqu'au lot de l'espace élève (W5-E19) : une seule session
     par onglet ; l'aperçu réutilisera les composants de cet espace avec les rencontres de la classe (F6-Q5).
 26. **Vraie carte géographique (non implémentée)** : fond OpenStreetMap avec zoom = autre design que la maquette.
@@ -1298,6 +1379,17 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 56. **Doublon d'une requête donateur** : sans clé d'idempotence ni code documenté, seule la relecture prudente de la
     décision 104 évite un double envoi après une réponse perdue.
 57. **Début du soutien d'un donateur** absent (« Mécène depuis ») : `createdAt` est la date de création du compte.
+58. **`SpeakerView` contredit sa description** (« nom, ville, pays et compétences… Aucune autre donnée ») : le schéma déclare
+    aussi `jobTitle`, `organization` et `motivation`. Métier et structure affichés s'ils sont présents ; `motivation`
+    ignorée. **Backend : trancher et aligner le schéma sur la description (ou l'inverse).**
+59. **Statut de `StudentMeetingResponse`** : l'énumération déclare les 5 statuts, la description seulement CONFIRMED et
+    COMPLETED ; les autres sont ignorés côté client.
+60. **Rencontres annulées invisibles pour l'élève** : une rencontre annulée disparaît de la liste sans aucune trace
+    (« Bon à savoir » le dit). Un statut CANCELLED dans la réponse élève permettrait de l'annoncer.
+61. **Pas de maquette mobile pour W5-E19** : version mobile déduite (liste puis détail plein écran, sans navigation basse) ;
+    à valider avec le design.
+62. **Établissement absent du profil élève** : « Lycée de Sor » de la carte utilisateur n'est pas reproductible.
+    **Backend : `schoolName` dans `StudentProfileResponse`.**
 
 ## Écarts de design restants
 
@@ -1395,3 +1487,8 @@ attendue (maquette) et la raison.
 | Mes requêtes (W4-requetes) | `pages/donor/RequestsPage.tsx` | Sur-ligne « Mes requêtes · E18 » | « Mes requêtes ». |
 | Mes requêtes | `pages/donor/donorModel.ts` | « Envoyée » blanc sur `#EF7A0A` | Contraste 2,82:1 : encre sur orange (5,71:1). |
 | Mes requêtes | `pages/donor/RequestsPage.tsx` | Suivi à 3 étapes (Envoyée, En cours, Traitée) | 2 étapes (décision 105). |
+| Mon espace (W5-E19) | `pages/student/StudentHomePage.tsx` | Sur-ligne « Mon espace · E19 » | « Mon espace ». |
+| Mon espace | idem | Bordure jaune `#E5A60A` de la rencontre choisie | Contraste 2,14:1 (seuil non textuel 3:1) : bordure encre et `aria-pressed`. |
+| Mon espace | idem | « Bon à savoir » dans la barre latérale | Dans la page, sous les listes (barre latérale commune à toutes les personas). |
+| Mon espace | idem | Pastille de secteur, « Son parcours » | Retirés (décision 113). |
+| Mon espace (mobile) | idem, `components/layout/AppLayout.tsx` | Aucune maquette mobile | Liste puis détail plein écran ; pas de navigation basse (une seule entrée) ; menu de l'avatar pour se déconnecter. |

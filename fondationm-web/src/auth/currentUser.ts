@@ -1,7 +1,7 @@
 import { invalidResponseError } from '../api/errors'
 import type { components } from '../api/schema'
 import { asRecord, oneOf, text, type WireRecord } from '../api/wire'
-import { profileName, readSchoolDetails, readSpeakerDetails, type ProfileDetails } from '../lib/profiles'
+import { profileName, readSchoolDetails, readSpeakerDetails, readStudentDetails, type UserDetails } from '../lib/profiles'
 
 export type { SchoolDetails, SpeakerDetails } from '../lib/profiles'
 
@@ -22,7 +22,7 @@ export interface CurrentUser {
   mustChangePassword: boolean
   createdAt: string | null
   displayName: string
-  details: ProfileDetails | null
+  details: UserDetails | null
 }
 
 /*
@@ -30,10 +30,11 @@ export interface CurrentUser {
  * `profile: null` pour la Fondation, `rejectionReason: null` hors refus… Seuls id, role et status sont
  * indispensables.
  */
-function detailsOf(role: Role, profile: WireRecord | null): ProfileDetails | null {
+function detailsOf(role: Role, profile: WireRecord | null): UserDetails | null {
   if (profile === null) return null
   if (role === 'SCHOOL') return readSchoolDetails(profile)
   if (role === 'SPEAKER') return readSpeakerDetails(profile)
+  if (role === 'STUDENT') return readStudentDetails(profile)
   return null
 }
 
