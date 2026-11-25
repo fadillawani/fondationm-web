@@ -1,10 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
-import { flushSync } from 'react-dom'
-import { useBlocker, useSearchParams } from 'react-router'
+import { useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { errorMessage } from '../../../api/errors'
 import { useCurrentUser } from '../../../auth/currentUserContext'
-import { tokenStorage } from '../../../auth/tokenStorage'
 import { PageTitle } from '../../../components/layout/PageTitle'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
@@ -17,7 +15,10 @@ import { schoolSuffix } from '../../../lib/studentLogin'
 import { DESKTOP_QUERY, useMediaQuery } from '../../../lib/useMediaQuery'
 import { ClassForm } from '../classes/ClassForm'
 import { CLASSES_PREFIX, classErrorMessage, useDeleteClass, useManagedClasses, type ManagedClass } from '../classes/classData'
-import { AccessPanel, PrintSheets } from './AccessPanel'
+import { LeaveGuardModal } from '../../../components/access/LeaveGuardModal'
+import { useLeaveGuard } from '../../../components/access/useLeaveGuard'
+import { usePrintQueue } from '../../../components/access/usePrintQueue'
+import { AccessPanel, StudentPrintSheets } from './AccessPanel'
 import { AddStudentForm } from './AddStudentForm'
 import { BulkAddForm } from './BulkAddForm'
 import { CLASS_TABS_ID, ClassTabs } from './ClassTabs'
@@ -31,9 +32,6 @@ type Confirm =
   | { kind: 'renew'; student: Student; classId: string }
   | { kind: 'remove'; student: Student; run: () => Promise<void> }
   | { kind: 'deleteClass'; cls: ManagedClass }
-
-/** Classe d'impression posée sur <body> le temps d'imprimer : seules les fiches sont imprimées. */
-const PRINTING_CLASS = 'impression-fiches'
 
 /**
  * « Mon établissement » (maquette W5-E2) : classes, élèves et fiches d'accès. Les codes d'accès vivent dans l'état
@@ -51,7 +49,7 @@ export function EstablishmentPage() {
   const deleteClass = useDeleteClass()
 
   const [sheets, setSheets] = useState<ReadonlyMap<string, AccessSheet>>(new Map())
-  const [printQueue, setPrintQueue] = useState<readonly AccessSheet[]>([])
+  const printQueue = usePrintQueue<AccessSheet>()
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -71,20 +69,8 @@ export function EstablishmentPage() {
   const classSheets = [...sheets.values()].filter((sheet) => sheet.classId === cls?.id)
   const unprinted = [...sheets.values()].filter((sheet) => !sheet.printed).length
 
-  // Fiches non imprimées : avertissement avant de fermer ou de recharger l'onglet…
-  useEffect(() => {
-    if (unprinted === 0) return undefined
-    const warn = (event: BeforeUnloadEvent) => {
-      event.preventDefault()
-    }
-    window.addEventListener('beforeunload', warn)
-    return () => window.removeEventListener('beforeunload', warn)
-  }, [unprinted])
-  // … et avant de quitter la page dans l'application (sauf fin de session : le jeton est déjà effacé).
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      unprinted > 0 && tokenStorage.get() !== null && currentLocation.pathname !== nextLocation.pathname,
-  )
+  // Fiches non imprimées : avertissement avant de fermer, de recharger ou de quitter la page.
+  const blocker = useLeaveGuard(unprinted > 0)
 
   function selectClass(id: string) {
     const next = new URLSearchParams(params)
@@ -113,20 +99,13 @@ export function EstablishmentPage() {
   }
 
   function print(toPrint: readonly AccessSheet[]) {
-    if (toPrint.length === 0) return
-    flushSync(() => setPrintQueue(toPrint))
-    document.body.classList.add(PRINTING_CLASS)
-    try {
-      window.print()
-    } finally {
-      document.body.classList.remove(PRINTING_CLASS)
-    }
-    setSheets((current) => {
-      const next = new Map(current)
-      for (const sheet of toPrint) next.set(sheet.studentId, { ...sheet, printed: true })
-      return next
-    })
-    setPrintQueue([])
+    printQueue.print(toPrint, (printed) =>
+      setSheets((current) => {
+        const next = new Map(current)
+        for (const sheet of printed) next.set(sheet.studentId, { ...sheet, printed: true })
+        return next
+      }),
+    )
   }
 
   function closeConfirm() {
@@ -321,7 +300,7 @@ export function EstablishmentPage() {
         </>
       )}
 
-      <PrintSheets sheets={printQueue} />
+      <StudentPrintSheets sheets={printQueue.queue} />
 
       <Modal
         open={confirm !== null}
@@ -358,25 +337,7 @@ export function EstablishmentPage() {
         )}
       </Modal>
 
-      {blocker.state === 'blocked' && (
-        <Modal
-          open
-          title="Quitter sans imprimer ?"
-          onClose={() => blocker.reset?.()}
-          footer={
-            <>
-              <Button size="md" variant="outline" onClick={() => blocker.proceed?.()}>
-                Quitter la page
-              </Button>
-              <Button size="md" onClick={() => blocker.reset?.()}>
-                Rester et imprimer
-              </Button>
-            </>
-          }
-        >
-          <p className="text-[15px] font-semibold text-ink">{PRINT_REMINDER}</p>
-        </Modal>
-      )}
+      <LeaveGuardModal blocker={blocker} message={PRINT_REMINDER} />
     </div>
   )
 }

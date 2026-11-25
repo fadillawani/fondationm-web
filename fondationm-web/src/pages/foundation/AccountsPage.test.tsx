@@ -56,12 +56,12 @@ function factValue(scope: ReturnType<typeof within>, label: string): string | nu
 }
 
 describe('Espace Fondation — navigation', () => {
-  it('redirige /fondation vers /fondation/comptes', async () => {
+  it('redirige /fondation vers le tableau de bord', async () => {
     setup([])
     const { router } = renderApp('/fondation', { token: true })
 
-    expect(await screen.findByRole('heading', { name: 'Comptes à valider', level: 1 })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/fondation/comptes')
+    expect(await screen.findByRole('heading', { name: "Bonjour l'équipe", level: 1 })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/fondation/tableau-de-bord')
   })
 
   it('affiche les entrées actives, les entrées « Bientôt », le badge et la carte utilisateur', async () => {
@@ -75,10 +75,10 @@ describe('Espace Fondation — navigation', () => {
     )
     expect(nav.getByRole('link', { name: /^Demandes de rencontre/ })).toHaveAttribute('href', '/fondation/demandes')
     expect(nav.getByRole('link', { name: /^Rencontres/ })).toHaveAttribute('href', '/fondation/rencontres')
-    for (const label of ['Tableau de bord', "Retours d'expérience", 'Requêtes donateurs']) {
-      expect(nav.queryByRole('link', { name: new RegExp(label) })).not.toBeInTheDocument()
-      expect(nav.getByText(label).closest('li')).toHaveTextContent('Bientôt')
-    }
+    expect(nav.getByRole('link', { name: 'Tableau de bord' })).toHaveAttribute('href', '/fondation/tableau-de-bord')
+    expect(nav.getByRole('link', { name: /^Requêtes donateurs/ })).toHaveAttribute('href', '/fondation/requetes')
+    expect(nav.queryByRole('link', { name: /Retours d'expérience/ })).not.toBeInTheDocument()
+    expect(nav.getByText("Retours d'expérience").closest('li')).toHaveTextContent('Bientôt')
     const [aside] = screen.getAllByRole('complementary')
     if (aside === undefined) throw new Error('Barre latérale absente')
     expect(within(aside).getByText('Pilotage du programme')).toBeInTheDocument()
@@ -93,7 +93,7 @@ describe('Espace Fondation — navigation', () => {
     const [, bottom] = await screen.findAllByRole('navigation', { name: 'Navigation principale' })
     if (bottom === undefined) throw new Error('Navigation basse absente')
     expect(within(bottom).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
-      'AccueilBientôt',
+      'Accueil',
       'Comptes',
       'Demandes',
       'Rencontres',

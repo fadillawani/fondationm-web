@@ -1,5 +1,5 @@
 # État du frontend — Fondation M
-Dernière mise à jour : 24 novembre 2026 — lot F7 (« Demandes de rencontre » et « Rencontres » de la Fondation).
+Dernière mise à jour : 25 novembre 2026 — lot F8 (« Tableau de bord » et « Requêtes donateurs » de la Fondation).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 ## Avancement
@@ -18,10 +18,11 @@ Dernière mise à jour : 24 novembre 2026 — lot F7 (« Demandes de rencontre �
 | F6  | « Mon établissement » (W5-E2) : classes, élèves, fiches d'accès, ajout en série | Terminé |
 | F6.1 | Rencontres uniquement en classe : drapeau `ONLINE_MEETINGS_ENABLED`, aucun choix ni envoi « en ligne » | Terminé |
 | F7  | Fondation : « Demandes de rencontre » (avis en parallèle de l'intervenant) et « Rencontres » (calendrier, Réalisée, Annulée) | Terminé |
-| F8+ | Autres écrans métier (retours d'expérience, espace élève, tableau de bord Fondation, donateurs…) | À faire  |
+| F8  | Fondation : « Tableau de bord » (À faire, indicateurs, rencontres par mois et statut) et « Requêtes donateurs » (réponses, comptes donateurs) | Terminé |
+| F9+ | Autres écrans métier (retours d'expérience, espace élève, espace donateur…) | À faire  |
 
-Vérifications au moment de la livraison de F7 : `npm run build`, `npm run lint` et `npm test`
-(244 tests, deux passages) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F8 : `npm run build`, `npm run lint` et `npm test`
+(270 tests, deux passages, tests de F6 compris) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -48,6 +49,72 @@ Vérifications au moment de la livraison de F7 : `npm run build`, `npm run lint`
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F8 livre — « Tableau de bord » et « Requêtes donateurs » de la Fondation (W3-pilotage, W3-requetes)
+
+- **`/fondation/tableau-de-bord`** (`/fondation` y redirige désormais) : sur-ligne = date du jour (« Mardi 24 novembre
+  2026 », mobile sans l'année), titre « Bonjour l'équipe » (le compte Fondation n'a pas de profil), phrase « 1 action vous
+  attend. » / « {n} actions vous attendent. » + « Chaque validation rapproche une classe d'un métier. », ou à 0 « Tout est
+  à jour. Chaque validation a déjà rapproché des classes d'un métier. ». Sélecteur « Ce trimestre / Cette année »
+  (`role="tablist"`, flèches, `?periode=trimestre|annee`, aussi sur mobile).
+  - **Deux appels** `GET /api/foundation/indicators` : sans période (« À faire » : instantanés) et avec la période (bornes
+    du trimestre civil ou de l'année civile, calculées dans le fuseau du navigateur avec décalage, `to` exclu).
+  - **« À faire »** (5 cartes, 0 → « Rien à traiter ») : comptes à valider (« 2 écoles · 3 intervenants »), demandes de
+    rencontre (`awaitingFoundation` ; « dont {n} en attente depuis 2 jours ou plus » sur les rencontres chargées),
+    rencontres à marquer (règle F7), retours à valider (`submittedCount` sans période ; non cliquable, « Bientôt »),
+    requête(s) donateur(s) (`openCount` ; « {nom}, depuis le {date} » ou « {n} requêtes, la plus ancienne depuis le
+    {date} »). Mobile : « À faire · {n} » et lignes à chevron.
+  - **Indicateurs** : « Jeunes touchés » (`studentsReached`, « ce trimestre / depuis janvier · {n} établissements » et
+    « Effectif déclaré par les écoles, pas un comptage des présents. »), « Taux de réalisation » (réalisées / (réalisées +
+    confirmées passées) sur les rencontres dont le début est dans la période, « — » sans base), « Retours d'expérience »
+    (validés, barre, « {n} à valider »), « Notes moyennes » (globale, écoles, intervenants ; « — » si null) à la place
+    de « Délais de validation ».
+  - **« Rencontres par mois »** (3 mois du trimestre, ou 4 trimestres) : réalisées `#2B337A`, prévues (PENDING ou
+    CONFIRMED à venir) `#9DAA3C` avec contour 1 px `#4A4A57` ; total en texte ; `role="img"` avec libellé complet et
+    tableau équivalent masqué visuellement ; « Aucune rencontre sur cette période. ». Sans bibliothèque.
+  - **« Rencontres par statut »** (`byStatus`, PC seulement comme la maquette) : 5 lignes-liens de 44 px vers les
+    rencontres (« Réalisées : 38 ») ; « Annulées » `#C9BFA8` avec contour 1 px `#4A4A57`.
+  - **« Le moment de la semaine »** (publié il y a moins de 7 jours) ou « Un moment marquant » : retour PUBLIÉ le plus
+    récent avec un commentaire, dans la première page de 100 (`status=PUBLISHED`, tri du serveur non documenté, choix
+    par `publishedAt` côté client) ; « {intervenant}, après sa rencontre au {école} » ou « {école}, après sa rencontre
+    avec {intervenant} » ; masqué sans retour ; « Lire les retours » « Bientôt ».
+  - Chaque bloc a son chargement et son erreur avec « Réessayer », sans casser les autres.
+- **`/fondation/requetes`** (« Requêtes donateurs ») : sur-ligne « Donateurs », onglets « Requêtes · n » / « Donateurs · n »
+  (`?onglet=requetes|donateurs`, `?requete={id}`).
+  - Liste : nouvelles d'abord puis date décroissante, « {donateur} · 12 nov », pastille « Nouvelle » (OPEN, `#B81C1F`/blanc)
+    ou « Traitée » (ANSWERED, `#4E6A2C`/blanc), objet en Lilita.
+  - Détail : objet, donateur, bulle du donateur (`#F7F3EA`), bulle « Fondation M · {date} » (`#2B337A`/blanc) si répondue ;
+    sinon « Votre réponse » (2000 caractères, compteur), refus d'une réponse vide (« Écrivez votre réponse avant de
+    l'envoyer. »), « Envoyer la réponse », « Votre réponse sera visible dans l'espace de {nom}. Vous ne pourrez plus la
+    modifier. » ; après l'envoi, « Requête traitée. La réponse est visible dans l'espace de {nom}. ».
+  - Mobile : liste puis détail plein écran avec « Retour à la liste ».
+- **Onglet « Donateurs »** (sans maquette) : `GET /api/foundation/donor-consultations` (liste principale, ordre du
+  serveur) complété de l'e-mail de `GET /api/foundation/donors` quand l'identifiant correspond (omis sinon) ;
+  « Dernière consultation le {date} » ou « Jamais consulté », nombre de consultations ; filtre « Tous / Jamais consultés ».
+  - « Créer un compte donateur » (nom 1–200, e-mail ; « Aucun e-mail n'est envoyé : remettez-le vous-même au donateur. ») →
+    `POST /api/foundation/donors` avec un code de `lib/accessCode.ts` ; `EMAIL_ALREADY_USED` : « Cette adresse e-mail est
+    déjà utilisée par un compte. ».
+  - « Nouveau code » (sur chaque donateur dont le code n'est plus affiché) : confirmation « L'ancien code ne fonctionnera
+    plus. », puis `POST /api/foundation/accounts/{id}/password`.
+  - Fiche d'accès à remettre (composants extraits de F6) : nom, identifiant (e-mail), code affiché une seule fois, note
+    `DONOR_ACCESS_NOTE`, « Imprimer la fiche » ; bandeau, `beforeunload` et « Quitter sans imprimer ? ». Les codes vivent
+    dans l'état de l'onglet (gardé monté quand on change d'onglet) : jamais dans l'URL, un stockage ni le cache. Si la
+    liste ne se recharge pas après la création, la fiche reste affichée.
+- **Navigation Fondation** : « Tableau de bord » (« Accueil » sur mobile) et « Requêtes donateurs » (pastille = requêtes
+  OPEN de la requête partagée) deviennent des liens ; « Retours d'expérience » reste « Bientôt ».
+
+**Fichiers — tableau de bord** : `src/pages/foundation/dashboard/` (`DashboardPage.tsx`, `DashboardBlocks.tsx`,
+`dashboardData.ts`, `dashboardModel.ts`, `dashboardModel.test.ts`, `DashboardPage.test.tsx`).
+**Fichiers — requêtes et donateurs** : `src/pages/foundation/donors/` (`DonorRequestsPage.tsx`, `DonorRequestViews.tsx`,
+`DonorsTab.tsx`, `donorsData.ts`, `donorsText.ts`, `donorRequestCount.ts`, `DonorRequestsPage.test.tsx`).
+**Fichiers — extraits de F6** : nouveaux `src/components/access/` (`AccessSheet.tsx`, `sheetTypes.ts`, `usePrintQueue.ts`,
+`useLeaveGuard.ts`, `LeaveGuardModal.tsx`) ; F6 touchés : `src/pages/school/establishment/AccessPanel.tsx`
+(`StudentPrintSheets`, `SheetBody` partagé) et `src/pages/school/establishment/EstablishmentPage.tsx` (`usePrintQueue`,
+`useLeaveGuard`, `LeaveGuardModal`) ; rendu et tests de F6 inchangés.
+**Fichiers — communs** : `src/auth/roles.ts`, `src/nav/badges.ts`, `src/routes/routes.tsx`, `src/test/helpers.tsx`
+(réponses par défaut), `src/test/foundationMeetingsFixtures.ts` (type `Handler` exporté),
+`src/pages/foundation/AccountsPage.test.tsx`, `src/pages/login/LoginPage.test.tsx`, `src/pages/login/LoginPages.test.tsx`
+(redirection de `/fondation`), `README.md`, `docs/etat-frontend.md`.
 
 ## Ce que F7 livre — « Demandes de rencontre » et « Rencontres » de la Fondation (W3-demandes, W3-rencontres)
 
@@ -793,6 +860,22 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     le détail reste affiché pendant le rechargement ; le résultat de l'action s'affiche avant la liste rechargée.
 80. **Pastilles du calendrier** : nom court d'école = premier mot distinctif (mots génériques retirés) ; intervenant =
     premier mot du nom ; demandes PENDING d'un même créneau groupées (« 2 demandes × … »).
+81. **Tableau de bord, deux appels d'indicateurs** : sans période pour « À faire » (instantanés, dont `submittedCount`
+    global), avec la période (trimestre ou année civils, fuseau du navigateur, `to` exclu) pour les indicateurs ; ce que
+    les indicateurs ne donnent pas (retards, à marquer, taux, rencontres par mois) vient des rencontres de F7.
+82. **Taux de réalisation** : COMPLETED / (COMPLETED + CONFIRMED dont `endAt` est passé), début du créneau dans la
+    période ; « — » si le dénominateur est 0 ; les annulations ne comptent pas.
+83. **« Rencontres par mois »** : 3 mois du trimestre civil (la maquette en montre 4) ou 4 trimestres de l'année ;
+    « Prévues » = PENDING ou CONFIRMED à venir. Contour 1 px `#4A4A57` sur « Prévues » (`#9DAA3C`, ≈ 2,3:1 sur blanc) et
+    « Annulées » (`#C9BFA8`, ≈ 1,6:1 sur `#F7F3EA`), barres et pastilles de légende, pour passer le seuil non textuel de
+    3:1 ; valeurs écrites et tableau alternatif.
+84. **Moment marquant** : retour publié le plus récent avec commentaire, première page de 100 seulement (tri du serveur
+    non documenté) ; « Le moment de la semaine » si publié il y a moins de 7 jours, sinon « Un moment marquant ».
+85. **Requêtes donateurs** : un message et une réponse (pas de fil) ; « Nouvelle » / « Traitée » ; réponse de 1 à 2000
+    caractères, vide refusée côté client ; aucun bouton d'insertion (pas de chiffres inventés).
+86. **Comptes donateurs** : consultations en liste principale, e-mail joint par identifiant seulement s'il correspond ;
+    création et nouveau code hors TanStack Query, code dans l'état de l'onglet (gardé monté), fiche imprimable partagée
+    avec F6 (`components/access/`).
 
 ## Écarts
 
@@ -856,6 +939,10 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | Métier de l'intervenant (W3-demandes, W3-rencontres) | Absent de `SpeakerInfo` | « ville · 2 premières compétences » ; panneau « avec {Nom} » sans métier (point ouvert 31) |
 | « Mame Diarra », « Cheikh T. », « Sor » (pastilles W3-rencontres) | Ni prénom séparé ni nom court d'école | Premier mot du nom, mot distinctif de l'école (décision 80, point ouvert 32) |
 | Pastilles « Demandes » / « Rencontres » de la navigation | Aucun compteur | Calculées sur toutes les rencontres (point ouvert 27) |
+| « Délais de validation » (W3-pilotage) | Aucune donnée | « Notes moyennes » (point ouvert 33) |
+| « {n} encore attendus » (retours, W3-pilotage) | Aucune donnée | « {n} à valider » (point ouvert 34) |
+| « Bonjour Samirath » (W3-pilotage) | Compte Fondation sans profil | « Bonjour l'équipe » (point ouvert 35) |
+| « En cours », plusieurs messages, « Rouvrir », « Mécène depuis 2024 » (W3-requetes) | Un message, une réponse, OPEN / ANSWERED, `DonorInfo` = id + nom | Retirés (point ouvert 37) |
 | Code d'erreur « e-mail déjà utilisé » | Non documenté (aucun 409 ni code dans le contrat) | Règle de la décision 16. Code réellement observé : `EMAIL_ALREADY_USED` (HTTP 409, message « Cette adresse e-mail est déjà utilisée. ») |
 
 ## Points ouverts
@@ -936,14 +1023,27 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 28. **Codes d'erreur des rencontres de la Fondation non documentés** (`validate`, `refuse`, `complete`, `cancel`) :
     `INVALID_STATUS_TRANSITION`, `SLOT_NOT_AVAILABLE`, `SLOT_PASSED` traités par leur code, les autres par le message du
     serveur.
-29. **`awaitingFoundation`** de `GET /api/foundation/meetings` n'est pas décrit (inclut-il « validée par la Fondation,
-    en attente de l'intervenant » ?) : non utilisé.
+29. **`awaitingFoundation`** : désormais documenté dans `GET /api/foundation/indicators` (PENDING avec la décision de
+    la Fondation PENDING, même règle que le filtre de `GET /api/foundation/meetings`) ; cohérent avec la règle de F7.
+    Point fermé ; le filtre reste inutilisé (toutes les rencontres sont chargées).
 30. **`reason` vide à vérifier** avec un compte Fondation : le contrat l'accepte (`minLength: 0`) ; si le serveur le
     refuse, son message s'affiche sous le champ.
 31. **Métier de l'intervenant absent** de `SpeakerInfo` : « ville · compétences » à la place. **Backend : `jobTitle` dans
     `SpeakerInfo`.**
 32. **Nom court d'école et prénom séparé absents** : « Sor », « Mame » sont dérivés du nom complet ; « Mame Diarra »,
     « Cheikh T. » de la maquette ne sont pas reproductibles.
+33. **Délais moyens de validation** (comptes, demandes, retours) absents des indicateurs : carte remplacée par « Notes
+    moyennes ». **Backend : délais moyens.**
+34. **Retours « encore attendus »** absents : « {n} à valider » à la place. **Backend : nombre de retours attendus.**
+35. **Profil ou prénom du compte Fondation** absent (`profile: null`) : « Bonjour l'équipe ».
+36. **Retours à valider par période** : `feedbacks.submittedCount` dépend de la période ; « À faire » utilise l'appel
+    sans période. **Backend : un compteur global explicite.**
+37. **Statut « En cours » et fil de discussion des requêtes donateurs** absents du contrat (un message, une réponse).
+38. **Tri de `GET /api/foundation/feedbacks` non documenté** : le moment marquant est cherché dans la première page de 100.
+39. **Identifiant commun** entre `donor-consultations` (`donorId`) et `donors` (`id`) non garanti : e-mail omis s'il ne
+    correspond pas.
+40. **Changement de mot de passe imposé à un donateur créé par la Fondation** à vérifier (`mustChangePassword`), comme le
+    point 24 ; la note de la fiche ne promet rien.
 
 ## Écarts de design restants
 
@@ -1015,3 +1115,17 @@ attendue (maquette) et la raison.
 | Rencontres | idem | Flèches de mois atténuées (opacité 0,4) aux bornes | Mois non bornés, pas d'opacité. |
 | Rencontres | `pages/foundation/meetings/MeetingPanel.tsx` | Mobile : bouton « Voir les retours (école : … · intervenant : …) » | Cases « Retour école » / « Retour intervenant » et « Voir les retours d'expérience · Bientôt » (écran non livré), comme sur PC. |
 | Rencontres | idem | « avec Amadou Baila, ingénieur réseaux » | « avec Amadou Baila » (métier absent). |
+| Tableau de bord (W3-pilotage) | `pages/foundation/dashboard/DashboardPage.tsx` | « Bonjour Samirath », phrase « 18 actions… » | « Bonjour l'équipe » ; phrase accordée, positive à 0. |
+| Tableau de bord | `pages/foundation/dashboard/DashboardBlocks.tsx` | Carte « Délais de validation » | « Notes moyennes » (aucune donnée de délai). |
+| Tableau de bord | idem | « {n} encore attendus (écoles et intervenants) » | « {n} à valider ». |
+| Tableau de bord | idem | Carte demandes « dont 2 depuis plus de 48 h » | « dont {n} en attente depuis 2 jours ou plus » (règle de F7). |
+| Tableau de bord | idem | « Ce trimestre » : 4 barres (Sept. à Déc.) | 3 mois du trimestre civil. |
+| Tableau de bord | idem | Barres et légende « Prévues » / « Annulées » sans contour | Contour 1 px `#4A4A57` (seuil non textuel 3:1). |
+| Tableau de bord | idem | « Lire les retours » et carte « retours à valider » cliquables | « Bientôt » (écran des retours non livré). |
+| Tableau de bord (mobile) | `pages/foundation/dashboard/DashboardPage.tsx` | Pas de sélecteur de période | Sélecteur conservé (« Cette année » accessible sur téléphone) ; « Rencontres par statut » masqué comme la maquette. |
+| Tableau de bord | `pages/foundation/dashboard/DashboardBlocks.tsx` | « Le moment de la semaine » toujours | « Un moment marquant » si le retour a plus de 7 jours. |
+| Requêtes (W3-requetes) | `pages/foundation/donors/DonorRequestsPage.tsx` | Sur-ligne « E16 » | « Donateurs ». |
+| Requêtes | `pages/foundation/donors/DonorRequestViews.tsx` | « En cours », « Après envoi : … », « Rouvrir la requête », fil de messages, boutons d'insertion (« Chiffres de Saint-Louis (T4) »…) | Retirés : absents du contrat ; pas de chiffres inventés. |
+| Requêtes | idem | « Samirath (Fondation M) » ; « Mécène depuis 2024 » | « Fondation M » ; rôle du donateur omis. |
+| Requêtes | idem | Bouton « Envoyer » grisé sans texte (blanc sur `#C9BFA8`, 1,8:1) | Bouton actif, message « Écrivez votre réponse avant de l'envoyer. ». |
+| Donateurs | `pages/foundation/donors/DonorsTab.tsx` | Aucune maquette | Onglet « Donateurs », création de compte, fiche d'accès et « Nouveau code » (gabarit de la fiche élève de F6). |

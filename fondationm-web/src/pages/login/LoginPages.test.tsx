@@ -136,8 +136,8 @@ describe('Connexions par persona', () => {
     mockApi({ 'GET /api/me': () => jsonResponse(200, foundationMe), 'GET /api/foundation/accounts': pagedHandler(() => []) })
     const { router } = renderApp('/connexion/eleve', { token: true })
 
-    expect(await screen.findByRole('heading', { name: 'Comptes à valider' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/fondation/comptes')
+    expect(await screen.findByRole('heading', { level: 1, name: "Bonjour l'équipe" })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/fondation/tableau-de-bord')
   })
 
   it('ramène une session expirée sur la connexion de la persona', async () => {

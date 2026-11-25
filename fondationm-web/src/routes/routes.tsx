@@ -4,6 +4,8 @@ import { PATHS, ROLE_HOME } from '../auth/roles'
 import { AppLayout } from '../components/layout/AppLayout'
 import { RootLayout } from '../components/layout/RootLayout'
 import { AccountsPage } from '../pages/foundation/AccountsPage'
+import { DashboardPage as FoundationDashboardPage } from '../pages/foundation/dashboard/DashboardPage'
+import { DonorRequestsPage } from '../pages/foundation/donors/DonorRequestsPage'
 import { MeetingsPage as FoundationMeetingsPage } from '../pages/foundation/meetings/MeetingsPage'
 import { RequestsPage as FoundationRequestsPage } from '../pages/foundation/meetings/RequestsPage'
 import { AgendaPage } from '../pages/speaker/AgendaPage'
@@ -32,8 +34,9 @@ const ROLES: readonly Role[] = ['SCHOOL', 'SPEAKER', 'FOUNDATION', 'DONOR', 'STU
 function rolePages(role: Role): RouteObject[] {
   if (role === 'FOUNDATION') {
     return [
-      // Le tableau de bord viendra plus tard : l'accueil de la Fondation ouvre les comptes à valider.
-      { path: ROLE_HOME.FOUNDATION, element: <Navigate to={PATHS.foundationAccounts} replace /> },
+      { path: ROLE_HOME.FOUNDATION, element: <Navigate to={PATHS.foundationDashboard} replace /> },
+      { path: PATHS.foundationDashboard, element: <FoundationDashboardPage /> },
+      { path: PATHS.foundationDonorRequests, element: <DonorRequestsPage /> },
       { path: PATHS.foundationAccounts, element: <AccountsPage /> },
       { path: PATHS.foundationRequests, element: <FoundationRequestsPage /> },
       { path: PATHS.foundationMeetings, element: <FoundationMeetingsPage /> },
