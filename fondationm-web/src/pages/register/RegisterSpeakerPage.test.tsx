@@ -24,8 +24,7 @@ async function fillSpeakerForm(user: User, { withSkills = true } = {}) {
   await user.type(screen.getByLabelText(/^Prénom et nom/), 'Awa Diallo')
   await user.type(screen.getByLabelText(/^Votre métier/), 'Ingénieure réseaux')
   await user.selectOptions(screen.getByLabelText(/^Votre secteur/), 'DIGITAL')
-  await user.type(screen.getByLabelText(/^Pays/), 'Sénégal')
-  await user.type(screen.getByLabelText(/^Zone \(ville\)/), 'Dakar')
+  await user.selectOptions(screen.getByLabelText(/^Zone \(ville\)/), 'Dakar')
   if (withSkills) {
     await user.click(screen.getByRole('button', { name: 'Réseaux' }))
     await user.click(screen.getByRole('button', { name: 'Cybersécurité' }))

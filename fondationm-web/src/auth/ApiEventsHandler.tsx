@@ -3,7 +3,8 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { onApiEvent } from '../api/events'
 import { endSession, meQuery, type LoginRedirectState } from './hooks'
-import { PATHS, destinationFor } from './roles'
+import { lastRole } from './lastRole'
+import { destinationFor, loginPathFor } from './roles'
 
 export function ApiEventsHandler() {
   const queryClient = useQueryClient()
@@ -15,7 +16,7 @@ export function ApiEventsHandler() {
         if (event === 'unauthenticated') {
           endSession(queryClient)
           const state: LoginRedirectState = { notice: 'session-expired' }
-          void navigate(PATHS.login, { replace: true, state })
+          void navigate(loginPathFor(lastRole.get()), { replace: true, state })
           return
         }
         void queryClient

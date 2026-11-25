@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { onApiEvent, type ApiEvent } from '../api/events'
-import { tokenStorage } from '../auth/tokenStorage'
+import { onApiEvent, type ApiEvent } from '../../api/events'
+import { tokenStorage } from '../../auth/tokenStorage'
 import {
   FAKE_TOKEN,
   accountsHandler,
@@ -14,7 +14,7 @@ import {
   renderApp,
   speakerMe,
   tokenResponse,
-} from '../test/helpers'
+} from '../../test/helpers'
 
 describe('Connexion', () => {
   it('connecte un référent d’établissement et l’envoie sur son accueil', async () => {

@@ -5,7 +5,8 @@ import { errorMessage } from '../api/errors'
 import type { Role } from '../auth/currentUser'
 import { CurrentUserContext, useCurrentUser } from '../auth/currentUserContext'
 import { meQuery } from '../auth/hooks'
-import { PATHS, ROLE_HOME, destinationFor } from '../auth/roles'
+import { lastRole } from '../auth/lastRole'
+import { ROLE_HOME, destinationFor, loginPathFor } from '../auth/roles'
 import { tokenStorage } from '../auth/tokenStorage'
 import { CenteredLayout } from '../components/layout/CenteredLayout'
 import { ErrorState } from '../components/ui/ErrorState'
@@ -30,7 +31,7 @@ export function RequireAuth() {
     [queryClient],
   )
 
-  if (token === null) return <Navigate to={PATHS.login} replace />
+  if (token === null) return <Navigate to={loginPathFor(lastRole.get())} replace />
 
   if (me.isPending) {
     return (

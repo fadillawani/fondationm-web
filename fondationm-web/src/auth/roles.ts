@@ -2,6 +2,10 @@ import type { CurrentUser, Role } from './currentUser'
 
 export const PATHS = {
   login: '/connexion',
+  loginSpeaker: '/connexion/intervenant',
+  loginFoundation: '/connexion/fondation',
+  loginDonor: '/connexion/donateur',
+  loginStudent: '/connexion/eleve',
   register: '/inscription',
   registerSchool: '/inscription/ecole',
   registerSpeaker: '/inscription/intervenant',
@@ -26,6 +30,22 @@ export const ROLE_HOME: Record<Role, string> = {
   FOUNDATION: '/fondation',
   DONOR: '/donateur',
   STUDENT: '/eleve',
+}
+
+/** Page de connexion de chaque persona ; sans rôle connu, celle de l'établissement. */
+export function loginPathFor(role: Role | null): string {
+  switch (role) {
+    case 'SPEAKER':
+      return PATHS.loginSpeaker
+    case 'FOUNDATION':
+      return PATHS.loginFoundation
+    case 'DONOR':
+      return PATHS.loginDonor
+    case 'STUDENT':
+      return PATHS.loginStudent
+    default:
+      return PATHS.login
+  }
 }
 
 export const ROLE_LABEL: Record<Role, string> = {
