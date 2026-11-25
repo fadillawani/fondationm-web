@@ -21,7 +21,6 @@ import {
   SUGGESTED_COUNTRIES,
 } from '../../lib/referenceData'
 import { applyServerFieldErrors } from '../../lib/serverFieldErrors'
-import { CharterNote } from './CharterNote'
 import { schoolSchema, type SchoolFormInput, type SchoolFormValues } from './schemas'
 
 const FIELDS = [
@@ -85,13 +84,13 @@ export function RegisterSchoolPage() {
       eyebrow="Espace établissement"
       title="Ouvrez les métiers à vos élèves"
       intro="Des professionnels bénévoles viennent dans vos classes, ou en ligne, pour parler de leur métier. La Fondation M accompagne chaque rencontre."
-      mobileIntro="Des professionnels bénévoles viennent parler de leur métier à vos élèves."
+      mobileIntro="Des professionnels bénévoles rencontrent vos classes. La Fondation M accompagne chaque rencontre."
       steps={STEPS}
     >
-      <AuthTabs activeLabel="Créer un compte" activeTone="terra" />
+      <AuthTabs activeLabel="Créer un compte" activeTone="indigo" />
 
       <div>
-        <h1 className="text-[32px] leading-tight">Créer le compte de l'établissement</h1>
+        <h1 className="text-[26px] leading-tight md:text-[30px]">Créer le compte de l'établissement</h1>
         <p className="mt-1 text-sm font-semibold text-muted">
           Votre zone permet de vous proposer d'abord les intervenants proches de chez vous.
         </p>
@@ -102,7 +101,7 @@ export function RegisterSchoolPage() {
           <FormField label="Nom de l'établissement" error={errors.schoolName?.message} required>
             {(control) => <Input {...control} {...register('schoolName')} autoComplete="organization" />}
           </FormField>
-          <FormField label="Type d'établissement" error={errors.schoolType?.message} required>
+          <FormField label="Type" error={errors.schoolType?.message} required>
             {(control) => (
               <Select {...control} {...register('schoolType')}>
                 <option value="">Choisir…</option>
@@ -122,7 +121,13 @@ export function RegisterSchoolPage() {
             </FormField>
             <FormField label="Zone (ville)" error={errors.city?.message} required>
               {(control) => (
-                <Input {...control} {...register('city')} list="villes-suggerees" autoComplete="address-level2" />
+                <Input
+                  {...control}
+                  {...register('city')}
+                  list="villes-suggerees"
+                  autoComplete="address-level2"
+                  className={errors.city ? undefined : 'border-terra font-bold'}
+                />
               )}
             </FormField>
           </div>
@@ -131,15 +136,8 @@ export function RegisterSchoolPage() {
         </Fieldset>
 
         <Fieldset legend="Référent">
-          <FormField label="Votre fonction" error={errors.referentRole?.message} required>
-            {(control) => (
-              <Input
-                {...control}
-                {...register('referentRole')}
-                autoComplete="organization-title"
-                placeholder="Proviseur, CPE, professeur principal…"
-              />
-            )}
+          <FormField label="Fonction" error={errors.referentRole?.message} required>
+            {(control) => <Input {...control} {...register('referentRole')} autoComplete="organization-title" />}
           </FormField>
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="E-mail professionnel" error={errors.email?.message} required>
@@ -158,14 +156,11 @@ export function RegisterSchoolPage() {
           </FormField>
         </Fieldset>
 
-        <div className="flex flex-col gap-1">
-          <Checkbox
-            {...register('charterAccepted')}
-            error={errors.charterAccepted?.message}
-            label="J'accepte la charte des rencontres de la Fondation M et je confirme représenter cet établissement."
-          />
-          <CharterNote />
-        </div>
+        <Checkbox
+          {...register('charterAccepted')}
+          error={errors.charterAccepted?.message}
+          label="J'accepte la charte des rencontres de la Fondation M et je confirme représenter cet établissement."
+        />
 
         {formError !== null && <Alert tone="error">{errorMessage(formError)}</Alert>}
 
@@ -173,7 +168,7 @@ export function RegisterSchoolPage() {
           <Button type="submit" fullWidth loading={registration.isPending}>
             Envoyer la demande de compte
           </Button>
-          <p className="text-center text-[13px] font-semibold text-muted">
+          <p className="text-center text-[13px] font-bold text-muted">
             La Fondation M vérifie chaque établissement avant d'ouvrir l'accès.
           </p>
         </div>

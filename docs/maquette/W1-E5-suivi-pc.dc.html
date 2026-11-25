@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>E5 Mes rencontres — calendrier</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-wrap: wrap; align-items: stretch">
+
+  <aside style="flex: 1 1 240px; max-width: 100%; box-sizing: border-box; background: #2B337A; color: #FDE7A6; padding: 28px 20px; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a href="Desktop.dc.html" aria-label="FondationM, retour à l'accueil" style="font-family: 'Lilita One', sans-serif; font-size: 30px; line-height: 1; color: #FDE7A6; text-decoration: none">FondationM</a>
+      <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #F7F3EA">Espace établissement</span>
+    </div>
+    <nav aria-label="Navigation principale" style="display: flex; flex-direction: column; gap: 4px">
+      <a href="W1-E3-intervenants-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #F7F3EA; text-decoration: none; display: flex; align-items: center; font-weight: 800; font-size: 15px">Intervenants</a>
+      <a href="#" aria-current="page" style="min-height: 44px; padding: 0 14px; border-radius: 12px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; font-weight: 900; font-size: 15px">Mes rencontres</a>
+      <a href="W1-E6-rapport-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #F7F3EA; text-decoration: none; display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 15px">Retours d'expérience <span style="min-width: 24px; height: 24px; border-radius: 999px; background: #E5A60A; color: #1B1F3B; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center">1</span></a>
+      <a href="W5-E2-eleves-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #F7F3EA; text-decoration: none; display: flex; align-items: center; font-weight: 800; font-size: 15px">Mon établissement</a>
+    </nav>
+    <div style="margin-top: auto; padding: 14px; border-radius: 16px; background: #1B1F3B; display: flex; align-items: center; gap: 12px">
+      <div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: #E5A60A; color: #1B1F3B; font-family: 'Lilita One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">MN</div>
+      <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 900; font-size: 14px; color: #FFFFFF">Moussa Ndiaye</span><span style="font-size: 12px; font-weight: 700; color: #F7F3EA">Lycée de Sor · Saint-Louis</span></div>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 640px; min-width: 0; box-sizing: border-box; padding: 28px 32px 40px 32px">
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px">
+      <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #B8492A">Mon planning</span>
+          <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 40px; line-height: 1">Mes rencontres</h1>
+        </div>
+        <a href="W1-E3-intervenants-pc.dc.html" style="min-height: 50px; padding: 0 22px; border-radius: 16px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; font-family: 'Lilita One', sans-serif; font-size: 18px">Nouvelle demande</a>
+      </header>
+
+      <section style="border-radius: 20px; background: #4E6A2C; color: #FFFFFF; padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+        <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: #FDE7A6; color: #4E6A2C; font-family: 'Lilita One', sans-serif; font-size: 17px; display: flex; align-items: center; justify-content: center">AS</span>
+        <span style="flex: 1 1 300px; font-size: 16px; font-weight: 700; line-height: 1.4"><strong style="font-weight: 900; color: #FDE7A6">Dans 4 jours</strong> · Awa Sarr, ingénieure data, rencontre vos Terminale S2 mardi 17 novembre à 10h.</span>
+        <button onClick="{{ goNext }}" style="min-height: 44px; padding: 0 16px; border-radius: 12px; border: 2px solid #FDE7A6; background: transparent; color: #FDE7A6; font-family: inherit; font-weight: 900; font-size: 14px; cursor: pointer">Voir le détail</button>
+      </section>
+
+      <section style="border-radius: 20px; background: #FDE7A6; border: 2px solid #E5A60A; padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+        <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: #EF7A0A; color: #1B1F3B; font-family: 'Lilita One', sans-serif; font-size: 17px; display: flex; align-items: center; justify-content: center">AD</span>
+        <span style="flex: 1 1 300px; font-size: 16px; font-weight: 700; line-height: 1.4"><strong style="font-weight: 900">Votre rencontre avec Aïssatou Diop est terminée.</strong> Comment s'est-elle passée pour vous et vos Terminale L2 ?</span>
+        <a href="W1-E6-rapport-pc.dc.html" style="min-height: 44px; padding: 0 18px; border-radius: 12px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; font-weight: 900; font-size: 14px">Partager mon retour</a>
+      </section>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <section aria-label="Calendrier" style="flex: 3 1 600px; min-width: 0; background: #FFFFFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+            <button aria-label="Mois précédent" onClick="{{ prev }}" disabled="{{ prevDisabled }}" style="width: 44px; height: 44px; border-radius: 12px; border: 2px solid #E6DECB; background: #FFFFFF; color: #1B1F3B; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: {{ prevOpacity }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+            <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 26px">{{ monthLabel }}</h2>
+            <button aria-label="Mois suivant" onClick="{{ next }}" disabled="{{ nextDisabled }}" style="width: 44px; height: 44px; border-radius: 12px; border: 2px solid #E6DECB; background: #FFFFFF; color: #1B1F3B; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: {{ nextOpacity }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px">
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #4A4A57; text-align: center">Lun</span>
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #4A4A57; text-align: center">Mar</span>
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #4A4A57; text-align: center">Mer</span>
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #4A4A57; text-align: center">Jeu</span>
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #4A4A57; text-align: center">Ven</span>
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #4A4A57; text-align: center">Sam</span>
+            <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #4A4A57; text-align: center">Dim</span>
+            <sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+              <div style="min-height: 104px; box-sizing: border-box; border-radius: 12px; background: {{ c.bg }}; border: {{ c.border }}; padding: 6px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                <span style="align-self: flex-start; min-width: 26px; height: 26px; padding: 0 4px; box-sizing: border-box; border-radius: 999px; background: {{ c.numBg }}; color: {{ c.numColor }}; font-size: 13px; font-weight: 900; display: flex; align-items: center; justify-content: center">{{ c.label }}</span>
+                <sc-for list="{{ c.events }}" as="e" hint-placeholder-count="0">
+                  <button onClick="{{ e.pick }}" aria-label="{{ e.aria }}" style="width: 100%; min-height: 36px; border: 0; outline: {{ e.outline }}; outline-offset: 1px; border-radius: 8px; background: {{ e.bg }}; color: {{ e.fg }}; padding: 4px 6px; text-align: left; font-family: inherit; font-size: 12px; font-weight: 800; line-height: 1.2; cursor: pointer; opacity: {{ e.opacity }}; overflow: hidden">{{ e.text }}</button>
+                  <sc-if value="{{ e.todo }}" hint-placeholder-val="{{ false }}">
+                    <a href="W1-E6-rapport-pc.dc.html" style="min-height: 32px; border-radius: 8px; border: 2px solid #B8492A; background: #FFFFFF; color: #B8492A; text-decoration: none; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2px 4px; font-size: 11px; font-weight: 900; line-height: 1.15">Partager mon retour</a>
+                  </sc-if>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; font-weight: 800; color: #4A4A57; padding-top: 6px">
+            <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 4px; background: #EF7A0A"></span>En attente</span>
+            <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 4px; background: #4E6A2C"></span>Confirmée</span>
+            <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 4px; background: #2B337A"></span>Réalisée</span>
+            <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 4px; background: #B81C1F"></span>Refusée</span>
+            <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 4px; background: #E6DECB; border: 1px solid #B8AE98"></span>Annulée</span>
+            <span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 4px; background: #F1EBDD"></span>Jour passé</span>
+          </div>
+        </section>
+
+        <aside style="flex: 2 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <section aria-live="polite" style="background: #FFFFFF; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 14px; border: 2px solid {{ d.accent }}">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+              <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #4A4A57">{{ d.when }}</span>
+              <span style="font-size: 12px; font-weight: 900; padding: 4px 10px; border-radius: 999px; background: {{ d.bg }}; color: {{ d.fg }}">{{ d.status }}</span>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center">
+              <span style="width: 52px; height: 52px; flex-shrink: 0; border-radius: 16px; background: #F7F3EA; font-family: 'Lilita One', sans-serif; font-size: 19px; display: flex; align-items: center; justify-content: center">{{ d.initials }}</span>
+              <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-family: 'Lilita One', sans-serif; font-size: 22px; line-height: 1.1">{{ d.name }}</span><span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ d.metier }}</span></div>
+            </div>
+            <dl style="margin: 0; display: grid; grid-template-columns: 64px 1fr; gap: 6px 12px; font-size: 14px">
+              <dt style="font-weight: 700; color: #4A4A57">Date</dt><dd style="margin: 0; font-weight: 900">{{ d.date }}</dd>
+              <dt style="font-weight: 700; color: #4A4A57">Classe</dt><dd style="margin: 0; font-weight: 900">{{ d.classe }}</dd>
+              <dt style="font-weight: 700; color: #4A4A57">Lieu</dt><dd style="margin: 0; font-weight: 900">{{ d.lieu }}</dd>
+            </dl>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+              <div style="border-radius: 12px; background: {{ d.ib }}; padding: 10px; display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: {{ d.ic }}">Intervenant</span><span style="font-weight: 900; font-size: 14px; color: {{ d.ic }}">{{ d.it }}</span></div>
+              <div style="border-radius: 12px; background: {{ d.fb }}; padding: 10px; display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: {{ d.fc }}">Fondation M</span><span style="font-weight: 900; font-size: 14px; color: {{ d.fc }}">{{ d.ft }}</span></div>
+            </div>
+            <div style="border-radius: 14px; background: #F7F3EA; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+              <span style="font-size: 13px; font-weight: 900">{{ d.noteTitle }}</span>
+              <span style="font-size: 14px; font-weight: 600; line-height: 1.45">{{ d.note }}</span>
+            </div>
+            <sc-if value="{{ d.hasRetour }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px"><span style="font-size: 13px; font-weight: 800">Retour d'expérience</span><span style="font-size: 12px; font-weight: 900; padding: 4px 10px; border-radius: 999px; background: {{ d.rbg }}; color: {{ d.rfg }}">{{ d.retour }}</span></div>
+            </sc-if>
+            <sc-if value="{{ d.hasCta }}" hint-placeholder-val="{{ false }}">
+              <a href="{{ d.ctaHref }}" style="min-height: 52px; border-radius: 16px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-size: 18px">{{ d.ctaLabel }}</a>
+            </sc-if>
+          </section>
+
+          <section style="background: #FFFFFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+            <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 20px; text-transform: uppercase">À venir</h2>
+            <sc-for list="{{ upcoming }}" as="u" hint-placeholder-count="4">
+              <button onClick="{{ u.pick }}" style="min-height: 52px; border: 0; border-radius: 12px; background: {{ u.rowBg }}; padding: 8px 10px; display: flex; align-items: center; gap: 10px; text-align: left; font-family: inherit; color: #1B1F3B; cursor: pointer">
+                <span style="width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: {{ u.dot }}"></span>
+                <span style="flex: 1; display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 900; font-size: 14px">{{ u.name }}</span><span style="font-size: 12px; font-weight: 700; color: #4A4A57">{{ u.short }}</span></span>
+                <span style="font-size: 12px; font-weight: 800; color: #4A4A57; white-space: nowrap">{{ u.status }}</span>
+              </button>
+            </sc-for>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1280}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const month = st.month || 11;
+const selId = st.sel || 'e5';
+const STATUS = {
+attente: { label: 'En attente', bg: '#EF7A0A', fg: '#1B1F3B' },
+confirmee: { label: 'Confirmée', bg: '#4E6A2C', fg: '#FFFFFF' },
+refusee: { label: 'Refusée', bg: '#B81C1F', fg: '#FFFFFF' },
+annulee: { label: 'Annulée', bg: '#E6DECB', fg: '#1B1F3B' },
+realisee: { label: 'Réalisée', bg: '#2B337A', fg: '#FDE7A6' }
+};
+const AV = { v: ['Validé', '#3B5221', '#E8EEDF'], a: ['En attente', '#7A4100', '#FDEBD3'], r: ['Refusé', '#8E1518', '#FBE3E3'] };
+const RET = { 'À rédiger': ['#E5A60A', '#1B1F3B'], 'Soumis': ['#9DAA3C', '#1B1F3B'], 'Validé': ['#4E6A2C', '#FFFFFF'] };
+const MONTHS = { 10: ['Octobre 2026', 3, 31, 'oct.', 'octobre'], 11: ['Novembre 2026', 6, 30, 'nov.', 'novembre'], 12: ['Décembre 2026', 1, 31, 'déc.', 'décembre'] };
+const EV = [
+{ id: 'e1', m: 10, d: 8, wd: 'Jeudi', time: '10h00', name: 'Mame Diarra Sow', short: 'Mame Diarra', initials: 'MS', metier: 'Agronome · Ross Béthio', classe: 'Terminale S2', lieu: 'Salle 4', st: 'realisee', ia: 'v', fa: 'v', retour: 'Soumis', noteTitle: 'Merci pour votre retour', note: 'La Fondation M est en train de le lire avant de le partager aux donateurs.' },
+{ id: 'e2', m: 10, d: 22, wd: 'Jeudi', time: '11h00', name: 'Fatou Ndiaye', short: 'Fatou', initials: 'FN', metier: 'Avocate · Dakar', classe: 'Terminale S2', lieu: 'En ligne', st: 'realisee', ia: 'v', fa: 'v', retour: 'Validé', noteTitle: 'Une belle rencontre', note: 'Votre retour fait désormais partie du rapport d’impact partagé aux donateurs.' },
+{ id: 'e3', m: 10, d: 30, wd: 'Vendredi', time: '16h00', name: 'Oumar Sy', short: 'Oumar', initials: 'OS', metier: 'Infirmier · Hôpital régional', classe: 'Première S1', lieu: 'Salle 7', st: 'annulee', ia: 'v', fa: 'v', noteTitle: 'Annulée par la Fondation M', note: 'Oumar a eu un empêchement de dernière minute. Vous pouvez lui proposer une nouvelle date.' },
+{ id: 'e4', m: 11, d: 4, wd: 'Mercredi', time: '14h00', name: 'Aïssatou Diop', short: 'Aïssatou', initials: 'AD', metier: 'Maroquinière · Guet Ndar', classe: 'Terminale L2', lieu: 'Salle 12', st: 'realisee', ia: 'v', fa: 'v', retour: 'À rédiger', noteTitle: 'Comment cela s’est-il passé ?', note: 'Racontez-nous ce que vous et vos élèves avez vécu avec Aïssatou.', cta: ['Partager votre retour d’expérience', 'W1-E6-rapport-pc.dc.html'] },
+{ id: 'e5', m: 11, d: 17, wd: 'Mardi', time: '10h00', name: 'Awa Sarr', short: 'Awa', initials: 'AS', metier: 'Ingénieure data · Dakar', classe: 'Terminale S2', lieu: 'En ligne · salle informatique', st: 'confirmee', ia: 'v', fa: 'v', noteTitle: 'Tout est prêt', note: 'Pensez à prévenir vos élèves et à rassembler leurs questions pour Awa.' },
+{ id: 'e6', m: 11, d: 19, wd: 'Jeudi', time: '15h00', name: 'Ibrahima Fall', short: 'Ibrahima', initials: 'IF', metier: 'Pharmacien · Hôpital régional', classe: 'Première S1', lieu: 'Salle 7', st: 'refusee', ia: 'r', fa: 'v', noteTitle: 'Refusée par l’intervenant', note: '« Je suis de garde à l’hôpital ce jeudi. Je reste disponible en décembre. »', cta: ['Choisir un autre intervenant', 'W1-E3-intervenants-pc.dc.html'] },
+{ id: 'e7', m: 11, d: 23, wd: 'Lundi', time: '9h30', name: 'Mame Diarra Sow', short: 'Mame Diarra', initials: 'MS', metier: 'Agronome · Ross Béthio', classe: 'Terminale L2', lieu: 'CDI, bâtiment B', st: 'attente', ia: 'v', fa: 'a', noteTitle: 'Presque confirmée', note: 'Mame Diarra a accepté avec plaisir. La Fondation M doit encore valider.' },
+{ id: 'e8', m: 11, d: 27, wd: 'Vendredi', time: '11h00', name: 'Cheikh Tidiane Gueye', short: 'Cheikh T.', initials: 'CG', metier: 'Conseiller bancaire · Saint-Louis', classe: 'Première L1', lieu: 'Salle 3', st: 'attente', ia: 'a', fa: 'a', noteTitle: 'Demande envoyée', note: 'Cheikh Tidiane et la Fondation M vont vous répondre.' }
+];
+const isPast = (m, d) => m < 11 || (m === 11 && d < 13);
+const pick = (e) => () => this.setState({ sel: e.id, month: e.m });
+const [label, offset, days] = MONTHS[month];
+const total = Math.ceil((offset + days) / 7) * 7;
+const cells = [];
+for (let i = 0; i < total; i++) {
+const n = i - offset + 1;
+const inMonth = n >= 1 && n <= days;
+const past = inMonth && isPast(month, n);
+const today = month === 11 && n === 13;
+const events = inMonth ? EV.filter((e) => e.m === month && e.d === n).map((e) => ({
+text: e.time + ' · ' + e.short,
+aria: e.short + ', ' + e.time + ', ' + STATUS[e.st].label,
+bg: STATUS[e.st].bg, fg: STATUS[e.st].fg,
+outline: e.id === selId ? '3px solid #1B1F3B' : 'none',
+opacity: past ? '0.8' : '1',
+todo: e.retour === 'À rédiger',
+pick: pick(e)
+})) : [];
+cells.push({
+label: inMonth ? String(n) : '',
+bg: !inMonth ? 'transparent' : (past ? '#F1EBDD' : '#FFFFFF'),
+border: !inMonth ? '0' : (today ? '2px solid #B8492A' : '1px solid #EDE6D6'),
+numBg: today ? '#B8492A' : 'transparent',
+numColor: today ? '#FFFFFF' : (past ? '#4A4A57' : '#1B1F3B'),
+events
+});
+}
+const e = EV.find((x) => x.id === selId);
+const s = STATUS[e.st];
+const past = isPast(e.m, e.d);
+const d = {
+when: past ? 'Rencontre passée' : 'Rencontre à venir',
+status: s.label, bg: s.bg, fg: s.fg, accent: s.bg === '#E6DECB' ? '#B8AE98' : s.bg,
+initials: e.initials, name: e.name, metier: e.metier,
+date: e.wd + ' ' + e.d + ' ' + MONTHS[e.m][4] + ' · ' + e.time,
+classe: e.classe, lieu: e.lieu,
+it: AV[e.ia][0], ic: AV[e.ia][1], ib: AV[e.ia][2],
+ft: AV[e.fa][0], fc: AV[e.fa][1], fb: AV[e.fa][2],
+noteTitle: e.noteTitle, note: e.note,
+hasRetour: !!e.retour, retour: e.retour || '', rbg: e.retour ? RET[e.retour][0] : '', rfg: e.retour ? RET[e.retour][1] : '',
+hasCta: !!e.cta, ctaLabel: e.cta ? e.cta[0] : '', ctaHref: e.cta ? e.cta[1] : '#'
+};
+const upcoming = EV.filter((x) => !isPast(x.m, x.d)).map((x) => ({
+name: x.name, short: x.wd + ' ' + x.d + ' ' + MONTHS[x.m][3] + ' · ' + x.time + ' · ' + x.classe,
+status: STATUS[x.st].label, dot: STATUS[x.st].bg,
+rowBg: x.id === selId ? '#FDE7A6' : '#F7F3EA',
+pick: pick(x)
+}));
+return {
+cells, d, upcoming, monthLabel: label,
+prev: () => this.setState({ month: Math.max(10, month - 1) }),
+next: () => this.setState({ month: Math.min(12, month + 1) }),
+prevDisabled: month === 10, nextDisabled: month === 12,
+prevOpacity: month === 10 ? '0.4' : '1', nextOpacity: month === 12 ? '0.4' : '1',
+goNext: () => this.setState({ sel: 'e5', month: 11 })
+};
+}
+}
+</script>
+</body>
+</html>

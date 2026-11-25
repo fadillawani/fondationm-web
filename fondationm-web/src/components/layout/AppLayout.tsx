@@ -1,8 +1,8 @@
-import { useEffect, useId, useState, type ComponentType } from 'react'
+import type { ComponentType } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { useCurrentUser } from '../../auth/currentUserContext'
 import { useLogout } from '../../auth/hooks'
-import { ROLE_LABEL, ROLE_TAGLINE, accountCard, navItemsFor, type NavIcon, type NavItem } from '../../auth/roles'
+import { ROLE_TAGLINE, accountCard, navItemsFor, type NavIcon, type NavItem } from '../../auth/roles'
 import { cn } from '../../lib/cn'
 import { initialsOf } from '../../lib/initials'
 import { useNavBadges } from '../../nav/badges'
@@ -14,10 +14,8 @@ import {
   HomeIcon,
   LogoutIcon,
   MeetingsIcon,
-  MoreIcon,
   RequestsIcon,
 } from './icons'
-import { Logo } from './Logo'
 import { ROLE_THEME, type RoleTheme } from './roleTheme'
 
 const ICONS: Record<NavIcon, ComponentType<{ className?: string }>> = {
@@ -30,17 +28,19 @@ const ICONS: Record<NavIcon, ComponentType<{ className?: string }>> = {
   donors: DonorsIcon,
 }
 
+/** Lien de la barre latérale (maquette : 44 px, padding 0 14, rayon 12, 15 px). */
 const SIDEBAR_ITEM =
-  'flex min-h-touch items-center gap-3 rounded-button px-4 font-extrabold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2'
+  'flex min-h-touch items-center gap-3 rounded-[12px] px-3.5 text-[15px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2'
 
+/** Entrée de la navigation basse (maquette : 52 px, 11 px ; Fondation 10 px). */
 const BOTTOM_ITEM =
-  'relative flex min-h-touch flex-1 flex-col items-center justify-center gap-0.5 rounded-button px-1 py-2 text-center text-xs font-extrabold focus-visible:outline-2 focus-visible:-outline-offset-2'
+  'relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-[3px] rounded-[12px] px-0.5 text-center focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink'
 
-function CountBadge({ count, theme, className }: { count: number | undefined; theme: RoleTheme; className?: string }) {
+function CountBadge({ count, theme, className }: { count: number | undefined; theme: string; className?: string }) {
   if (count === undefined || count === 0) return null
   return (
     <span
-      className={cn('inline-flex min-w-6 items-center justify-center rounded-pill px-1.5 text-xs font-black', theme.badge, className)}
+      className={cn('inline-flex h-6 min-w-6 items-center justify-center rounded-pill px-1.5 text-xs font-black', theme, className)}
     >
       <span aria-hidden="true">{count}</span>
       <span className="sr-only">{`${count} en attente`}</span>
@@ -48,57 +48,31 @@ function CountBadge({ count, theme, className }: { count: number | undefined; th
   )
 }
 
-function SoonPill({ className }: { className?: string }) {
+function SidebarItem({ item, theme, count }: { item: NavItem; theme: RoleTheme; count: number | undefined }) {
+  const Icon = ICONS[item.icon]
+  if (item.to === undefined) {
+    return (
+      <li className={cn(SIDEBAR_ITEM, 'cursor-not-allowed font-extrabold', theme.link)}>
+        <Icon className="size-5" />
+        <span className="flex-1">{item.label}</span>
+        <span className={cn('rounded-pill px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.06em]', theme.soon)}>
+          Bientôt
+        </span>
+      </li>
+    )
+  }
   return (
-    <span className={cn('rounded-pill px-2 py-0.5 text-[11px] font-black uppercase tracking-[0.06em]', className)}>
-      Bientôt
-    </span>
-  )
-}
-
-/** Fenêtre « Plus » de la navigation basse : entrées désactivées. */
-function MoreMenu({ items, theme }: { items: NavItem[]; theme: RoleTheme }) {
-  const [open, setOpen] = useState(false)
-  const menuId = useId()
-  useEffect(() => {
-    if (!open) return
-    const close = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('keydown', close)
-    return () => document.removeEventListener('keydown', close)
-  }, [open])
-
-  return (
-    <li className="flex flex-1">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={menuId}
-        onClick={() => setOpen((value) => !value)}
-        className={cn(BOTTOM_ITEM, theme.focus, open ? theme.active : theme.hover)}
+    <li>
+      <NavLink
+        to={item.to}
+        className={({ isActive }) =>
+          cn(SIDEBAR_ITEM, theme.focus, isActive ? cn('font-black', theme.active) : cn('font-extrabold', theme.link))
+        }
       >
-        <MoreIcon className="size-6" />
-        Plus
-      </button>
-      <div
-        id={menuId}
-        hidden={!open}
-        className="absolute inset-x-3 bottom-full mb-2 rounded-block border-2 border-line bg-surface p-3 text-ink shadow-raised"
-      >
-        <ul aria-label="Autres rubriques" className="flex flex-col gap-1">
-          {items.map((item) => {
-            const Icon = ICONS[item.icon]
-            return (
-              <li key={item.label} className="flex min-h-touch items-center gap-3 rounded-button px-3 font-extrabold text-muted">
-                <Icon className="size-5" />
-                <span className="flex-1">{item.label}</span>
-                <SoonPill className="bg-line text-muted" />
-              </li>
-            )
-          })}
-        </ul>
-      </div>
+        <Icon className="size-5" />
+        <span className="flex-1">{item.label}</span>{' '}
+        <CountBadge count={count} theme={theme.badge} />
+      </NavLink>
     </li>
   )
 }
@@ -110,16 +84,10 @@ export function AppLayout() {
   const items = navItemsFor(user.role)
   const badges = useNavBadges(user.role)
   const badgeCount = (item: NavItem) => (item.badge === undefined ? undefined : badges[item.badge])
-  const activeItems = items.filter((item) => item.to !== undefined)
-  const disabledItems = items.filter((item) => item.to === undefined)
-  // Navigation basse : 5 entrées au plus (déconnexion comprise) ; au-delà, les entrées désactivées
-  // sont regroupées sous « Plus ».
-  const groupDisabled = items.length + 1 > 5
   const card = accountCard(user)
-  const sidebarLink = ({ isActive }: { isActive: boolean }) =>
-    cn(SIDEBAR_ITEM, theme.focus, isActive ? theme.active : theme.hover)
-  const bottomLink = ({ isActive }: { isActive: boolean }) =>
-    cn(BOTTOM_ITEM, theme.focus, isActive ? theme.active : theme.hover)
+  const mobileItems = items.filter((item) => item.mobile !== false)
+  const bottomText = user.role === 'FOUNDATION' ? 'text-[10px]' : 'text-[11px]'
+  const tagline = ROLE_TAGLINE[user.role]
 
   return (
     <div className="min-h-dvh bg-canvas lg:flex">
@@ -132,108 +100,91 @@ export function AppLayout() {
 
       <aside
         className={cn(
-          'hidden lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-sidebar lg:shrink-0 lg:flex-col lg:gap-8 lg:overflow-y-auto lg:px-5 lg:py-8',
+          'hidden lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-sidebar lg:shrink-0 lg:flex-col lg:gap-7 lg:overflow-y-auto lg:px-5 lg:py-7',
           theme.surface,
         )}
       >
-        <Logo className="px-4" subtitle={ROLE_TAGLINE[user.role]} />
+        <div className="flex flex-col gap-0.5">
+          <span className={cn('font-display text-[30px] leading-none', theme.logo)}>FondationM</span>
+          {tagline && (
+            <span className={cn('text-xs uppercase tracking-[0.1em]', theme.tagline)}>{tagline}</span>
+          )}
+        </div>
         <nav aria-label="Navigation principale" className="flex-1">
-          <ul className="flex flex-col gap-1.5">
-            {items.map((item) => {
-              const Icon = ICONS[item.icon]
-              if (item.to === undefined) {
-                return (
-                  <li key={item.label} className={cn(SIDEBAR_ITEM, 'cursor-not-allowed')}>
-                    <Icon className="size-5" />
-                    <span className="flex-1">{item.label}</span>
-                    <SoonPill className={theme.soon} />
-                  </li>
-                )
-              }
-              return (
-                <li key={item.label}>
-                  <NavLink to={item.to} className={sidebarLink}>
-                    <Icon className="size-5" />
-                    <span className="flex-1">{item.label}</span>{' '}
-                    <CountBadge count={badgeCount(item)} theme={theme} />
-                  </NavLink>
-                </li>
-              )
-            })}
+          <ul className="flex flex-col gap-1">
+            {items.map((item) => (
+              <SidebarItem key={item.label} item={item} theme={theme} count={badgeCount(item)} />
+            ))}
           </ul>
         </nav>
-        <div className={cn('flex flex-col gap-2 rounded-block p-3', theme.card)}>
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-2">
+          <div className={cn('flex items-center gap-3 rounded-2xl p-3.5', theme.card)}>
             <span
               aria-hidden="true"
-              className={cn(
-                'inline-flex size-10 shrink-0 items-center justify-center rounded-pill font-display text-lg',
-                theme.avatar,
-              )}
+              className={cn('inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] font-display text-lg', theme.avatar)}
             >
               {initialsOf(card.name, card.initials)}
             </span>
-            <div className="min-w-0">
-              <p className={cn('truncate font-extrabold', theme.cardName)}>{card.name}</p>
-              <p className={cn('truncate text-sm font-bold', theme.cardDetail)}>{card.detail || ROLE_LABEL[user.role]}</p>
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-sm font-black text-white">{card.name}</span>
+              <span className="truncate text-xs font-bold text-canvas">{card.detail}</span>
             </div>
           </div>
           <button
             type="button"
             onClick={logout}
-            className={cn(SIDEBAR_ITEM, 'px-2 hover:bg-white/10 focus-visible:outline-cream', theme.cardName)}
+            className={cn(
+              'inline-flex min-h-touch items-center gap-2 self-start rounded-[12px] px-3.5 text-sm font-extrabold focus-visible:outline-2 focus-visible:outline-offset-2',
+              theme.link,
+              theme.focus,
+            )}
           >
-            <LogoutIcon className="size-5" />
+            <LogoutIcon className="size-4" />
             Se déconnecter
           </button>
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col pb-20 lg:pb-0">
-        <header className="flex items-center justify-between bg-surface px-4 py-3 shadow-card lg:hidden">
-          <Logo className="text-terra" />
-          <span className="text-sm font-bold text-muted">{ROLE_LABEL[user.role]}</span>
-        </header>
-        <main id="contenu" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 lg:px-10 lg:py-10">
+      <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0">
+        <main id="contenu" tabIndex={-1} className="mx-auto w-full max-w-[1180px] flex-1 px-4 pb-6 pt-[18px] lg:px-8 lg:pb-10 lg:pt-7">
           <Outlet />
         </main>
       </div>
 
       <nav
         aria-label="Navigation principale"
-        className={cn('fixed inset-x-0 bottom-0 z-40 px-1 pb-[env(safe-area-inset-bottom)] pt-1 lg:hidden', theme.surface)}
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface px-2 pb-[max(22px,env(safe-area-inset-bottom))] pt-2 lg:hidden"
       >
-        <ul className="relative flex gap-1">
-          {(groupDisabled ? activeItems : items).map((item) => {
+        <ul className="flex">
+          {mobileItems.map((item) => {
             const Icon = ICONS[item.icon]
             if (item.to === undefined) {
               return (
-                <li key={item.label} className={cn(BOTTOM_ITEM, 'cursor-not-allowed')}>
+                <li key={item.label} className={cn(BOTTOM_ITEM, bottomText, 'cursor-not-allowed font-extrabold text-muted')}>
                   <Icon className="size-6" />
-                  {item.label}
-                  <span className="text-[10px] font-black uppercase">Bientôt</span>
+                  {item.short}
+                  <span className="text-[9px] font-black uppercase">Bientôt</span>
                 </li>
               )
             }
             return (
               <li key={item.label} className="flex flex-1">
-                <NavLink to={item.to} className={bottomLink}>
+                <NavLink
+                  to={item.to}
+                  aria-label={badgeCount(item) ? `${item.label} ${badgeCount(item)} en attente` : item.label}
+                  className={({ isActive }) =>
+                    cn(BOTTOM_ITEM, bottomText, isActive ? 'font-black text-terra' : 'font-extrabold text-muted')
+                  }
+                >
                   <span className="relative">
                     <Icon className="size-6" />
-                    <CountBadge count={badgeCount(item)} theme={theme} className="absolute -right-4 -top-2" />
-                  </span>{' '}
-                  {item.label}
+                    <CountBadge count={badgeCount(item)} theme="bg-terra text-white" className="absolute -right-4 -top-2" />
+                  </span>
+                  {item.short}
                 </NavLink>
               </li>
             )
           })}
-          {groupDisabled && disabledItems.length > 0 && <MoreMenu items={disabledItems} theme={theme} />}
-          <li className="flex flex-1">
-            <button type="button" onClick={logout} className={bottomLink({ isActive: false })}>
-              <LogoutIcon className="size-6" />
-              Déconnexion
-            </button>
-          </li>
         </ul>
       </nav>
     </div>

@@ -1,53 +1,67 @@
 import type { CurrentUser } from '../../auth/currentUser'
-import { SCHOOL_TYPE_LABELS, SECTOR_LABELS } from '../../lib/referenceData'
+import { SCHOOL_TYPE_LABELS } from '../../lib/referenceData'
 
 interface SummaryRow {
   label: string
   value: string
 }
 
-function join(values: readonly string[], separator: string): string {
+function join(values: readonly (string | null | undefined)[], separator: string): string {
   return values.filter(Boolean).join(separator)
 }
 
+/** Lignes de la maquette : école (W1-E1-attente) ou intervenant (W2-E7). */
 function summaryRows(user: CurrentUser): SummaryRow[] {
   const details = user.details
   if (details?.kind === 'school') {
+    const type = details.schoolType ? SCHOOL_TYPE_LABELS[details.schoolType].toLocaleLowerCase('fr-FR') : ''
     return [
-      {
-        label: 'Établissement',
-        value: join([details.schoolName, details.schoolType ? SCHOOL_TYPE_LABELS[details.schoolType] : ''], ' · '),
-      },
-      { label: 'Pays et ville', value: join([details.city, details.country], ', ') },
-      { label: 'Fonction', value: details.referentRole },
+      { label: 'Établissement', value: type ? `${details.schoolName} (${type})` : details.schoolName },
+      { label: 'Pays · zone', value: join([details.country, details.city], ' · ') },
+      // Maquette : « {Prénom Nom}, {fonction} » ; le nom du référent est absent du contrat.
+      { label: 'Référent', value: details.referentRole },
       { label: 'Contact', value: join([user.email, details.phone], ' · ') },
     ].filter((row) => row.value)
   }
   if (details?.kind === 'speaker') {
+    const job = details.jobTitle ? details.jobTitle.charAt(0).toLocaleLowerCase('fr-FR') + details.jobTitle.slice(1) : ''
     return [
-      { label: 'Métier', value: details.jobTitle },
+      { label: 'Intervenant', value: join([details.fullName, job], ', ') },
       { label: 'Structure', value: details.organization },
-      { label: 'Secteur', value: details.sector ? SECTOR_LABELS[details.sector].name : '' },
-      { label: 'Ville', value: join([details.city, details.country], ', ') },
+      { label: 'Pays · zone', value: join([details.country, details.city], ' · ') },
     ].filter((row) => row.value)
   }
   return [{ label: 'E-mail', value: user.email }]
 }
 
 export function RequestSummary({ user }: { user: CurrentUser }) {
+  const speaker = user.details?.kind === 'speaker' ? user.details : null
+  const title = speaker ? 'Votre profil' : 'Votre demande'
   return (
-    <section aria-labelledby="votre-demande" className="flex flex-col gap-3 rounded-block border-2 border-line p-5">
-      <h2 id="votre-demande" className="text-xl">
-        Votre demande
+    <section
+      aria-labelledby="votre-demande"
+      className="flex flex-col gap-3 rounded-[20px] bg-surface p-[18px] md:rounded-[24px] md:p-7"
+    >
+      <h2 id="votre-demande" className="text-lg uppercase md:text-[22px]">
+        {title}
       </h2>
-      <dl className="flex flex-col gap-2">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
         {summaryRows(user).map((row) => (
-          <div key={row.label} className="flex flex-col">
-            <dt className="text-xs font-black uppercase tracking-[0.08em] text-muted">{row.label}</dt>
-            <dd className="font-bold">{row.value}</dd>
+          <div key={row.label} className="contents">
+            <dt className="font-bold text-muted">{row.label}</dt>
+            <dd className="font-extrabold">{row.value}</dd>
           </div>
         ))}
       </dl>
+      {speaker && speaker.skills.length > 0 && (
+        <ul aria-label="Compétences" className="flex flex-wrap gap-2">
+          {speaker.skills.map((skill) => (
+            <li key={skill} className="rounded-pill bg-canvas px-3 py-[5px] text-[13px] font-extrabold">
+              {skill}
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   )
 }

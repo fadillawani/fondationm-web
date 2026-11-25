@@ -1,34 +1,31 @@
 import { useState, type FormEvent } from 'react'
+import { PageTitle } from '../../components/layout/PageTitle'
 import { useSearchParams } from 'react-router'
 import { errorMessage } from '../../api/errors'
 import { useCurrentUser } from '../../auth/currentUserContext'
 import { Alert } from '../../components/ui/Alert'
-import { Button } from '../../components/ui/Button'
 import { ChoiceGroup } from '../../components/ui/ChoiceGroup'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { ErrorState } from '../../components/ui/ErrorState'
-import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
 import { Spinner } from '../../components/ui/Spinner'
 import { parseIso } from '../../lib/dateTime'
-import { initialsOf } from '../../lib/initials'
 import { normalizeName, sameName } from '../../lib/normalize'
 import { SECTORS, type Sector } from '../../lib/referenceData'
 import { useNow } from '../../lib/useNow'
 import { NetworkSection } from './NetworkSection'
+import { useSchoolMeetings, type SchoolMeeting } from './meetingsData'
 import { RefusalBanner } from './RefusalBanner'
 import {
   useDirectory,
-  useRefusedMeetings,
   useSpeakerStats,
   type CityCount,
   type DirectoryFilter,
   type MeetingFormat,
-  type RefusedMeeting,
   type SpeakerSummary,
 } from './schoolData'
-import { SpeakerCard } from './SpeakerCard'
+import { SpeakerCard, SpeakerRow } from './SpeakerCard'
 import { FILTER_SECTORS, sectorName } from './sectorStyle'
 
 const MY_ZONE = 'ma-zone'
@@ -45,9 +42,10 @@ function speakersCount(count: number): string {
 }
 
 /** Refus le plus récent par l'intervenant, datant de 14 jours au plus. */
-function latestRefusal(meetings: readonly RefusedMeeting[], now: Date): RefusedMeeting | null {
-  let latest: { meeting: RefusedMeeting; at: number } | null = null
+function latestRefusal(meetings: readonly SchoolMeeting[], now: Date): SchoolMeeting | null {
+  let latest: { meeting: SchoolMeeting; at: number } | null = null
   for (const meeting of meetings) {
+    if (meeting.status !== 'REFUSED') continue
     const at = parseIso(meeting.refusedAt)?.getTime()
     if (meeting.closedBy !== 'SPEAKER' || at === undefined || now.getTime() - at > REFUSAL_WINDOW_MS) continue
     if (latest === null || at > latest.at) latest = { meeting, at }
@@ -71,16 +69,23 @@ interface SectionProps {
   exclude?: (speaker: SpeakerSummary) => boolean
   showCity?: boolean
   emptyText: string
+  /** Lignes compactes sur mobile (maquette : « Autres zones · en ligne »). */
+  compactOnMobile?: boolean
 }
 
-function DirectorySection({ title, filter, exclude, showCity, emptyText }: SectionProps) {
+function DirectorySection({ title, filter, exclude, showCity, emptyText, compactOnMobile = false }: SectionProps) {
   const directory = useDirectory(filter)
   const speakers = (directory.data?.items ?? []).filter((speaker) => !exclude?.(speaker))
   const headingId = `section-${normalizeName(title).replace(/[^a-z0-9]+/g, '-')}`
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-4">
-      <h2 id={headingId} className="text-2xl text-ink">
-        {directory.data ? title.replace('{n}', speakersCount(speakers.length)) : title.replace(' · {n}', '')}
+      <h2 id={headingId} className="text-xl uppercase text-ink lg:text-2xl">
+        {title.split(' · ')[0]}{' '}
+        <span className="font-sans text-[13px] font-extrabold normal-case text-muted lg:text-[15px]">
+          {title.includes(' · ')
+            ? `· ${directory.data ? title.split(' · ')[1]?.replace('{n}', speakersCount(speakers.length)) : '…'}`
+            : null}
+        </span>
       </h2>
       {directory.isPending ? (
         <div className="flex justify-center py-6 text-terra">
@@ -99,7 +104,20 @@ function DirectorySection({ title, filter, exclude, showCity, emptyText }: Secti
           {directory.data.truncated && (
             <Alert tone="warning">Beaucoup d'intervenants correspondent : affinez la recherche pour tous les voir.</Alert>
           )}
-          <SpeakerGrid speakers={speakers} showCity={showCity} />
+          {compactOnMobile ? (
+            <>
+              <div className="hidden lg:block">
+                <SpeakerGrid speakers={speakers} showCity={showCity} />
+              </div>
+              <ul aria-label={`${title.split(' · ')[0]} (liste compacte)`} className="flex flex-col gap-2.5 lg:hidden">
+                {speakers.map((speaker) => (
+                  <SpeakerRow key={speaker.id} speaker={speaker} />
+                ))}
+              </ul>
+            </>
+          ) : (
+            <SpeakerGrid speakers={speakers} showCity={showCity} />
+          )}
         </>
       )}
     </section>
@@ -113,7 +131,7 @@ export function SpeakersPage() {
   const now = useNow()
   const [params, setParams] = useSearchParams()
   const stats = useSpeakerStats()
-  const refused = useRefusedMeetings()
+  const meetings = useSchoolMeetings()
   const [sheet, setSheet] = useState<Sheet>(null)
   const [selectedCity, setSelectedCity] = useState<CityCount | null>(null)
 
@@ -131,7 +149,7 @@ export function SpeakersPage() {
   const otherCities = byCity.filter((entry) => !sameName(entry.city, myCity))
   const myCityEntry = byCity.find((entry) => sameName(entry.city, myCity)) ?? (myCity ? { city: myCity, country: myCountry, count: 0 } : null)
   const panelCity = selectedCity ?? myCityEntry ?? byCity[0] ?? null
-  const refusal = latestRefusal(refused.data?.items ?? [], now)
+  const refusal = latestRefusal(meetings.data?.items ?? [], now)
 
   function update(changes: Record<string, string | null>) {
     const next = new URLSearchParams(params)
@@ -180,41 +198,46 @@ export function SpeakersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3 md:hidden">
-          <p className="font-extrabold text-muted">{[school?.schoolName, myCity].filter(Boolean).join(' · ')}</p>
-          <span
-            aria-hidden="true"
-            className="inline-flex size-10 items-center justify-center rounded-pill bg-indigo font-display text-cream"
-          >
-            {initialsOf(user.displayName)}
-          </span>
-        </div>
-        <p className="hidden text-xs font-black uppercase tracking-[0.12em] text-terra md:block">Tableau de bord</p>
-        <h1 className="text-[32px] leading-tight text-ink md:text-[40px]">Intervenants disponibles</h1>
-        <p className="text-[15px] font-semibold text-muted">
-          Tous validés par la Fondation M. Ceux de votre zone apparaissent en premier.
-        </p>
-        <form role="search" onSubmit={submitSearch} className="flex gap-2">
-          <Input
+      <header className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end lg:justify-between">
+        <PageTitle
+          kicker="Tableau de bord"
+          mobileKicker={[school?.schoolName, myCity].filter(Boolean).join(' · ')}
+          title="Intervenants disponibles"
+          subtitle="Tous validés par la Fondation M. Ceux de votre zone apparaissent en premier."
+        />
+        <form
+          role="search"
+          onSubmit={submitSearch}
+          className="flex h-12 items-center gap-2 rounded-[14px] border-2 border-line bg-surface px-3.5 text-muted focus-within:border-terra lg:w-80"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true" className="size-[18px] shrink-0">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+          <input
             type="search"
             aria-label="Rechercher un intervenant"
             placeholder="Métier, compétence, nom…"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
+            className="h-full min-w-0 flex-1 border-0 bg-transparent text-[15px] font-semibold text-ink outline-none placeholder:font-semibold placeholder:text-muted lg:text-sm"
           />
-          <Button type="submit" size="md" variant="secondary">
+          <button type="submit" className="sr-only">
             Rechercher
-          </Button>
+          </button>
         </form>
       </header>
 
       {refusal !== null && <RefusalBanner meeting={refusal} />}
 
-      <div className="hidden flex-wrap items-end gap-x-6 gap-y-4 md:flex">
-        <label className="flex flex-col gap-1.5 text-[13px] font-extrabold text-ink">
+      <section aria-label="Filtres" className="hidden flex-wrap items-end gap-x-6 gap-y-4 rounded-[20px] bg-surface p-[18px] md:flex">
+        <label className="flex flex-col gap-1.5 text-xs font-black uppercase tracking-[0.08em] text-muted">
           Zone
-          <Select value={zone} onChange={(event) => setZone(event.target.value)} className="min-w-52">
+          <Select
+            value={zone}
+            onChange={(event) => setZone(event.target.value)}
+            className="h-11 min-w-52 border-indigo font-extrabold normal-case tracking-normal"
+          >
             {zoneOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -223,14 +246,16 @@ export function SpeakersPage() {
           </Select>
         </label>
         <div className="flex flex-col gap-1.5">
-          <span aria-hidden="true" className="text-[13px] font-extrabold text-ink">
+          <span aria-hidden="true" className="text-xs font-black uppercase tracking-[0.08em] text-muted">
             Secteur
           </span>
-          <ChoiceGroup label="Secteur" value={sectorValue} onChange={setSector} options={sectorOptions} />
+          <ChoiceGroup label="Secteur" value={sectorValue} onChange={setSector} options={sectorOptions} look="filter" />
         </div>
-        <label className="flex flex-col gap-1.5 text-[13px] font-extrabold text-ink">
+        <label className="flex flex-col gap-1.5 text-xs font-black uppercase tracking-[0.08em] text-muted">
           Format
-          <Select value={formatValue} onChange={(event) => setFormat(event.target.value === 'IN_PERSON' ? 'IN_PERSON' : event.target.value === 'ONLINE' ? 'ONLINE' : 'TOUS')}>
+          <Select
+            className="h-11 font-bold normal-case tracking-normal"
+            value={formatValue} onChange={(event) => setFormat(event.target.value === 'IN_PERSON' ? 'IN_PERSON' : event.target.value === 'ONLINE' ? 'ONLINE' : 'TOUS')}>
             {formatOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -238,18 +263,31 @@ export function SpeakersPage() {
             ))}
           </Select>
         </label>
-      </div>
+      </section>
 
+      {/* B8 — pastilles-filtres mobiles (40 px) ; la zone est mise en avant en indigo / crème. */}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 md:hidden">
-        <Button variant="outline" size="md" className="shrink-0" onClick={() => setSheet('zone')}>
+        <button
+          type="button"
+          onClick={() => setSheet('zone')}
+          className="inline-flex min-h-10 shrink-0 items-center rounded-pill border-2 border-indigo bg-indigo px-3 text-[13px] font-black text-cream"
+        >
           {zoneLabel}
-        </Button>
-        <Button variant="outline" size="md" className="shrink-0" onClick={() => setSheet('secteur')}>
+        </button>
+        <button
+          type="button"
+          onClick={() => setSheet('secteur')}
+          className="inline-flex min-h-10 shrink-0 items-center rounded-pill border-2 border-line bg-surface px-3 text-[13px] font-extrabold text-ink"
+        >
           Secteur{sector ? ` · ${sectorName(sector)}` : ''}
-        </Button>
-        <Button variant="outline" size="md" className="shrink-0" onClick={() => setSheet('format')}>
+        </button>
+        <button
+          type="button"
+          onClick={() => setSheet('format')}
+          className="inline-flex min-h-10 shrink-0 items-center rounded-pill border-2 border-line bg-surface px-3 text-[13px] font-extrabold text-ink"
+        >
           Format{format ? ` · ${FORMAT_LABEL[format]}` : ''}
-        </Button>
+        </button>
       </div>
 
       <Modal
@@ -289,11 +327,6 @@ export function SpeakersPage() {
         <ErrorState message={errorMessage(stats.error)} onRetry={() => void stats.refetch()} retrying={stats.isFetching} />
       ) : stats.data ? (
         <>
-          {myCityEntry && (
-            <p className="font-extrabold text-ink md:hidden">
-              {myCityEntry.count} bénévole{myCityEntry.count > 1 ? 's' : ''} près de vous, à {myCityEntry.city}
-            </p>
-          )}
           <NetworkSection
             byCity={byCity}
             total={stats.data.total}
@@ -318,6 +351,7 @@ export function SpeakersPage() {
               filter={{ ...common, format: 'ONLINE' }}
               exclude={isMine}
               showCity
+              compactOnMobile
               emptyText="Aucun autre intervenant disponible en ligne pour ces critères."
             />
           )}

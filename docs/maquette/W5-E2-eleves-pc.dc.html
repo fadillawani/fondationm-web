@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>W5 Élèves de la classe</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+input{font-family:inherit}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-wrap: wrap; align-items: stretch">
+
+  <aside style="flex: 1 1 240px; max-width: 100%; box-sizing: border-box; background: #2B337A; color: #FDE7A6; padding: 28px 20px; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <a href="Desktop.dc.html" aria-label="FondationM, retour à l'accueil" style="font-family: 'Lilita One', sans-serif; font-size: 30px; line-height: 1; color: #FDE7A6; text-decoration: none">FondationM</a>
+      <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #F7F3EA">Espace établissement</span>
+    </div>
+    <nav aria-label="Navigation principale" style="display: flex; flex-direction: column; gap: 4px">
+      <a href="W1-E3-intervenants-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #F7F3EA; text-decoration: none; display: flex; align-items: center; font-weight: 800; font-size: 15px">Intervenants</a>
+      <a href="W1-E5-suivi-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #F7F3EA; text-decoration: none; display: flex; align-items: center; font-weight: 800; font-size: 15px">Mes rencontres</a>
+      <a href="W1-E6-rapport-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #F7F3EA; text-decoration: none; display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 15px">Retours d'expérience <span style="min-width: 24px; height: 24px; border-radius: 999px; background: #E5A60A; color: #1B1F3B; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center">1</span></a>
+      <a href="#" aria-current="page" style="min-height: 44px; padding: 0 14px; border-radius: 12px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; font-weight: 900; font-size: 15px">Mon établissement</a>
+    </nav>
+    <div style="margin-top: auto; padding: 14px; border-radius: 16px; background: #1B1F3B; display: flex; align-items: center; gap: 12px">
+      <div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: #E5A60A; color: #1B1F3B; font-family: 'Lilita One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">MN</div>
+      <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 900; font-size: 14px; color: #FFFFFF">Moussa Ndiaye</span><span style="font-size: 12px; font-weight: 700; color: #F7F3EA">Lycée de Sor · Saint-Louis</span></div>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 640px; min-width: 0; box-sizing: border-box; padding: 28px 32px 40px 32px">
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px">
+      <header style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #B8492A">Mon établissement · Élèves · E2</span>
+        <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 40px; line-height: 1">Les élèves de vos classes</h1>
+        <span style="font-size: 15px; font-weight: 700; color: #4A4A57; max-width: 760px">Ajoutez vos élèves à leur classe et remettez-leur un accès : ils pourront voir qui viendra leur parler de son métier. Les rencontres restent réservées par classe.</span>
+      </header>
+
+      <div role="tablist" aria-label="Classe" style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{ classes }}" as="c" hint-placeholder-count="4">
+          <button role="tab" aria-selected="{{ c.selected }}" onClick="{{ c.pick }}" style="min-height: 48px; padding: 0 16px; border-radius: 14px; border: 2px solid {{ c.border }}; background: {{ c.bg }}; color: {{ c.fg }}; font-family: inherit; font-weight: 900; font-size: 15px; cursor: pointer">{{ c.label }} <span style="font-weight: 700; opacity: 0.8">· {{ c.n }}</span></button>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <section aria-label="Élèves de la classe" style="flex: 1.6 1 520px; min-width: 0; background: #FFFFFF; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 24px">{{ cls }}</h2>
+              <span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ summary }}</span>
+            </div>
+            <sc-if value="{{ hasNoAccess }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ giveAll }}" style="min-height: 48px; padding: 0 18px; border: 0; border-radius: 14px; background: #B8492A; color: #FFFFFF; font-family: inherit; font-weight: 900; font-size: 14px; cursor: pointer">Donner l'accès à tous ({{ noAccessCount }})</button>
+            </sc-if>
+          </div>
+
+          <form style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; padding: 14px; border-radius: 18px; background: #F7F3EA">
+            <div style="flex: 1 1 160px; display: flex; flex-direction: column; gap: 6px"><label for="prenom" style="font-size: 13px; font-weight: 800">Prénom</label><input id="prenom" value="{{ first }}" onChange="{{ setFirst }}" placeholder="Ex. : Rokhaya" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 12px; font-size: 15px; font-weight: 600; color: #1B1F3B"></div>
+            <div style="flex: 1 1 160px; display: flex; flex-direction: column; gap: 6px"><label for="nom" style="font-size: 13px; font-weight: 800">Nom</label><input id="nom" value="{{ last }}" onChange="{{ setLast }}" placeholder="Ex. : Faye" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 12px; font-size: 15px; font-weight: 600; color: #1B1F3B"></div>
+            <button type="button" onClick="{{ add }}" style="min-height: 48px; padding: 0 18px; border: 0; border-radius: 12px; background: #2B337A; color: #FFFFFF; font-family: inherit; font-weight: 900; font-size: 14px; cursor: pointer">+ Ajouter à la classe</button>
+          </form>
+          <sc-if value="{{ showError }}" hint-placeholder-val="{{ false }}"><p role="alert" style="margin: -6px 0 0 0; font-size: 14px; font-weight: 800; color: #B81C1F">Indiquez le prénom et le nom de l'élève.</p></sc-if>
+
+          <div role="table" aria-label="Liste des élèves" style="display: flex; flex-direction: column">
+            <div role="row" style="display: grid; grid-template-columns: 1.4fr 1.2fr 150px; gap: 12px; padding: 0 12px 8px 12px; font-size: 12px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: #4A4A57"><span role="columnheader">Élève</span><span role="columnheader">Accès</span><span role="columnheader">Action</span></div>
+            <sc-for list="{{ students }}" as="s" hint-placeholder-count="10">
+              <div role="row" style="display: grid; grid-template-columns: 1.4fr 1.2fr 150px; gap: 12px; align-items: center; padding: 8px 12px; border-top: 1px solid #EDE6D6; background: {{ s.rowBg }}; border-radius: 12px">
+                <span role="cell" style="display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px"><span aria-hidden="true" style="width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; background: #FDE7A6; font-family: 'Lilita One', sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: center">{{ s.ini }}</span>{{ s.name }}</span>
+                <span role="cell"><span style="padding: 3px 10px; border-radius: 999px; background: {{ s.bg }}; color: {{ s.fg }}; font-size: 12px; font-weight: 900">{{ s.status }}</span></span>
+                <span role="cell"><button onClick="{{ s.act }}" style="width: 100%; min-height: 44px; border-radius: 12px; border: 2px solid {{ s.btnBorder }}; background: {{ s.btnBg }}; color: {{ s.btnFg }}; font-family: inherit; font-weight: 900; font-size: 13px; cursor: pointer">{{ s.actLabel }}</button></span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <aside style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <sc-if value="{{ hasCard }}" hint-placeholder-val="{{ true }}">
+            <section aria-label="Fiche d'accès" style="border-radius: 24px; background: #E5A60A; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+              <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase">Fiche d'accès à remettre</span>
+              <span style="font-family: 'Lilita One', sans-serif; font-size: 26px; line-height: 1">{{ card.name }}</span>
+              <div style="border-radius: 16px; background: #FFFFFF; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+                <div style="display: flex; justify-content: space-between; gap: 8px"><span style="font-size: 13px; font-weight: 800; color: #4A4A57">Identifiant</span><span style="font-weight: 900; font-size: 15px">{{ card.login }}</span></div>
+                <div style="display: flex; justify-content: space-between; gap: 8px"><span style="font-size: 13px; font-weight: 800; color: #4A4A57">Code d'accès</span><span style="font-family: 'Lilita One', sans-serif; font-size: 20px; letter-spacing: 0.08em">{{ card.code }}</span></div>
+              </div>
+              <span style="font-size: 13px; font-weight: 700">{{ card.note }}</span>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <button style="min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px; background: #1B1F3B; color: #FDE7A6; font-family: inherit; font-weight: 900; font-size: 13px; cursor: pointer">Imprimer la fiche</button>
+                <a href="W5-E1-connexion-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; border: 2px solid #1B1F3B; color: #1B1F3B; text-decoration: none; display: flex; align-items: center; font-weight: 900; font-size: 13px">Voir ce que l'élève verra</a>
+              </div>
+            </section>
+          </sc-if>
+          <section style="border-radius: 24px; background: #FFFFFF; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+            <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 20px; text-transform: uppercase">Ce que vos élèves verront</h2>
+            <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 700; line-height: 1.45">
+              <li>Les rencontres <strong>confirmées</strong> et <strong>réalisées</strong> de leur classe.</li>
+              <li>Le nom de l'intervenant, son métier et ses compétences.</li>
+              <li>Un espace en lecture seule : ils ne peuvent rien écrire.</li>
+              <li>Aucun contact direct avec l'intervenant : tout passe par vous et la Fondation M.</li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const BASE = {
+'Terminale S2': [['Khadija', 'Ba', 'actif'], ['Mamadou', 'Diallo', 'actif'], ['Aminata', 'Diop', 'actif'], ['Cheikh', 'Fall', 'remis'], ['Fatou', 'Gueye', 'actif'], ['Ibrahima', 'Kane', 'none'], ['Ndèye', 'Mbaye', 'actif'], ['Pape', 'Seck', 'actif'], ['Mariama', 'Sow', 'none'], ['Alioune', 'Thiam', 'actif']],
+'Terminale L2': [['Adama', 'Cissé', 'actif'], ['Bineta', 'Diouf', 'actif'], ['Modou', 'Faye', 'remis'], ['Astou', 'Ndour', 'none']],
+'Première S1': [['Abdou', 'Camara', 'none'], ['Coumba', 'Dieng', 'none'], ['Lamine', 'Gaye', 'none']],
+'Première L1': []
+};
+const cls = st.cls || 'Terminale S2';
+const over = st.over || {};
+const added = st.added || {};
+const list = [...BASE[cls], ...(added[cls] || [])].map(([f, l, s]) => { const k = cls + '|' + f + ' ' + l; return { f, l, k, s: over[k] || s }; });
+const slug = (x) => x.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+const code = (k) => { let h = 7; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) % 1679616; const a = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let o = ''; for (let i = 0; i < 4; i++) { o += a[h % a.length]; h = Math.floor(h / a.length) + 13 * (i + 1); } return 'SOR-' + o; };
+const S = { actif: ['Connecté·e', '#4E6A2C', '#FFFFFF'], remis: ['Code remis, pas encore connecté·e', '#FDE7A6', '#1B1F3B'], none: ['Pas encore d\'accès', '#EDE6D6', '#4A4A57'] };
+const setS = (k, s, extra) => this.setState({ over: { ...over, [k]: s }, cardKey: k, ...(extra || {}) });
+const students = list.map((x) => {
+const sel = st.cardKey === x.k;
+const none = x.s === 'none';
+return { name: x.f + ' ' + x.l, ini: (x.f[0] + x.l[0]).toUpperCase(), status: S[x.s][0], bg: S[x.s][1], fg: S[x.s][2], rowBg: sel ? '#FFF6DA' : 'transparent',
+actLabel: none ? 'Donner l\'accès' : 'Voir la fiche', btnBg: none ? '#B8492A' : '#FFFFFF', btnFg: none ? '#FFFFFF' : '#1B1F3B', btnBorder: none ? '#B8492A' : '#E6DECB',
+act: () => none ? setS(x.k, 'remis', { allGiven: 0 }) : this.setState({ cardKey: x.k, allGiven: 0 }) };
+});
+const noAccess = list.filter((x) => x.s === 'none');
+const giveAll = () => { const o = { ...over }; noAccess.forEach((x) => { o[x.k] = 'remis'; }); this.setState({ over: o, cardKey: noAccess[0] ? noAccess[0].k : st.cardKey, allGiven: noAccess.length }); };
+const cur = list.find((x) => x.k === st.cardKey);
+const card = cur ? { name: cur.f + ' ' + cur.l, login: slug(cur.f) + '.' + slug(cur.l) + '.sor', code: code(cur.k),
+note: cur.s === 'actif' ? 'Cet élève s\'est déjà connecté. Le code a été remplacé par son mot de passe personnel.' : (st.allGiven ? st.allGiven + ' fiches prêtes à imprimer. Chaque élève choisira son mot de passe à la première connexion.' : 'Remettez cette fiche en main propre. L\'élève choisira son mot de passe à la première connexion.') } : { name: '', login: '', code: '', note: '' };
+const first = st.first || '', last = st.last || '';
+const add = () => {
+if (!first.trim() || !last.trim()) { this.setState({ err: true }); return; }
+const f = first.trim(), l = last.trim();
+this.setState({ added: { ...added, [cls]: [...(added[cls] || []), [f, l, 'none']] }, first: '', last: '', err: false });
+};
+const counts = (c) => BASE[c].length + (added[c] || []).length;
+const classes = Object.keys(BASE).map((c) => ({ label: c, n: String(counts(c)), selected: c === cls ? 'true' : 'false', bg: c === cls ? '#1B1F3B' : '#FFFFFF', fg: c === cls ? '#FFFFFF' : '#1B1F3B', border: c === cls ? '#1B1F3B' : '#E6DECB', pick: () => this.setState({ cls: c, cardKey: null, allGiven: 0, err: false }) }));
+const actifs = list.filter((x) => x.s === 'actif').length;
+return { classes, cls, students, card, hasCard: !!cur, hasNoAccess: noAccess.length > 0, noAccessCount: String(noAccess.length), giveAll,
+summary: list.length === 0 ? 'Aucun élève rattaché pour l\'instant. Ajoutez le premier ci-dessous.' : list.length + ' élèves rattachés · ' + actifs + ' déjà connectés',
+first, last, setFirst: (e) => this.setState({ first: e.target.value }), setLast: (e) => this.setState({ last: e.target.value }), add, showError: !!st.err };
+}
+}
+</script>
+</body>
+</html>

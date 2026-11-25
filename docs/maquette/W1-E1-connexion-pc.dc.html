@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>E1 Création de compte établissement</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+input,select{font-family:inherit}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-wrap: wrap">
+
+  <section style="flex: 1 1 420px; box-sizing: border-box; background: #B8492A; color: #FFFFFF; padding: 48px; display: flex; flex-direction: column; gap: 40px">
+    <span style="font-family: 'Lilita One', sans-serif; font-size: 32px; color: #FDE7A6">FondationM</span>
+    <div style="display: flex; flex-direction: column; gap: 16px; max-width: 460px">
+      <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #FDE7A6">Espace établissement</span>
+      <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 52px; line-height: 1; color: #FDE7A6">Ouvrez les métiers à vos élèves</h1>
+      <p style="margin: 0; font-size: 17px; line-height: 1.5; font-weight: 600">Des professionnels bénévoles viennent dans vos classes, ou en ligne, pour parler de leur métier. La Fondation M accompagne chaque rencontre.</p>
+    </div>
+    <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; max-width: 460px">
+      <li style="display: flex; gap: 14px; align-items: center"><span style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; background: #2B337A; color: #FDE7A6; font-family: 'Lilita One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">1</span><span style="font-weight: 800">Créez le compte de votre établissement</span></li>
+      <li style="display: flex; gap: 14px; align-items: center"><span style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; background: #2B337A; color: #FDE7A6; font-family: 'Lilita One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">2</span><span style="font-weight: 800">La Fondation M vérifie et ouvre votre accès</span></li>
+      <li style="display: flex; gap: 14px; align-items: center"><span style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; background: #2B337A; color: #FDE7A6; font-family: 'Lilita One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">3</span><span style="font-weight: 800">Choisissez un intervenant et demandez une rencontre</span></li>
+    </ol>
+    <span style="margin-top: auto; font-size: 13px; font-weight: 700; color: #FDE7A6">Une question ? contact@fondationm.sn · +221 33 800 00 00</span>
+  </section>
+
+  <section style="flex: 1.3 1 520px; box-sizing: border-box; padding: 48px; display: flex; justify-content: center; align-items: flex-start">
+    <div style="width: 100%; max-width: 620px; background: #FFFFFF; border-radius: 28px; padding: 36px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+      <div role="tablist" aria-label="Accès" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 6px; border-radius: 16px; background: #F7F3EA">
+        <a href="W1-E3-intervenants-pc.dc.html" role="tab" aria-selected="false" style="min-height: 44px; border-radius: 12px; color: #4A4A57; font-weight: 800; font-size: 15px; text-decoration: none; display: flex; align-items: center; justify-content: center">Se connecter</a>
+        <button role="tab" aria-selected="true" style="min-height: 44px; border: 0; border-radius: 12px; background: #2B337A; color: #FDE7A6; font-weight: 900; font-size: 15px; cursor: pointer; font-family: inherit">Créer un compte</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 30px">Créer le compte de l'établissement</h2>
+        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #4A4A57">Votre zone permet de vous proposer d'abord les intervenants proches de chez vous.</p>
+      </div>
+
+      <fieldset style="border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+        <legend style="padding: 0 0 12px 0; font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #B8492A">Établissement</legend>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="etab" style="font-size: 13px; font-weight: 800">Nom de l'établissement</label>
+          <input id="etab" value="Lycée de Sor" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B; background: #FFFFFF">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="type" style="font-size: 13px; font-weight: 800">Type</label>
+          <select id="type" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; background: #FFFFFF"><option>Lycée</option><option>Collège (CEM)</option><option>Centre de formation</option></select>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="pays" style="font-size: 13px; font-weight: 800">Pays</label>
+          <select id="pays" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; background: #FFFFFF"><option>Sénégal</option><option>Bénin</option><option>Burkina Faso</option><option>Côte d'Ivoire</option><option>Gambie</option><option>Guinée</option><option>Mali</option><option>Mauritanie</option><option>Togo</option></select>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="zone" style="font-size: 13px; font-weight: 800">Zone (ville)</label>
+          <select id="zone" style="height: 48px; border-radius: 12px; border: 2px solid #B8492A; padding: 0 12px; font-size: 15px; font-weight: 700; color: #1B1F3B; background: #FFFFFF"><option>Saint-Louis</option><option>Dakar</option><option>Thiès</option><option>Kaolack</option><option>Ziguinchor</option></select>
+        </div>
+      </fieldset>
+
+      <fieldset style="border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+        <legend style="padding: 0 0 12px 0; font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #B8492A">Référent</legend>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="nom" style="font-size: 13px; font-weight: 800">Prénom et nom</label>
+          <input id="nom" value="Moussa Ndiaye" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="fonction" style="font-size: 13px; font-weight: 800">Fonction</label>
+          <input id="fonction" value="Référent orientation" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="mail" style="font-size: 13px; font-weight: 800">E-mail professionnel</label>
+          <input id="mail" type="email" value="m.ndiaye@lyceedesor.sn" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="tel" style="font-size: 13px; font-weight: 800">Téléphone</label>
+          <input id="tel" type="tel" value="+221 77 412 58 30" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+        </div>
+        <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 6px">
+          <label for="mdp" style="font-size: 13px; font-weight: 800">Mot de passe</label>
+          <input id="mdp" type="password" value="motdepasse" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B">
+          <span style="font-size: 12px; font-weight: 700; color: #4E6A2C">8 caractères minimum, dont un chiffre</span>
+        </div>
+      </fieldset>
+
+      <label style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px; font-weight: 600; color: #4A4A57; line-height: 1.4">
+        <input type="checkbox" checked="checked" style="width: 20px; height: 20px; margin: 0; accent-color: #2B337A; flex-shrink: 0">
+        J'accepte la charte des rencontres de la Fondation M et je confirme représenter cet établissement.
+      </label>
+      <a href="W1-E1-attente-pc.dc.html" style="min-height: 56px; border-radius: 16px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-size: 20px">Envoyer la demande de compte</a>
+      <p style="margin: 0; text-align: center; font-size: 13px; font-weight: 700; color: #4A4A57">La Fondation M vérifie chaque établissement avant d'ouvrir l'accès.</p>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

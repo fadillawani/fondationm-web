@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { CONTACT_EMAIL } from '../../lib/referenceData'
+import { CONTACT_EMAIL, CONTACT_PHONE } from '../../lib/referenceData'
 import { cn } from '../../lib/cn'
 import { Card } from '../ui/Card'
 import { Logo } from './Logo'
@@ -79,7 +79,7 @@ export function AuthSplitLayout({
           {steps && (
             <ol className="mt-2 hidden flex-col gap-4 md:flex">
               {steps.map((step, index) => (
-                <li key={step} className={cn('flex items-center gap-4 font-bold', colors.body)}>
+                <li key={step} className={cn('flex items-center gap-4 font-extrabold', colors.body)}>
                   <span
                     aria-hidden="true"
                     className={cn(
@@ -95,14 +95,12 @@ export function AuthSplitLayout({
             </ol>
           )}
         </div>
-        <p className={cn('hidden text-sm font-semibold md:block', colors.body)}>
+        <p className={cn('hidden text-[13px] font-bold md:block', colors.accent)}>
           Une question ?{' '}
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className={cn('font-extrabold underline underline-offset-2', colors.link)}
-          >
+          <a href={`mailto:${CONTACT_EMAIL}`} className={cn('underline underline-offset-2', colors.link)}>
             {CONTACT_EMAIL}
-          </a>
+          </a>{' '}
+          · {CONTACT_PHONE}
         </p>
       </aside>
 
@@ -114,7 +112,7 @@ export function AuthSplitLayout({
       >
         <Card
           className={cn(
-            'relative -mt-3.5 flex w-full flex-col gap-6 md:mt-0',
+            'relative -mt-3.5 flex w-full flex-col gap-6 rounded-[24px] md:mt-0 md:rounded-card',
             wide ? 'max-w-[640px]' : 'max-w-[460px]',
           )}
         >

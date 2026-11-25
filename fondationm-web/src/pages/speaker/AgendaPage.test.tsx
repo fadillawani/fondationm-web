@@ -43,11 +43,17 @@ describe('Espace intervenant — navigation', () => {
     )
     expect(nav.queryByRole('link', { name: /Mon impact/ })).not.toBeInTheDocument()
     expect(nav.getByText('Mon impact').closest('li')).toHaveTextContent('Bientôt')
-    expect(screen.getByText('Espace intervenant')).toBeInTheDocument()
-    expect(screen.getByText('Awa Diallo')).toBeInTheDocument()
-    expect(screen.getByText('Ingénieure réseaux · Dakar')).toBeInTheDocument()
-    // 4 entrées au plus dans la navigation basse : pas de bouton « Plus ».
-    expect(screen.queryByRole('button', { name: 'Plus' })).not.toBeInTheDocument()
+    const [aside] = screen.getAllByRole('complementary')
+    if (aside === undefined) throw new Error('Barre latérale absente')
+    expect(within(aside).getByText('Espace intervenant')).toBeInTheDocument()
+    expect(within(aside).getByText('Awa Diallo')).toBeInTheDocument()
+    expect(within(aside).getByText('Ingénieure réseaux · Dakar')).toBeInTheDocument()
+    const [, bottom] = screen.getAllByRole('navigation', { name: 'Navigation principale' })
+    if (bottom === undefined) throw new Error('Navigation basse absente')
+    expect(within(bottom).getAllByRole('listitem')).toHaveLength(3)
+    expect(within(bottom).getByRole('link', { name: 'Mon agenda' })).toBeInTheDocument()
+    expect(within(bottom).getByRole('link', { name: 'Demandes reçues 2 en attente' })).toHaveTextContent('Demandes')
+    expect(within(bottom).getByText('Mon impact').closest('li')).toHaveTextContent('Bientôt')
   })
 
   it('refuse l’accès à un utilisateur d’un autre rôle', async () => {
@@ -66,11 +72,11 @@ describe('Mon agenda', () => {
 
     const grid = await calendar()
     expect(screen.getByText('Bonjour Awa')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Novembre 2026' })).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { name: 'Novembre 2026' }).length).toBeGreaterThan(0)
     expect(grid.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual([
       'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim',
     ])
-    expect(grid.getByRole('button', { name: 'Libre, Jeudi 26 novembre, 10h00 – 11h30' })).toHaveTextContent('10h00Libre')
+    expect(grid.getByRole('button', { name: 'Libre, Jeudi 26 novembre, 10h00 – 11h30' })).toHaveTextContent('10h00 · Libre')
     expect(grid.getByRole('button', { name: 'Demandé, Vendredi 27 novembre, 14h00 – 15h00' })).toBeInTheDocument()
     expect(
       grid.getByRole('button', { name: 'Confirmé, Lundi 30 novembre, 9h00 – 10h00, Lycée Blaise Diagne' }),
@@ -91,9 +97,12 @@ describe('Mon agenda', () => {
       'Libre (disponible)', 'Demandé', 'Confirmé', 'Réalisé', 'Annulé ou refusé',
     ])
 
+    // Maquette : carte encre entière cliquable, chiffre en Lilita.
     const banner = within(screen.getByRole('region', { name: 'Demandes en attente' }))
-    expect(banner.getByText("2 demandes d'écoles attendent votre réponse")).toBeInTheDocument()
-    expect(banner.getByRole('link', { name: 'Répondre' })).toHaveAttribute('href', '/intervenant/demandes')
+    const link = banner.getByRole('link')
+    expect(link).toHaveAttribute('href', '/intervenant/demandes')
+    expect(link).toHaveTextContent("2demandes d'écoles attendent votre réponse")
+    expect(link).toHaveTextContent('Répondre')
   })
 
   it('navigue entre les mois', async () => {
@@ -101,28 +110,33 @@ describe('Mon agenda', () => {
     const { router, user } = renderApp('/intervenant/agenda', { token: true })
     await calendar()
 
-    await user.click(screen.getByRole('button', { name: 'Mois suivant' }))
-    expect(await screen.findByRole('heading', { name: 'Décembre 2026' })).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: 'Mois suivant' })[0] ?? document.body)
+    expect((await screen.findAllByRole('heading', { name: 'Décembre 2026' })).length).toBeGreaterThan(0)
     expect((await calendar()).queryByRole('button', { name: /^Libre/ })).not.toBeInTheDocument()
     expect(router.state.location.search).toBe('?mois=2026-12')
 
-    await user.click(screen.getByRole('button', { name: 'Mois précédent' }))
-    await user.click(screen.getByRole('button', { name: 'Mois précédent' }))
-    expect(await screen.findByRole('heading', { name: 'Octobre 2026' })).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: 'Mois précédent' })[0] ?? document.body)
+    await user.click(screen.getAllByRole('button', { name: 'Mois précédent' })[0] ?? document.body)
+    expect((await screen.findAllByRole('heading', { name: 'Octobre 2026' })).length).toBeGreaterThan(0)
     // Mois passé : aucun bouton de publication.
     expect((await calendar()).queryByRole('button', { name: /^Publier un créneau le/ })).not.toBeInTheDocument()
   })
 
-  it('liste les éléments à venir pour le téléphone', async () => {
+  it('propose un calendrier compact sur téléphone (maquette W2-E8-mobile)', async () => {
     setupSpeaker()
-    renderApp('/intervenant/agenda', { token: true })
+    const { user } = renderApp('/intervenant/agenda', { token: true })
 
-    const days = within(await screen.findByRole('list', { name: 'Prochains jours' }))
-    expect(days.getAllByRole('heading').map((heading) => heading.textContent)).toEqual([
-      'Jeudi 26 novembre',
-      'Vendredi 27 novembre',
-      'Lundi 30 novembre',
-    ])
+    const compact = within(await screen.findByRole('table', { name: 'Calendrier compact de Novembre 2026' }))
+    expect(compact.getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['L', 'M', 'M', 'J', 'V', 'S', 'D'])
+    expect(screen.getByText('Touchez un jour libre pour publier un créneau.')).toBeInTheDocument()
+    // Jour passé sans élément : non actif.
+    expect(compact.queryByRole('button', { name: /^23/ })).not.toBeInTheDocument()
+
+    await user.click(compact.getByRole('button', { name: 'Libre, Jeudi 26 novembre, 10h00 – 11h30' }))
+    expect(within(screen.getByRole('region', { name: 'Détail' })).getByText('Créneau libre · 10h00 – 11h30')).toBeInTheDocument()
+
+    await user.click(compact.getByRole('button', { name: 'Publier un créneau le mercredi 25 novembre 2026' }))
+    expect(within(screen.getByRole('region', { name: 'Détail' })).getByRole('form', { name: 'Publier un créneau' })).toBeInTheDocument()
   })
 
   it('publie un créneau avec formats et décalage horaire, puis recharge', async () => {
@@ -138,8 +152,10 @@ describe('Mon agenda', () => {
 
     await user.click((await calendar()).getByRole('button', { name: 'Publier un créneau le mercredi 25 novembre 2026' }))
     const form = within(panel().getByRole('form', { name: 'Publier un créneau' }))
-    expect(form.getByText('Publier un créneau ce jour-là · Mercredi 25 novembre')).toBeInTheDocument()
-    expect(form.getByRole('button', { name: 'Les deux' })).toHaveAttribute('aria-pressed', 'true')
+    expect(form.getByText('Publier un créneau ce jour-là')).toBeInTheDocument()
+    expect(panel().getByText('Mer. 25 nov.')).toBeInTheDocument()
+    expect(form.getByRole('button', { name: 'En classe ou en ligne' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(form.getByLabelText(/^De/)).getByRole('option', { name: '10h00' })).toHaveValue('10:00')
     expect(form.getByText(/Visible par toutes les écoles, celles de Dakar en premier/)).toBeInTheDocument()
 
     const slotCallsBefore = calls('GET', '/api/speaker/slots').length
@@ -208,7 +224,7 @@ describe('Mon agenda', () => {
 
     await user.click((await calendar()).getByRole('button', { name: 'Libre, Jeudi 26 novembre, 10h00 – 11h30' }))
     const detail = panel()
-    expect(detail.getByRole('heading', { name: 'Créneau libre · Jeudi 26 novembre, 10h00 – 11h30' })).toBeInTheDocument()
+    expect(detail.getByRole('heading', { name: 'Créneau libre · 10h00 – 11h30' })).toBeInTheDocument()
     expect(detail.getByText('En classe ou en ligne')).toBeInTheDocument()
     await user.click(detail.getByRole('button', { name: 'Retirer ce créneau' }))
 

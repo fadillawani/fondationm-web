@@ -1,7 +1,6 @@
 import { useCurrentUser } from '../auth/currentUserContext'
 import { useLogout } from '../auth/hooks'
 import { AccountStatusLayout } from '../components/layout/AccountStatusLayout'
-import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { CONTACT_EMAIL } from '../lib/referenceData'
 
@@ -11,9 +10,12 @@ export function RejectedAccountPage() {
 
   return (
     <AccountStatusLayout>
-      <div className="flex flex-col items-start gap-4">
-        <Badge tone="danger">Demande refusée</Badge>
-        <h1 className="text-[32px] leading-tight md:text-[42px]">Votre demande n’a pas pu être acceptée</h1>
+      <section className="flex flex-col gap-6 rounded-[24px] bg-surface p-[22px] md:rounded-[28px] md:p-10">
+      <div className="flex flex-col items-start gap-3">
+        <span className="rounded-pill bg-red px-3 py-[5px] text-xs font-black text-white md:px-3.5 md:py-1.5 md:text-[13px]">
+          Demande refusée
+        </span>
+        <h1 className="text-[30px] leading-[1.05] md:text-[42px]">Votre demande n’a pas pu être acceptée</h1>
       </div>
 
       <section aria-labelledby="motif" className="rounded-block border-l-[6px] border-red bg-red-tint p-5 text-red">
@@ -36,6 +38,7 @@ export function RejectedAccountPage() {
       <div>
         <Button onClick={logout}>Se déconnecter</Button>
       </div>
+      </section>
     </AccountStatusLayout>
   )
 }

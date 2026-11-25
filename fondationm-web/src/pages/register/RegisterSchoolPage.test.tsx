@@ -18,10 +18,10 @@ const pendingSchool = makeMe({ status: 'PENDING' })
 
 async function fillSchoolForm(user: User) {
   await user.type(screen.getByLabelText(/^Nom de l'établissement/), 'Lycée des Tisserands')
-  await user.selectOptions(screen.getByLabelText(/^Type d'établissement/), 'HIGH_SCHOOL')
+  await user.selectOptions(screen.getByLabelText(/^Type/), 'HIGH_SCHOOL')
   await user.type(screen.getByLabelText(/^Pays/), 'Sénégal')
   await user.type(screen.getByLabelText(/^Zone \(ville\)/), 'Dakar')
-  await user.type(screen.getByLabelText(/^Votre fonction/), 'Proviseure')
+  await user.type(screen.getByLabelText(/^Fonction/), 'Proviseure')
   await user.type(screen.getByLabelText(/^E-mail professionnel/), 'referent@ecole.test')
   await user.type(screen.getByLabelText(/^Téléphone/), '+221 77 000 00 00')
   await user.type(screen.getByLabelText(/^Mot de passe/), FAKE_PASSWORD)

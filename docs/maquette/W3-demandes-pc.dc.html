@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>W3 Demandes de rencontre</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+textarea{font-family:inherit}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-wrap: wrap; align-items: stretch">
+
+  <aside style="flex: 1 1 250px; max-width: 100%; box-sizing: border-box; background: #B8492A; color: #FFFFFF; padding: 28px 20px; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="font-family: 'Lilita One', sans-serif; font-size: 30px; line-height: 1; color: #FDE7A6">FondationM</span>
+      <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase">Pilotage du programme</span>
+    </div>
+    <nav aria-label="Navigation principale" style="display: flex; flex-direction: column; gap: 4px">
+      <a href="W3-pilotage-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; font-weight: 800; font-size: 15px">Tableau de bord</a>
+      <a href="W3-comptes-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 15px">Comptes à valider <span style="min-width: 24px; height: 24px; border-radius: 999px; background: #FDE7A6; color: #1B1F3B; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center">5</span></a>
+      <a href="#" aria-current="page" style="min-height: 44px; padding: 0 14px; border-radius: 12px; background: #1B1F3B; color: #FDE7A6; text-decoration: none; display: flex; align-items: center; justify-content: space-between; font-weight: 900; font-size: 15px">Demandes de rencontre <span style="min-width: 24px; height: 24px; border-radius: 999px; background: #FDE7A6; color: #1B1F3B; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center">{{ todoCount }}</span></a>
+      <a href="W3-rencontres-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 15px">Rencontres <span style="min-width: 24px; height: 24px; border-radius: 999px; background: #FDE7A6; color: #1B1F3B; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center">2</span></a>
+      <a href="W3-retours-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 15px">Retours d'expérience <span style="min-width: 24px; height: 24px; border-radius: 999px; background: #FDE7A6; color: #1B1F3B; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center">4</span></a>
+      <a href="W3-requetes-pc.dc.html" style="min-height: 44px; padding: 0 14px; border-radius: 12px; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 15px">Requêtes donateurs <span style="min-width: 24px; height: 24px; border-radius: 999px; background: #FDE7A6; color: #1B1F3B; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center">1</span></a>
+    </nav>
+    <div style="margin-top: auto; padding: 14px; border-radius: 16px; background: #8F3720; display: flex; align-items: center; gap: 12px">
+      <div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; background: #FDE7A6; color: #B8492A; font-family: 'Lilita One', sans-serif; font-size: 18px; display: flex; align-items: center; justify-content: center">S</div>
+      <div style="display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 900; font-size: 14px">Samirath</span><span style="font-size: 12px; font-weight: 700">Chargée de programme</span></div>
+    </div>
+  </aside>
+
+  <main style="flex: 999 1 640px; min-width: 0; box-sizing: border-box; padding: 28px 32px 40px 32px">
+    <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px">
+      <header style="display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #B8492A">E13</span>
+        <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 40px; line-height: 1">Demandes de rencontre</h1>
+        <span style="font-size: 15px; font-weight: 700; color: #4A4A57">Vous donnez votre avis en parallèle de l'intervenant. La rencontre est confirmée quand vous avez validé tous les deux.</span>
+      </header>
+
+      <div role="tablist" aria-label="Filtrer" style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+          <button role="tab" aria-selected="{{ t.selected }}" onClick="{{ t.pick }}" style="min-height: 42px; padding: 0 14px; border-radius: 999px; border: 2px solid {{ t.border }}; background: {{ t.bg }}; color: {{ t.fg }}; font-family: inherit; font-weight: 900; font-size: 13px; cursor: pointer">{{ t.label }}</button>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <section aria-label="Liste des demandes" style="flex: 2 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+          <sc-for list="{{ items }}" as="r" hint-placeholder-count="4">
+            <button onClick="{{ r.pick }}" style="text-align: left; border: 2px solid {{ r.border }}; background: #FFFFFF; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-family: inherit; color: #1B1F3B; cursor: pointer">
+              <span style="display: flex; justify-content: space-between; gap: 8px; align-items: center; width: 100%">
+                <span style="font-size: 12px; font-weight: 900; text-transform: uppercase; color: #B8492A">{{ r.slotShort }}</span>
+                <span style="font-size: 11px; font-weight: 900; padding: 3px 9px; border-radius: 999px; background: {{ r.bg }}; color: {{ r.fg }}; white-space: nowrap">{{ r.status }}</span>
+              </span>
+              <span style="font-family: 'Lilita One', sans-serif; font-size: 18px; line-height: 1.15">{{ r.school }} → {{ r.inter }}</span>
+              <span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ r.classe }} · {{ r.city }}</span>
+              <span style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; font-weight: 800">
+                <span>Intervenant : <span style="color: {{ r.ic }}">{{ r.it }}</span></span>
+                <sc-if value="{{ r.late }}" hint-placeholder-val="{{ false }}"><span style="color: #B81C1F">En attente depuis {{ r.age }}</span></sc-if>
+              </span>
+            </button>
+          </sc-for>
+          <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 18px; border-radius: 18px; background: #FFFFFF; font-weight: 700; color: #4A4A57">Aucune demande ici.</p></sc-if>
+        </section>
+
+        <section aria-live="polite" aria-label="Détail de la demande" style="flex: 3 1 460px; min-width: 0; background: #FFFFFF; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap">
+            <span style="font-size: 13px; font-weight: 700; color: #4A4A57">Envoyée le {{ d.sent }}</span>
+            <span style="font-size: 12px; font-weight: 900; padding: 4px 10px; border-radius: 999px; background: {{ d.bg }}; color: {{ d.fg }}">{{ d.status }}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+            <div style="border-radius: 16px; background: #DCE3EF; padding: 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #2B337A">École</span><span style="font-family: 'Lilita One', sans-serif; font-size: 20px; line-height: 1.1">{{ d.school }}</span><span style="font-size: 13px; font-weight: 700">{{ d.city }}</span></div>
+            <div style="border-radius: 16px; background: #FDEBD3; padding: 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #7A4100">Intervenant</span><span style="font-family: 'Lilita One', sans-serif; font-size: 20px; line-height: 1.1">{{ d.inter }}</span><span style="font-size: 13px; font-weight: 700">{{ d.interSub }}</span></div>
+          </div>
+          <dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+            <div style="border-radius: 14px; background: #F7F3EA; padding: 12px 14px"><dt style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #4A4A57">Créneau</dt><dd style="margin: 0; font-weight: 900">{{ d.slot }}</dd></div>
+            <div style="border-radius: 14px; background: #F7F3EA; padding: 12px 14px"><dt style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: #4A4A57">Classe</dt><dd style="margin: 0; font-weight: 900">{{ d.classe }} · {{ d.eleves }} élèves</dd></div>
+          </dl>
+          <blockquote style="margin: 0; padding: 14px 16px; border-radius: 14px; background: #FDE7A6; font-size: 15px; font-weight: 600; line-height: 1.5">« {{ d.message }} »<span style="display: block; margin-top: 4px; font-size: 12px; font-weight: 900">Le mot de l'école</span></blockquote>
+
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+            <div style="border-radius: 14px; background: {{ d.ib }}; padding: 12px 14px; display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: {{ d.ic }}">Avis de l'intervenant</span><span style="font-weight: 900; font-size: 15px; color: {{ d.ic }}">{{ d.it }}</span></div>
+            <div style="border-radius: 14px; background: {{ d.fb }}; padding: 12px 14px; display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 900; text-transform: uppercase; color: {{ d.fc }}">Votre avis</span><span style="font-weight: 900; font-size: 15px; color: {{ d.fc }}">{{ d.ft }}</span></div>
+          </div>
+
+          <sc-if value="{{ d.conflict }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0; padding: 12px 14px; border-radius: 12px; border: 2px solid #EF7A0A; background: #FDEBD3; font-size: 14px; font-weight: 700; line-height: 1.45">{{ d.conflictText }}</p>
+          </sc-if>
+
+          <sc-if value="{{ d.canDecide }}" hint-placeholder-val="{{ true }}">
+            <sc-if value="{{ notRefusing }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-wrap: wrap; gap: 10px">
+                <button onClick="{{ validate }}" style="flex: 2 1 200px; min-height: 54px; border: 0; border-radius: 16px; background: #4E6A2C; color: #FFFFFF; font-family: 'Lilita One', sans-serif; font-size: 19px; cursor: pointer">Valider la demande</button>
+                <button onClick="{{ startRefuse }}" style="flex: 1 1 140px; min-height: 54px; border-radius: 16px; border: 2px solid #1B1F3B; background: #FFFFFF; color: #1B1F3B; font-family: inherit; font-weight: 900; font-size: 15px; cursor: pointer">Refuser</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ refusing }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; background: #F7F3EA">
+                <label for="motif" style="font-size: 14px; font-weight: 900">Motif du refus <span style="font-weight: 600; color: #4A4A57">(facultatif, transmis à l'école et à l'intervenant)</span></label>
+                <textarea id="motif" rows="3" value="{{ motifDraft }}" onChange="{{ setMotif }}" placeholder="Ex. : cette classe a déjà rencontré un intervenant du même secteur ce mois-ci." style="border-radius: 12px; border: 2px solid #E6DECB; padding: 12px; font-size: 15px; font-weight: 600; color: #1B1F3B; line-height: 1.5; background: #FFFFFF"></textarea>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                  <button onClick="{{ confirmRefuse }}" style="min-height: 48px; padding: 0 18px; border: 0; border-radius: 14px; background: #B81C1F; color: #FFFFFF; font-family: inherit; font-weight: 900; font-size: 15px; cursor: pointer">Confirmer le refus</button>
+                  <button onClick="{{ cancelRefuse }}" style="min-height: 48px; padding: 0 18px; border-radius: 14px; border: 2px solid #E6DECB; background: #FFFFFF; color: #1B1F3B; font-family: inherit; font-weight: 800; font-size: 15px; cursor: pointer">Annuler</button>
+                </div>
+              </div>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ d.hasOutcome }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 14px 16px; border-radius: 14px; background: {{ d.outBg }}; display: flex; flex-direction: column; gap: 4px">
+              <span style="font-weight: 900; font-size: 15px; color: {{ d.outFg }}">{{ d.outTitle }}</span>
+              <span style="font-size: 14px; font-weight: 600; line-height: 1.45">{{ d.outText }}</span>
+              <sc-if value="{{ d.toCalendar }}" hint-placeholder-val="{{ false }}"><a href="W3-rencontres-pc.dc.html" style="font-size: 14px; font-weight: 900">Voir dans le calendrier des rencontres</a></sc-if>
+            </div>
+          </sc-if>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const DATA = [
+{ id: 'r1', slotKey: 'A24', slotShort: 'Mar 24 nov · 10h00', slot: 'Mardi 24 novembre, 10h00 – 11h30', sent: '12 novembre', age: 4, school: 'Lycée de Sor', city: 'Saint-Louis', classe: 'Terminale S2 · Sciences exp.', eleves: 32, inter: 'Amadou Baila', interSub: 'Ingénieur réseaux · Dakar', message: 'Nos élèves hésitent entre la médecine et les écoles d’ingénieurs. Ils aimeraient comprendre concrètement ce métier.', inter_: 'todo', fm: 'todo' },
+{ id: 'r2', slotKey: 'A24', slotShort: 'Mar 24 nov · 10h00', slot: 'Mardi 24 novembre, 10h00 – 11h30', sent: '13 novembre', age: 3, school: 'Lycée de Grand-Yoff', city: 'Dakar', classe: 'Première S1 · Sciences math.', eleves: 41, inter: 'Amadou Baila', interSub: 'Ingénieur réseaux · Dakar', message: 'Classe très curieuse du numérique. Beaucoup veulent « faire de l’informatique » sans savoir ce que cela recouvre.', inter_: 'todo', fm: 'todo' },
+{ id: 'r3', slotKey: 'M23', slotShort: 'Lun 23 nov · 9h30', slot: 'Lundi 23 novembre, 9h30 – 11h00', sent: '10 novembre', age: 6, school: 'Lycée de Sor', city: 'Saint-Louis', classe: 'Terminale L2 · Lettres', eleves: 38, inter: 'Mame Diarra Sow', interSub: 'Agronome · Saint-Louis', message: 'Plusieurs élèves s’intéressent à l’agriculture mais ne connaissent pas les métiers de la vallée.', inter_: 'ok', fm: 'todo' },
+{ id: 'r4', slotKey: 'C27', slotShort: 'Ven 27 nov · 11h00', slot: 'Vendredi 27 novembre, 11h00 – 12h00', sent: '13 novembre', age: 3, school: 'Lycée de Sor', city: 'Saint-Louis', classe: 'Première L1 · Lettres', eleves: 40, inter: 'Cheikh Tidiane Gueye', interSub: 'Conseiller bancaire · Saint-Louis', message: 'Cette classe n’a encore rencontré personne. Ils ont beaucoup de questions sur l’argent et le travail.', inter_: 'todo', fm: 'todo' },
+{ id: 'r5', slotKey: 'A01', slotShort: 'Mar 1 déc · 10h00', slot: 'Mardi 1er décembre, 10h00 – 11h30', sent: '9 novembre', age: 7, school: 'Lycée de Mbour', city: 'Mbour', classe: 'Première S2 · Sciences exp.', eleves: 36, inter: 'Amadou Baila', interSub: 'Ingénieur réseaux · Dakar', message: 'Nous préparons une semaine de l’orientation et aimerions l’ouvrir avec un métier du numérique.', inter_: 'ok', fm: 'todo' },
+{ id: 'r6', slotKey: 'A26', slotShort: 'Jeu 26 nov · 15h00', slot: 'Jeudi 26 novembre, 15h00 – 16h00', sent: '11 novembre', age: 5, school: 'CEM Parcelles Assainies', city: 'Dakar', classe: '3e B · Enseignement moyen', eleves: 41, inter: 'Amadou Baila', interSub: 'Ingénieur réseaux · Dakar', message: 'Nos élèves vont bientôt choisir leur série au lycée. Un témoignage les aiderait.', inter_: 'todo', fm: 'todo' },
+{ id: 'r7', slotKey: 'A25', slotShort: 'Mer 25 nov · 14h00', slot: 'Mercredi 25 novembre, 14h00 – 15h30', sent: '6 novembre', age: 10, school: 'Lycée de Thiès', city: 'Thiès', classe: 'Terminale S1 · Sciences math.', eleves: 29, inter: 'Amadou Baila', interSub: 'Ingénieur réseaux · Dakar', message: 'Plusieurs élèves veulent passer le concours de l’ESP.', inter_: 'ok', fm: 'ok' },
+{ id: 'r8', slotKey: 'A25', slotShort: 'Mer 25 nov · 14h00', slot: 'Mercredi 25 novembre, 14h00 – 15h30', sent: '8 novembre', age: 8, school: 'Lycée de Rufisque', city: 'Rufisque', classe: 'Terminale S1 · Sciences math.', eleves: 33, inter: 'Amadou Baila', interSub: 'Ingénieur réseaux · Dakar', message: 'Nos élèves aimeraient découvrir les métiers des télécoms.', inter_: 'todo', fm: 'todo', auto: true },
+{ id: 'r9', slotKey: 'A18', slotShort: 'Mer 18 nov · 10h00', slot: 'Mercredi 18 novembre, 10h00 – 11h30', sent: '5 novembre', age: 11, school: 'Lycée de Louga', city: 'Louga', classe: 'Première S2 · Sciences exp.', eleves: 40, inter: 'Amadou Baila', interSub: 'Ingénieur réseaux · Dakar', message: 'Nos élèves aimeraient découvrir le numérique.', inter_: 'ok', fm: 'no', motif: 'Cette classe a déjà rencontré un intervenant du numérique ce mois-ci.' }
+];
+const over = st.over || {};
+let all = DATA.map((x) => ({ ...x, ...(over[x.id] || {}) }));
+const statusOf = (x) => x.auto ? 'auto' : (x.fm === 'no' || x.inter_ === 'no') ? 'refused' : (x.fm === 'ok' && x.inter_ === 'ok') ? 'confirmed' : 'pending';
+const S = { pending: ['En attente', '#EF7A0A', '#1B1F3B'], confirmed: ['Confirmée', '#4E6A2C', '#FFFFFF'], refused: ['Refusée', '#B81C1F', '#FFFFFF'], auto: ['Créneau pris', '#E6DECB', '#1B1F3B'] };
+const AV = { todo: ['À traiter', '#7A4100', '#FDEBD3'], ok: ['Validé', '#3B5221', '#E8EEDF'], no: ['Refusé', '#8E1518', '#FBE3E3'] };
+const tab = st.tab || 'todo';
+const inTab = (x) => { const s = statusOf(x); return tab === 'all' || (tab === 'todo' && s === 'pending' && x.fm === 'todo') || (tab === 'confirmed' && s === 'confirmed') || (tab === 'refused' && (s === 'refused' || s === 'auto')); };
+const todoCount = all.filter((x) => statusOf(x) === 'pending' && x.fm === 'todo').length;
+const visible = all.filter(inTab);
+const selId = st.sel && all.find((x) => x.id === st.sel) ? st.sel : (visible[0] ? visible[0].id : 'r1');
+const cnt = (k) => all.filter((x) => { const s = statusOf(x); return k === 'refused' ? (s === 'refused' || s === 'auto') : s === k; }).length;
+const tabs = [['todo', 'À traiter · ' + todoCount], ['confirmed', 'Confirmées · ' + cnt('confirmed')], ['refused', 'Refusées · ' + cnt('refused')], ['all', 'Toutes · ' + all.length]].map(([k, label]) => ({
+label, selected: tab === k ? 'true' : 'false', bg: tab === k ? '#1B1F3B' : '#FFFFFF', fg: tab === k ? '#FFFFFF' : '#1B1F3B', border: tab === k ? '#1B1F3B' : '#E6DECB', pick: () => this.setState({ tab: k, sel: null, refusing: false })
+}));
+const items = visible.map((x) => { const s = statusOf(x); return {
+slotShort: x.slotShort, school: x.school, inter: x.inter, classe: x.classe, city: x.city,
+status: S[s][0], bg: S[s][1], fg: S[s][2], it: AV[x.inter_][0], ic: AV[x.inter_][1],
+late: s === 'pending' && x.age >= 2, age: x.age + ' jours',
+border: x.id === selId ? '#1B1F3B' : 'transparent',
+pick: () => this.setState({ sel: x.id, refusing: false, motifDraft: '' })
+}; });
+const x = all.find((y) => y.id === selId);
+const s = statusOf(x);
+const siblings = all.filter((y) => y.slotKey === x.slotKey && y.id !== x.id && statusOf(y) === 'pending');
+let outTitle = '', outText = '', outBg = '#F7F3EA', outFg = '#1B1F3B', toCalendar = false;
+if (s === 'confirmed') { outTitle = 'Rencontre confirmée'; outText = 'L’école et ' + x.inter.split(' ')[0] + ' sont prévenus. Les autres demandes sur ce créneau sont refusées automatiquement.'; outBg = '#E8EEDF'; outFg = '#3B5221'; toCalendar = true; }
+else if (s === 'refused') { outTitle = x.fm === 'no' ? 'Refusée par la Fondation M' : 'Refusée par l’intervenant'; outText = x.motif ? 'Motif : « ' + x.motif + ' »' : 'Aucun motif transmis. L’école peut choisir un autre intervenant.'; outBg = '#FBE3E3'; outFg = '#8E1518'; }
+else if (s === 'auto') { outTitle = 'Refusée automatiquement · créneau pris'; outText = 'Une autre rencontre a été confirmée sur ce créneau. L’école est invitée à choisir une autre date.'; }
+else if (x.fm === 'ok') { outTitle = 'Votre validation est enregistrée'; outText = 'Il manque l’avis de ' + x.inter.split(' ')[0] + '. La rencontre sera confirmée dès qu’il aura accepté.'; outBg = '#E8EEDF'; outFg = '#3B5221'; }
+const d = {
+...x, status: S[s][0], bg: S[s][1], fg: S[s][2],
+it: AV[x.inter_][0], ic: AV[x.inter_][1], ib: AV[x.inter_][2], ft: AV[x.fm][0], fc: AV[x.fm][1], fb: AV[x.fm][2],
+conflict: s === 'pending' && siblings.length > 0,
+conflictText: siblings.length + (siblings.length > 1 ? ' autres demandes' : ' autre demande') + ' sur ce créneau (' + siblings.map((y) => y.school).join(', ') + '). Si cette rencontre est confirmée, elles seront refusées automatiquement.',
+canDecide: s === 'pending' && x.fm === 'todo',
+hasOutcome: !(s === 'pending' && x.fm === 'todo'), outTitle, outText, outBg, outFg, toCalendar
+};
+const setOver = (patch) => {
+const next = { ...over, [x.id]: { ...(over[x.id] || {}), ...patch } };
+const after = { ...x, ...patch };
+if (statusOf(after) === 'confirmed') all.filter((y) => y.slotKey === x.slotKey && y.id !== x.id && statusOf(y) === 'pending').forEach((y) => { next[y.id] = { ...(next[y.id] || {}), auto: true }; });
+this.setState({ over: next, refusing: false, motifDraft: '' });
+};
+return {
+tabs, items, d, empty: visible.length === 0, todoCount: String(todoCount),
+refusing: !!st.refusing, notRefusing: !st.refusing, motifDraft: st.motifDraft || '',
+validate: () => setOver({ fm: 'ok' }),
+startRefuse: () => this.setState({ refusing: true }),
+cancelRefuse: () => this.setState({ refusing: false, motifDraft: '' }),
+setMotif: (e) => this.setState({ motifDraft: e.target.value }),
+confirmRefuse: () => setOver({ fm: 'no', motif: (st.motifDraft || '').trim() })
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>E4 Demande de rencontre — mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+input,textarea{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 2000px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="display: flex; align-items: center; gap: 8px; padding: 14px 12px 6px 8px">
+    <a href="W1-E3-intervenants-mobile.dc.html" aria-label="Retour aux intervenants" style="width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #1B1F3B"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></a>
+    <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 24px">Demander une rencontre</h1>
+  </header>
+
+  <section style="margin: 8px 16px 0 16px; background: #4E6A2C; color: #FFFFFF; border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; gap: 12px; align-items: center">
+      <div style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 18px; background: #FDE7A6; color: #4E6A2C; font-family: 'Lilita One', sans-serif; font-size: 22px; display: flex; align-items: center; justify-content: center">MS</div>
+      <div style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #FDE7A6">Vous invitez</span><span style="font-family: 'Lilita One', sans-serif; font-size: 21px; line-height: 1.1">Mame Diarra Sow</span><span style="font-size: 13px; font-weight: 700">Agronome · Ross Béthio</span></div>
+    </div>
+    <span style="font-size: 14px; font-weight: 600; line-height: 1.45">« J'aime montrer aux jeunes que l'agriculture, c'est de la science et de l'entrepreneuriat. »</span>
+  </section>
+
+  <fieldset style="margin: 22px 16px 0 16px; padding: 0; border: 0; display: flex; flex-direction: column; gap: 10px">
+    <legend style="padding: 0 0 10px 0; font-family: 'Lilita One', sans-serif; font-size: 20px; display: flex; align-items: center; gap: 8px"><span style="width: 26px; height: 26px; border-radius: 8px; background: #2B337A; color: #FDE7A6; font-size: 14px; display: inline-flex; align-items: center; justify-content: center">1</span>Quand ?</legend>
+    <sc-for list="{{ slots }}" as="s" hint-placeholder-count="3">
+      <label style="min-height: 64px; box-sizing: border-box; border-radius: 16px; border: {{ s.border }}; background: {{ s.bg }}; padding: 10px 14px; display: flex; align-items: center; gap: 12px"><input type="radio" name="m-slot" checked="{{ s.checked }}" onChange="{{ s.pick }}" style="width: 20px; height: 20px; margin: 0; accent-color: #B8492A"><span style="display: flex; flex-direction: column"><span style="font-weight: 900; font-size: 15px">{{ s.day }} {{ s.date }}</span><span style="font-size: 13px; font-weight: 700">{{ s.time }}</span></span></label>
+    </sc-for>
+  </fieldset>
+
+  <fieldset style="margin: 22px 16px 0 16px; padding: 0; border: 0; display: flex; flex-direction: column; gap: 10px">
+    <legend style="padding: 0 0 10px 0; font-family: 'Lilita One', sans-serif; font-size: 20px; display: flex; align-items: center; gap: 8px"><span style="width: 26px; height: 26px; border-radius: 8px; background: #2B337A; color: #FDE7A6; font-size: 14px; display: inline-flex; align-items: center; justify-content: center">2</span>Pour quelle classe ?</legend>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <sc-for list="{{ classes }}" as="c" hint-placeholder-count="4">
+        <label style="min-height: 60px; box-sizing: border-box; border-radius: 14px; border: {{ c.border }}; background: {{ c.bg }}; padding: 8px 12px; display: flex; align-items: center; gap: 10px"><input type="radio" name="m-classe" checked="{{ c.checked }}" onChange="{{ c.pick }}" style="width: 18px; height: 18px; margin: 0; accent-color: #B8492A"><span style="display: flex; flex-direction: column"><span style="font-weight: 900; font-size: 14px">{{ c.short }}</span><span style="font-size: 12px; font-weight: 700; color: #4A4A57">{{ c.n }} élèves</span></span></label>
+      </sc-for>
+    </div>
+  </fieldset>
+
+  <fieldset style="margin: 22px 16px 0 16px; padding: 0; border: 0; display: flex; flex-direction: column; gap: 12px">
+    <legend style="padding: 0 0 10px 0; font-family: 'Lilita One', sans-serif; font-size: 20px; display: flex; align-items: center; gap: 8px"><span style="width: 26px; height: 26px; border-radius: 8px; background: #2B337A; color: #FDE7A6; font-size: 14px; display: inline-flex; align-items: center; justify-content: center">3</span>Présentez vos élèves</legend>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-lieu" style="font-size: 13px; font-weight: 800">Où aura lieu la rencontre ?</label>
+      <input id="m-lieu" value="CDI, bâtiment B" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 15px; font-weight: 600; color: #1B1F3B; background: #FFFFFF">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="m-msg" style="font-size: 13px; font-weight: 800">Un mot pour Mame Diarra <span style="font-weight: 600; color: #4A4A57">(facultatif)</span></label>
+      <textarea id="m-msg" rows="5" style="border-radius: 12px; border: 2px solid #E6DECB; padding: 12px 14px; font-size: 15px; font-weight: 600; color: #1B1F3B; line-height: 1.5; background: #FFFFFF">Plusieurs de mes élèves s'intéressent à l'agriculture mais ne connaissent pas les métiers de la vallée. Ils aimeraient entendre votre parcours.</textarea>
+    </div>
+  </fieldset>
+
+  <section aria-labelledby="m-verif" style="margin: 22px 16px 0 16px; border-radius: 20px; padding: 18px; background: #FDE7A6; border: 2px solid #E5A60A; display: flex; flex-direction: column; gap: 12px">
+    <h2 id="m-verif" style="margin: 0; display: flex; align-items: center; gap: 8px; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 20px"><span style="width: 26px; height: 26px; border-radius: 8px; background: #1B1F3B; color: #FDE7A6; font-size: 14px; display: inline-flex; align-items: center; justify-content: center">4</span>Vérifiez votre demande</h2>
+    <dl style="margin: 0; display: grid; grid-template-columns: 76px 1fr; gap: 8px 12px; font-size: 14px">
+      <dt style="font-weight: 700">Avec</dt><dd style="margin: 0; font-weight: 900">Mame Diarra Sow</dd>
+      <dt style="font-weight: 700">Date</dt><dd style="margin: 0; font-weight: 900">{{ recap.date }}</dd>
+      <dt style="font-weight: 700">Classe</dt><dd style="margin: 0; font-weight: 900">{{ recap.classe }}</dd>
+      <dt style="font-weight: 700">Lieu</dt><dd style="margin: 0; font-weight: 900">CDI, bâtiment B</dd>
+    </dl>
+  </section>
+
+  <div style="margin: 22px 16px 0 16px; display: flex; flex-direction: column; gap: 10px">
+    <p style="margin: 0; font-size: 13px; font-weight: 600; line-height: 1.45; color: #4A4A57">Mame Diarra et la Fondation M vont chacune répondre. Vous suivrez leurs réponses dans « Mes rencontres ».</p>
+    <a href="W1-E5-suivi-mobile.dc.html" style="min-height: 58px; border-radius: 18px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-size: 21px">Envoyer la demande</a>
+    <a href="W1-E3-intervenants-mobile.dc.html" style="min-height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800">Annuler</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2000}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const slot = st.slot || 's1';
+const cls = st.cls || 'tl2';
+const slotData = [
+{ id: 's1', day: 'Lundi', date: '23 novembre', time: '9h30 – 11h00' },
+{ id: 's2', day: 'Mardi', date: '1er décembre', time: '10h00 – 11h30' },
+{ id: 's3', day: 'Jeudi', date: '3 décembre', time: '15h00 – 16h30' }
+];
+const classData = [
+{ id: 'ts2', name: 'Terminale S2', short: 'Tle S2', n: 32 },
+{ id: 'tl2', name: 'Terminale L2', short: 'Tle L2', n: 38 },
+{ id: 'ps1', name: 'Première S1', short: '1re S1', n: 35 },
+{ id: 'pl1', name: 'Première L1', short: '1re L1', n: 40 }
+];
+const on = (yes) => ({ border: yes ? '3px solid #B8492A' : '3px solid #E6DECB', bg: yes ? '#FDE7A6' : '#FFFFFF' });
+const slots = slotData.map((s) => ({ ...s, ...on(s.id === slot), checked: s.id === slot, pick: () => this.setState({ slot: s.id }) }));
+const classes = classData.map((c) => ({ ...c, ...on(c.id === cls), checked: c.id === cls, pick: () => this.setState({ cls: c.id }) }));
+const s = slotData.find((x) => x.id === slot);
+const c = classData.find((x) => x.id === cls);
+return { slots, classes, recap: { date: s.day + ' ' + s.date + ', ' + s.time.split(' ')[0], classe: c.name + ' · ' + c.n + ' élèves' } };
+}
+}
+</script>
+</body>
+</html>

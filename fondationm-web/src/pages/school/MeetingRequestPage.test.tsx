@@ -33,8 +33,10 @@ describe('Demander une rencontre', () => {
 
     const invite = within(await screen.findByRole('region', { name: 'Vous invitez' }))
     expect(invite.getByText('Awa Diallo')).toBeInTheDocument()
-    expect(invite.getByText('Ingénieure réseaux · Sonatel · Dakar')).toBeInTheDocument()
-    expect(invite.getByText('Montrer aux élèves que les métiers du numérique leur sont ouverts.')).toBeInTheDocument()
+    // Maquette : « {Nom}, {métier} à {ville} » sur PC, « Métier · Ville » sur mobile, citation entre « ».
+    expect(invite.getByText('Awa Diallo, ingénieure réseaux à Dakar')).toBeInTheDocument()
+    expect(invite.getByText('Ingénieure réseaux · Dakar')).toBeInTheDocument()
+    expect(invite.getByText('« Montrer aux élèves que les métiers du numérique leur sont ouverts. »')).toBeInTheDocument()
     expect(invite.getByRole('link', { name: "Changer d'intervenant" })).toHaveAttribute('href', '/ecole/intervenants')
     const crumbs = within(screen.getByRole('navigation', { name: "Fil d'Ariane" }))
     expect(crumbs.getByRole('link', { name: 'Intervenants' })).toHaveAttribute('href', '/ecole/intervenants')
@@ -58,10 +60,9 @@ describe('Demander une rencontre', () => {
     await user.type(form().getByLabelText(/^Où aura lieu la rencontre \?/), '  Salle 12  ')
     await user.type(form().getByLabelText('Un mot pour Awa (facultatif)'), 'Nos élèves ont hâte.')
 
-    expect(summaryValue('Intervenant')).toBe('Awa Diallo')
+    expect(summaryValue('Intervenant')).toBe('Awa Diallo · ingénieure réseaux')
     expect(summaryValue('Classe')).toBe('Terminale S2')
-    expect(summaryValue('Format')).toBe('En classe')
-    expect(summaryValue('Lieu')).toBe('Salle 12')
+    expect(summaryValue('Lieu')).toBe('En classe · Salle 12')
     expect(
       screen.getByText(/Awa et la Fondation M vont chacune répondre à votre demande\. Vous suivrez leurs réponses dans « Mes rencontres »\./),
     ).toBeInTheDocument()

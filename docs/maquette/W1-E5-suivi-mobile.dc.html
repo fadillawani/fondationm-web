@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>E5 Mes rencontres — calendrier mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+</style>
+</helmet>
+<div style="width: 390px; height: 1840px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="padding: 18px 16px 6px 16px; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; flex-direction: column"><span style="font-size: 12px; font-weight: 800; color: #4A4A57">Lycée de Sor · Saint-Louis</span><h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 30px; line-height: 1.05">Mes rencontres</h1></div>
+    <a href="W1-E3-intervenants-mobile.dc.html" aria-label="Nouvelle demande" style="width: 48px; height: 48px; border-radius: 16px; background: #B8492A; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></a>
+  </header>
+
+  <section style="margin: 10px 16px 0 16px; border-radius: 18px; background: #FDE7A6; border: 2px solid #E5A60A; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+    <span style="font-size: 14px; font-weight: 700; line-height: 1.4"><strong style="font-weight: 900">Votre rencontre avec Aïssatou Diop est terminée.</strong> Comment s'est-elle passée ?</span>
+    <a href="W1-E6-rapport-mobile.dc.html" style="min-height: 46px; border-radius: 14px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px">Partager mon retour</a>
+  </section>
+
+  <section aria-label="Calendrier" style="margin: 10px 16px 0 16px; background: #FFFFFF; border-radius: 22px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <button aria-label="Mois précédent" onClick="{{ prev }}" style="width: 44px; height: 44px; border-radius: 12px; border: 0; background: #F7F3EA; color: #1B1F3B; display: flex; align-items: center; justify-content: center; opacity: {{ prevOpacity }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+      <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 21px">{{ monthLabel }}</h2>
+      <button aria-label="Mois suivant" onClick="{{ next }}" style="width: 44px; height: 44px; border-radius: 12px; border: 0; background: #F7F3EA; color: #1B1F3B; display: flex; align-items: center; justify-content: center; opacity: {{ nextOpacity }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; text-align: center">
+      <span style="font-size: 11px; font-weight: 900; color: #4A4A57">L</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">M</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">M</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">J</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">V</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">S</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">D</span>
+      <sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+        <button onClick="{{ c.pick }}" disabled="{{ c.disabled }}" aria-label="{{ c.aria }}" style="height: 46px; border: {{ c.border }}; border-radius: 12px; background: {{ c.bg }}; color: {{ c.color }}; font-family: inherit; font-size: 14px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0">
+          <span>{{ c.label }}</span>
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: {{ c.dot }}"></span>
+        </button>
+      </sc-for>
+    </div>
+    <span style="font-size: 11px; font-weight: 700; color: #4A4A57">Les jours passés sont grisés. La pastille indique le statut de la rencontre.</span>
+  </section>
+
+  <section aria-live="polite" style="margin: 14px 16px 0 16px; background: #FFFFFF; border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 12px; border: 2px solid {{ d.accent }}">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+      <span style="font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #4A4A57">{{ d.when }}</span>
+      <span style="font-size: 12px; font-weight: 900; padding: 4px 10px; border-radius: 999px; background: {{ d.bg }}; color: {{ d.fg }}">{{ d.status }}</span>
+    </div>
+    <div style="display: flex; flex-direction: column"><span style="font-family: 'Lilita One', sans-serif; font-size: 21px; line-height: 1.1">{{ d.name }}</span><span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ d.metier }}</span></div>
+    <span style="font-size: 14px; font-weight: 900">{{ d.date }}<br><span style="font-weight: 700; color: #4A4A57">{{ d.classe }} · {{ d.lieu }}</span></span>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <div style="border-radius: 12px; background: {{ d.ib }}; padding: 8px 10px; display: flex; flex-direction: column"><span style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: {{ d.ic }}">Intervenant</span><span style="font-weight: 900; font-size: 13px; color: {{ d.ic }}">{{ d.it }}</span></div>
+      <div style="border-radius: 12px; background: {{ d.fb }}; padding: 8px 10px; display: flex; flex-direction: column"><span style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: {{ d.fc }}">Fondation M</span><span style="font-weight: 900; font-size: 13px; color: {{ d.fc }}">{{ d.ft }}</span></div>
+    </div>
+    <span style="font-size: 13px; font-weight: 600; line-height: 1.45"><strong style="font-weight: 900">{{ d.noteTitle }}.</strong> {{ d.note }}</span>
+    <sc-if value="{{ d.hasCta }}" hint-placeholder-val="{{ false }}">
+      <a href="{{ d.ctaHref }}" style="min-height: 50px; border-radius: 14px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 12px; font-family: 'Lilita One', sans-serif; font-size: 17px">{{ d.ctaLabel }}</a>
+    </sc-if>
+  </section>
+
+  <section style="margin: 18px 16px 0 16px; display: flex; flex-direction: column; gap: 8px">
+    <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 19px; text-transform: uppercase">À venir</h2>
+    <sc-for list="{{ upcoming }}" as="u" hint-placeholder-count="4">
+      <button onClick="{{ u.pick }}" style="min-height: 56px; border: 0; border-radius: 14px; background: {{ u.rowBg }}; padding: 8px 12px; display: flex; align-items: center; gap: 10px; text-align: left; font-family: inherit; color: #1B1F3B">
+        <span style="width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: {{ u.dot }}"></span>
+        <span style="flex: 1; display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 900; font-size: 14px">{{ u.name }}</span><span style="font-size: 12px; font-weight: 700; color: #4A4A57">{{ u.short }}</span></span>
+        <span style="font-size: 11px; font-weight: 900; color: {{ u.statusColor }}">{{ u.status }}</span>
+      </button>
+    </sc-for>
+    <h2 style="margin: 10px 0 0 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 19px; text-transform: uppercase">Passées</h2>
+    <sc-for list="{{ pastList }}" as="u" hint-placeholder-count="4">
+      <button onClick="{{ u.pick }}" style="min-height: 56px; border: 0; border-radius: 14px; background: {{ u.rowBg }}; padding: 8px 12px; display: flex; align-items: center; gap: 10px; text-align: left; font-family: inherit; color: #1B1F3B">
+        <span style="width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: {{ u.dot }}"></span>
+        <span style="flex: 1; display: flex; flex-direction: column; min-width: 0"><span style="font-weight: 900; font-size: 14px">{{ u.name }}</span><span style="font-size: 12px; font-weight: 700; color: #4A4A57">{{ u.short }}</span></span>
+        <span style="font-size: 11px; font-weight: 900; color: {{ u.statusColor }}">{{ u.status }}</span>
+      </button>
+    </sc-for>
+  </section>
+
+  <nav aria-label="Navigation principale" style="margin-top: auto; background: #FFFFFF; border-top: 1px solid #E6DECB; padding: 8px 8px 22px 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+    <a href="W1-E3-intervenants-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg>Intervenants</a>
+    <a href="#" aria-current="page" style="min-height: 52px; text-decoration: none; color: #B8492A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 900">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M3 10h18"/></svg>Rencontres</a>
+    <a href="W1-E6-rapport-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>Retours</a>
+    <a href="W5-E2-eleves-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg>Établissement</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1840}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const month = st.month || 11;
+const selId = st.sel || 'e5';
+const STATUS = {
+attente: { label: 'En attente', bg: '#EF7A0A', fg: '#1B1F3B' },
+confirmee: { label: 'Confirmée', bg: '#4E6A2C', fg: '#FFFFFF' },
+refusee: { label: 'Refusée', bg: '#B81C1F', fg: '#FFFFFF' },
+annulee: { label: 'Annulée', bg: '#E6DECB', fg: '#1B1F3B' },
+realisee: { label: 'Réalisée', bg: '#2B337A', fg: '#FDE7A6' }
+};
+const AV = { v: ['Validé', '#3B5221', '#E8EEDF'], a: ['En attente', '#7A4100', '#FDEBD3'], r: ['Refusé', '#8E1518', '#FBE3E3'] };
+const MONTHS = { 10: ['Octobre 2026', 3, 31, 'oct.', 'octobre'], 11: ['Novembre 2026', 6, 30, 'nov.', 'novembre'], 12: ['Décembre 2026', 1, 31, 'déc.', 'décembre'] };
+const EV = [
+{ id: 'e1', m: 10, d: 8, wd: 'Jeudi', time: '10h00', name: 'Mame Diarra Sow', metier: 'Agronome · Ross Béthio', classe: 'Terminale S2', lieu: 'Salle 4', st: 'realisee', ia: 'v', fa: 'v', noteTitle: 'Merci pour votre retour', note: 'La Fondation M le lit avant de le partager aux donateurs.' },
+{ id: 'e2', m: 10, d: 22, wd: 'Jeudi', time: '11h00', name: 'Fatou Ndiaye', metier: 'Avocate · Dakar', classe: 'Terminale S2', lieu: 'En ligne', st: 'realisee', ia: 'v', fa: 'v', noteTitle: 'Une belle rencontre', note: 'Votre retour fait partie du rapport d’impact.' },
+{ id: 'e3', m: 10, d: 30, wd: 'Vendredi', time: '16h00', name: 'Oumar Sy', metier: 'Infirmier · Hôpital régional', classe: 'Première S1', lieu: 'Salle 7', st: 'annulee', ia: 'v', fa: 'v', noteTitle: 'Annulée par la Fondation M', note: 'Oumar a eu un empêchement de dernière minute.' },
+{ id: 'e4', m: 11, d: 4, wd: 'Mercredi', time: '14h00', name: 'Aïssatou Diop', metier: 'Maroquinière · Guet Ndar', classe: 'Terminale L2', lieu: 'Salle 12', st: 'realisee', ia: 'v', fa: 'v', noteTitle: 'Comment cela s’est-il passé ?', note: 'Racontez-nous ce que vous avez vécu avec Aïssatou.', cta: ['Partager votre retour d’expérience', 'W1-E6-rapport-mobile.dc.html'] },
+{ id: 'e5', m: 11, d: 17, wd: 'Mardi', time: '10h00', name: 'Awa Sarr', metier: 'Ingénieure data · Dakar', classe: 'Terminale S2', lieu: 'En ligne', st: 'confirmee', ia: 'v', fa: 'v', noteTitle: 'Tout est prêt', note: 'Pensez à rassembler les questions de vos élèves.' },
+{ id: 'e6', m: 11, d: 19, wd: 'Jeudi', time: '15h00', name: 'Ibrahima Fall', metier: 'Pharmacien · Hôpital régional', classe: 'Première S1', lieu: 'Salle 7', st: 'refusee', ia: 'r', fa: 'v', noteTitle: 'Refusée par l’intervenant', note: '« Je suis de garde ce jeudi. Je reste disponible en décembre. »', cta: ['Choisir un autre intervenant', 'W1-E3-intervenants-mobile.dc.html'] },
+{ id: 'e7', m: 11, d: 23, wd: 'Lundi', time: '9h30', name: 'Mame Diarra Sow', metier: 'Agronome · Ross Béthio', classe: 'Terminale L2', lieu: 'CDI', st: 'attente', ia: 'v', fa: 'a', noteTitle: 'Presque confirmée', note: 'Mame Diarra a accepté. La Fondation M doit encore valider.' },
+{ id: 'e8', m: 11, d: 27, wd: 'Vendredi', time: '11h00', name: 'Cheikh Tidiane Gueye', metier: 'Conseiller bancaire', classe: 'Première L1', lieu: 'Salle 3', st: 'attente', ia: 'a', fa: 'a', noteTitle: 'Demande envoyée', note: 'Cheikh Tidiane et la Fondation M vont vous répondre.' }
+];
+const isPast = (m, d) => m < 11 || (m === 11 && d < 13);
+const pick = (e) => () => this.setState({ sel: e.id, month: e.m });
+const [label, offset, days] = MONTHS[month];
+const total = Math.ceil((offset + days) / 7) * 7;
+const cells = [];
+for (let i = 0; i < total; i++) {
+const n = i - offset + 1;
+const inMonth = n >= 1 && n <= days;
+const past = inMonth && isPast(month, n);
+const today = month === 11 && n === 13;
+const ev = inMonth ? EV.find((e) => e.m === month && e.d === n) : null;
+const selected = ev && ev.id === selId;
+cells.push({
+label: inMonth ? String(n) : '',
+disabled: !ev,
+aria: ev ? n + ' : ' + ev.name + ', ' + STATUS[ev.st].label : (inMonth ? String(n) : 'vide'),
+bg: selected ? '#FDE7A6' : (!inMonth ? 'transparent' : (past ? '#F1EBDD' : '#FFFFFF')),
+color: today ? '#B8492A' : (past ? '#4A4A57' : '#1B1F3B'),
+border: today ? '2px solid #B8492A' : (selected ? '2px solid #1B1F3B' : '2px solid transparent'),
+dot: ev ? STATUS[ev.st].bg : 'transparent',
+pick: ev ? pick(ev) : () => {}
+});
+}
+const e = EV.find((x) => x.id === selId);
+const s = STATUS[e.st];
+const d = {
+when: isPast(e.m, e.d) ? 'Rencontre passée' : 'Rencontre à venir',
+status: s.label, bg: s.bg, fg: s.fg, accent: s.bg === '#E6DECB' ? '#B8AE98' : s.bg,
+name: e.name, metier: e.metier, date: e.wd + ' ' + e.d + ' ' + MONTHS[e.m][4] + ' · ' + e.time,
+classe: e.classe, lieu: e.lieu,
+it: AV[e.ia][0], ic: AV[e.ia][1], ib: AV[e.ia][2], ft: AV[e.fa][0], fc: AV[e.fa][1], fb: AV[e.fa][2],
+noteTitle: e.noteTitle, note: e.note,
+hasCta: !!e.cta, ctaLabel: e.cta ? e.cta[0] : '', ctaHref: e.cta ? e.cta[1] : '#'
+};
+const row = (x) => ({ name: x.name, short: x.wd + ' ' + x.d + ' ' + MONTHS[x.m][3] + ' · ' + x.classe, status: x.id === 'e4' ? 'Retour à partager' : STATUS[x.st].label, statusColor: x.id === 'e4' ? '#B8492A' : '#4A4A57', dot: STATUS[x.st].bg, rowBg: x.id === selId ? '#FDE7A6' : '#FFFFFF', pick: pick(x) });
+const upcoming = EV.filter((x) => !isPast(x.m, x.d)).map(row);
+const pastList = EV.filter((x) => isPast(x.m, x.d)).reverse().map(row);
+return {
+cells, d, upcoming, pastList, monthLabel: label,
+prev: () => this.setState({ month: Math.max(10, month - 1) }),
+next: () => this.setState({ month: Math.min(12, month + 1) }),
+prevOpacity: month === 10 ? '0.4' : '1', nextOpacity: month === 12 ? '0.4' : '1'
+};
+}
+}
+</script>
+</body>
+</html>

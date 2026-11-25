@@ -70,3 +70,5 @@ export const SUGGESTED_SKILLS = [
 ] as const
 
 export const CONTACT_EMAIL = 'contact@fondationm.sn'
+/** Téléphone de la maquette (W1-E1, W2-E1), repris tel quel. */
+export const CONTACT_PHONE = '+221 33 800 00 00'

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PageTitle } from '../../components/layout/PageTitle'
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { errorMessage } from '../../api/errors'
 import { useCurrentUser } from '../../auth/currentUserContext'
@@ -72,6 +73,7 @@ export function RequestsPage() {
   const totalPages = Math.ceil(inTab.length / PAGE_SIZE)
   const items = inTab.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
   const toAnswer = all.filter(awaitsMyAnswer).length
+  const counted = (label: string, count: number) => (meetings.data ? `${label} · ${count}` : label)
 
   const explicit = selectedId === null ? undefined : items.find((meeting) => meeting.id === selectedId)
   const shownResult = lastResult !== null && lastResult.id === selectedId ? lastResult : null
@@ -127,16 +129,16 @@ export function RequestsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className={cn('flex flex-col gap-1', detailOpen && 'hidden lg:flex')}>
-        <p className="text-xs font-black uppercase tracking-[0.12em] text-terra">Des classes vous attendent</p>
-        <h1 className="text-[32px] leading-tight text-ink md:text-[40px]">Demandes reçues</h1>
-        <p className="text-[15px] font-semibold text-muted">
-          Répondez selon votre disponibilité. La Fondation M donne aussi son avis, de son côté.
-        </p>
-      </header>
+      <PageTitle
+        className={cn(detailOpen && 'hidden lg:flex')}
+        kicker="Des classes vous attendent"
+        title="Demandes reçues"
+        subtitle="Répondez selon votre disponibilité. La Fondation M donne aussi son avis, de son côté."
+      />
 
       <div className={cn(detailOpen && 'hidden lg:block')}>
         <Tabs
+          size="sm"
           label="Catégories de demandes"
           idPrefix={TAB_IDS}
           value={tab}
@@ -145,10 +147,10 @@ export function RequestsPage() {
             update({ onglet: value, page: null, demande: null })
           }}
           items={[
-            { value: 'a-traiter', label: meetings.data ? `À traiter · ${toAnswer}` : 'À traiter' },
-            { value: 'acceptees', label: 'Acceptées' },
-            { value: 'refusees', label: 'Refusées ou annulées' },
-            { value: 'toutes', label: 'Toutes' },
+            { value: 'a-traiter', label: counted('À traiter', toAnswer) },
+            { value: 'acceptees', label: counted('Acceptées', all.filter(IN_TAB.acceptees).length) },
+            { value: 'refusees', label: counted('Refusées ou annulées', all.filter(IN_TAB.refusees).length) },
+            { value: 'toutes', label: counted('Toutes', all.length) },
           ]}
         />
       </div>
@@ -197,18 +199,20 @@ export function RequestsPage() {
                             update({ demande: meeting.id }, { state: { fromList: true } })
                           }}
                           className={cn(
-                            'flex min-h-touch w-full flex-col gap-1 rounded-block border-2 bg-surface p-3 text-left transition-colors',
-                            selected ? 'border-ink' : 'border-line hover:border-muted',
+                            'flex min-h-touch w-full flex-col gap-1 rounded-[18px] border-2 bg-surface px-4 py-3.5 text-left transition-colors',
+                            selected ? 'border-ink' : 'border-transparent hover:border-line',
                           )}
                         >
                           <span className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="font-extrabold text-terra">{shortSlotText(meeting)}</span>
-                            <Badge tone={badge.tone}>{badge.label}</Badge>
+                            <span className="text-xs font-black uppercase tracking-[0.04em] text-terra">{shortSlotText(meeting)}</span>
+                            <Badge tone={badge.tone} size="sm">
+                              {badge.label}
+                            </Badge>
                           </span>
-                          <span className="font-extrabold text-ink">{meeting.schoolName}</span>
-                          {line && <span className="text-sm font-semibold text-muted">{line}</span>}
+                          <span className="font-display text-[19px] leading-tight text-ink">{meeting.schoolName}</span>
+                          {line && <span className="text-[13px] font-bold text-muted">{line}</span>}
                           {sameSlot > 1 && (
-                            <span className="text-sm font-extrabold text-terra-dark">{sameSlot} demandes sur ce créneau</span>
+                            <span className="text-xs font-black text-[#7A4100]">{sameSlot} demandes sur ce créneau</span>
                           )}
                         </button>
                       </li>
@@ -228,14 +232,17 @@ export function RequestsPage() {
             </div>
 
             <div className={cn('flex flex-col gap-4', !detailOpen && 'hidden lg:flex')}>
-              <button
-                type="button"
-                onClick={back}
-                className="inline-flex min-h-touch items-center gap-2 self-start rounded-button px-2 font-extrabold text-indigo lg:hidden"
-              >
-                <BackIcon className="size-5" />
-                Retour
-              </button>
+              <div className="flex items-center gap-1 lg:hidden">
+                <button
+                  type="button"
+                  onClick={back}
+                  aria-label="Retour à la liste"
+                  className="inline-flex size-11 items-center justify-center rounded-[14px] text-ink"
+                >
+                  <BackIcon className="size-6" />
+                </button>
+                {detail !== undefined && <span className="text-sm font-black">Demande de {detail.schoolName}</span>}
+              </div>
               {lastResult !== null && <RequestResult meeting={lastResult} live />}
               {detail !== undefined && (
                 <RequestDetail

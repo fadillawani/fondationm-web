@@ -8,7 +8,6 @@ import { SECTORS, type Sector } from '../../lib/referenceData'
 export type SlotFormats = 'IN_PERSON' | 'ONLINE' | 'BOTH'
 export type MeetingFormat = 'IN_PERSON' | 'ONLINE'
 const SLOT_FORMATS = ['IN_PERSON', 'ONLINE', 'BOTH'] as const satisfies readonly SlotFormats[]
-const CLOSERS = ['SPEAKER', 'FOUNDATION', 'SYSTEM'] as const
 
 export interface SpeakerSummary {
   id: string
@@ -53,14 +52,6 @@ export interface SchoolClass {
   studentCount: number | null
 }
 
-export interface RefusedMeeting {
-  id: string
-  closedBy: (typeof CLOSERS)[number] | null
-  refusedAt: string | null
-  speakerName: string
-  classTitle: string
-  slotStartAt: string | null
-}
 
 function readSummaryFields(value: unknown): SpeakerSummary | null {
   const record = asRecord(value)
@@ -128,23 +119,6 @@ export function readClass(value: unknown): SchoolClass | null {
   }
 }
 
-export function readRefusedMeeting(value: unknown): RefusedMeeting | null {
-  const record = asRecord(value)
-  if (record === null) return null
-  const id = text(record, 'id')
-  if (id === null || text(record, 'status') !== 'REFUSED') return null
-  const speaker = asRecord(record.speaker)
-  const schoolClass = asRecord(record.schoolClass)
-  const slot = asRecord(record.slot)
-  return {
-    id,
-    closedBy: oneOf(CLOSERS, text(record, 'closedBy')),
-    refusedAt: text(record, 'refusedAt'),
-    speakerName: (speaker && text(speaker, 'fullName')) ?? 'L’intervenant',
-    classTitle: (schoolClass && text(schoolClass, 'title')) ?? '',
-    slotStartAt: slot && text(slot, 'startAt'),
-  }
-}
 
 /** Filtres de l'annuaire envoyés au serveur. */
 export interface DirectoryFilter {
@@ -225,19 +199,6 @@ export function useClasses() {
   })
 }
 
-export function useRefusedMeetings() {
-  return useQuery({
-    queryKey: [...SCHOOL_KEY, 'meetings', 'REFUSED'],
-    queryFn: () =>
-      fetchAllPages(
-        (page) =>
-          unwrap(
-            api.GET('/api/school/meetings', { params: { query: { status: 'REFUSED', page, size: FETCH_PAGE_SIZE } } }),
-          ),
-        readRefusedMeeting,
-      ),
-  })
-}
 
 export interface NewClass {
   title: string

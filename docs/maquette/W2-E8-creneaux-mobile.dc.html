@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>W2 E8 Mon agenda — mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+select{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 1900px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+  <header style="padding: 18px 16px 6px 16px; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; flex-direction: column"><span style="font-size: 12px; font-weight: 800; color: #4A4A57">Bonjour Amadou</span><h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 30px; line-height: 1.05">Mon agenda</h1></div>
+    <div style="width: 44px; height: 44px; border-radius: 14px; background: #2B337A; color: #FDE7A6; font-family: 'Lilita One', sans-serif; font-size: 17px; display: flex; align-items: center; justify-content: center">AB</div>
+  </header>
+
+  <div style="margin: 10px 16px 0 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+    <a href="W2-E9-demandes-mobile.dc.html" style="border-radius: 16px; background: #1B1F3B; color: #FFFFFF; padding: 12px; text-decoration: none; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-family: 'Lilita One', sans-serif; font-size: 26px; color: #FDE7A6; line-height: 1">3</span>
+      <span style="font-size: 13px; font-weight: 800">demandes à traiter</span>
+    </a>
+    <a href="W2-E10-retour-mobile.dc.html" style="border-radius: 16px; background: #FDE7A6; border: 2px solid #E5A60A; color: #1B1F3B; padding: 10px; text-decoration: none; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 13px; font-weight: 900">Thiaroye, 6 nov</span>
+      <span style="font-size: 13px; font-weight: 800; color: #B8492A">Partager mon retour</span>
+    </a>
+  </div>
+
+  <section aria-label="Agenda" style="margin: 12px 16px 0 16px; background: #FFFFFF; border-radius: 22px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <button aria-label="Mois précédent" onClick="{{ prev }}" style="width: 44px; height: 44px; border-radius: 12px; border: 0; background: #F7F3EA; color: #1B1F3B; display: flex; align-items: center; justify-content: center; opacity: {{ prevOpacity }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+      <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 21px">{{ monthLabel }}</h2>
+      <button aria-label="Mois suivant" onClick="{{ next }}" style="width: 44px; height: 44px; border-radius: 12px; border: 0; background: #F7F3EA; color: #1B1F3B; display: flex; align-items: center; justify-content: center; opacity: {{ nextOpacity }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; text-align: center">
+      <span style="font-size: 11px; font-weight: 900; color: #4A4A57">L</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">M</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">M</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">J</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">V</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">S</span><span style="font-size: 11px; font-weight: 900; color: #4A4A57">D</span>
+      <sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+        <button onClick="{{ c.pick }}" disabled="{{ c.disabled }}" aria-label="{{ c.aria }}" style="height: 48px; border: {{ c.border }}; border-radius: 12px; background: {{ c.bg }}; color: {{ c.color }}; font-family: inherit; font-size: 14px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0">
+          <span>{{ c.label }}</span>
+          <span style="width: 9px; height: 9px; box-sizing: border-box; border-radius: 50%; background: {{ c.dot }}; border: {{ c.dotBorder }}"></span>
+        </button>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; font-weight: 800; color: #4A4A57">
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; box-sizing: border-box; border-radius: 50%; border: 2px dashed #4E6A2C"></span>Libre</span>
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #E5A60A"></span>Demandé</span>
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #4E6A2C"></span>Confirmé</span>
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #2B337A"></span>Réalisé</span>
+      <span style="display: flex; align-items: center; gap: 4px"><span style="width: 10px; height: 10px; border-radius: 50%; background: #C9BFA8"></span>Annulé</span>
+    </div>
+    <span style="font-size: 12px; font-weight: 700; color: #4A4A57">Touchez un jour libre pour publier un créneau.</span>
+  </section>
+
+  <section aria-live="polite" style="margin: 14px 16px 0 16px; background: #FFFFFF; border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 12px; border: 2px solid {{ p.accent }}">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+      <span style="font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; color: #4A4A57">{{ p.date }}</span>
+      <span style="font-size: 11px; font-weight: 900; padding: 4px 9px; border-radius: 999px; background: {{ p.pillBg }}; color: {{ p.pillFg }}; border: {{ p.pillBorder }}">{{ p.pill }}</span>
+    </div>
+
+    <sc-if value="{{ p.isNew }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <span style="font-family: 'Lilita One', sans-serif; font-size: 21px; line-height: 1.1">Publier un créneau ce jour-là</span>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+          <div style="display: flex; flex-direction: column; gap: 6px"><label for="m-debut" style="font-size: 13px; font-weight: 800">De</label><select id="m-debut" value="{{ form.start }}" onChange="{{ setStart }}" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 10px; font-size: 15px; font-weight: 700; color: #1B1F3B; background: #FFFFFF"><option>8h00</option><option>9h00</option><option>10h00</option><option>11h00</option><option>14h00</option><option>15h00</option><option>16h00</option></select></div>
+          <div style="display: flex; flex-direction: column; gap: 6px"><label for="m-fin" style="font-size: 13px; font-weight: 800">À</label><select id="m-fin" value="{{ form.end }}" onChange="{{ setEnd }}" style="height: 48px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 10px; font-size: 15px; font-weight: 700; color: #1B1F3B; background: #FFFFFF"><option>9h30</option><option>10h30</option><option>11h30</option><option>12h30</option><option>15h30</option><option>16h30</option><option>17h30</option></select></div>
+        </div>
+        <div role="group" aria-label="Format" style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{ formats }}" as="f" hint-placeholder-count="3">
+            <button type="button" aria-pressed="{{ f.pressed }}" onClick="{{ f.pick }}" style="min-height: 42px; padding: 0 12px; border-radius: 999px; border: 2px solid {{ f.border }}; background: {{ f.bg }}; color: {{ f.fg }}; font-family: inherit; font-weight: 800; font-size: 13px">{{ f.label }}</button>
+          </sc-for>
+        </div>
+        <button onClick="{{ publish }}" style="min-height: 52px; border: 0; border-radius: 16px; background: #B8492A; color: #FFFFFF; font-family: 'Lilita One', sans-serif; font-size: 18px">Publier ce créneau</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p.isAvailable }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <span style="font-family: 'Lilita One', sans-serif; font-size: 21px; line-height: 1.1">Créneau libre · {{ p.time }}</span>
+        <span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ p.format }}</span>
+        <sc-if value="{{ p.justPublished }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin: 0; padding: 12px; border-radius: 12px; background: #E8EEDF; color: #3B5221; font-size: 14px; font-weight: 800">Créneau publié. Les écoles le voient dès maintenant.</p></sc-if>
+        <button onClick="{{ remove }}" style="min-height: 46px; border-radius: 14px; border: 2px solid #E6DECB; background: #FFFFFF; color: #1B1F3B; font-family: inherit; font-weight: 900; font-size: 14px">Retirer ce créneau</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p.isRequested }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <span style="font-family: 'Lilita One', sans-serif; font-size: 21px; line-height: 1.1">{{ p.headline }}</span>
+        <span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ p.time }} · {{ p.format }}</span>
+        <sc-for list="{{ p.demandes }}" as="q" hint-placeholder-count="2">
+          <a href="W2-E9-demandes-mobile.dc.html" style="border-radius: 14px; background: #F7F3EA; padding: 12px; text-decoration: none; color: #1B1F3B; display: flex; flex-direction: column; gap: 4px">
+            <span style="display: flex; justify-content: space-between; gap: 8px; align-items: center"><span style="font-weight: 900; font-size: 15px">{{ q.school }}</span><span style="font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 999px; background: {{ q.bg }}; color: {{ q.fg }}">{{ q.st }}</span></span>
+            <span style="font-size: 12px; font-weight: 700; color: #4A4A57">{{ q.city }} · {{ q.classe }}</span>
+            <span style="font-size: 13px; font-weight: 900; color: #2B337A">{{ q.action }}</span>
+          </a>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p.isMeeting }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; flex-direction: column"><span style="font-family: 'Lilita One', sans-serif; font-size: 21px; line-height: 1.1">{{ p.title }}</span><span style="font-size: 13px; font-weight: 700; color: #4A4A57">{{ p.classe }}</span></div>
+        <span style="font-size: 14px; font-weight: 900">{{ p.time }}<br><span style="font-weight: 700; color: #4A4A57">{{ p.format }}</span></span>
+        <span style="font-size: 13px; font-weight: 600; line-height: 1.45; padding: 10px 12px; border-radius: 12px; background: #F7F3EA">{{ p.note }}</span>
+        <sc-if value="{{ p.hasCta }}" hint-placeholder-val="{{ false }}">
+          <a href="{{ p.ctaHref }}" style="min-height: 50px; border-radius: 14px; background: #B8492A; color: #FFFFFF; text-decoration: none; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 12px; font-family: 'Lilita One', sans-serif; font-size: 17px">{{ p.ctaLabel }}</a>
+        </sc-if>
+      </div>
+    </sc-if>
+  </section>
+
+  <nav aria-label="Navigation principale" style="margin-top: auto; background: #FFFFFF; border-top: 1px solid #E6DECB; padding: 8px 8px 22px 8px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))">
+    <a href="#" aria-current="page" style="min-height: 52px; text-decoration: none; color: #B8492A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 900">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M3 10h18"/></svg>Agenda</a>
+    <a href="W2-E9-demandes-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1Z"/></svg>Demandes</a>
+    <a href="W2-impact-mobile.dc.html" style="min-height: 52px; text-decoration: none; color: #4A4A57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 800">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg>Mon impact</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1900}}'>
+class Component extends DCLogic {
+renderVals() {
+const st = this.state || {};
+const month = st.month || 11;
+const sel = st.sel || 'i5';
+const MONTHS = { 10: ['Octobre 2026', 3, 31, 'octobre'], 11: ['Novembre 2026', 6, 30, 'novembre'], 12: ['Décembre 2026', 1, 31, 'décembre'] };
+const WD = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const base = [
+{ id: 'i1', m: 10, d: 20, kind: 'done', time: '10h00 – 11h30', title: 'Lycée de Pikine', classe: 'Terminale S2 · 34 élèves', format: 'En classe', note: 'Votre retour a été validé et partagé.', cta: ['Voir dans Mon impact', 'W2-impact-mobile.dc.html'] },
+{ id: 'i2', m: 10, d: 30, kind: 'closed', time: '15h00 – 16h30', title: 'Lycée de Kolda', classe: 'Première S1 · 38 élèves', format: 'En ligne', pill: 'Annulée', note: 'Annulée par la Fondation M : le lycée a dû fermer ce jour-là.' },
+{ id: 'i3', m: 11, d: 6, kind: 'done', time: '14h00 – 16h00', title: 'Lycée de Thiaroye', classe: 'Terminale L1 · 34 élèves', format: 'En classe', note: 'La rencontre est terminée. Racontez ce que vous avez vécu.', cta: ['Partager mon retour d’expérience', 'W2-E10-retour-mobile.dc.html'] },
+{ id: 'i4', m: 11, d: 18, kind: 'closed', time: '10h00 – 11h30', title: 'Lycée de Louga', classe: 'Première S2 · 40 élèves', format: 'En classe', pill: 'Refusée', note: 'Refusée par la Fondation M : la classe a déjà rencontré un intervenant du numérique ce mois-ci.' },
+{ id: 'i5', m: 11, d: 24, kind: 'requested', time: '10h00 – 11h30', format: 'En classe ou en ligne', demandes: [['Lycée de Sor', 'Saint-Louis', 'Terminale S2 · 32 élèves', 'todo'], ['Lycée de Grand-Yoff', 'Dakar', 'Première S1 · 41 élèves', 'todo']] },
+{ id: 'i6', m: 11, d: 25, kind: 'confirmed', time: '14h00 – 15h30', title: 'Lycée de Thiès', classe: 'Terminale S1 · 29 élèves', format: 'En ligne · lien transmis par la Fondation M', note: 'C’est confirmé ! Les élèves préparent leurs questions.' },
+{ id: 'i7', m: 11, d: 26, kind: 'requested', time: '15h00 – 16h00', format: 'En ligne', demandes: [['CEM Parcelles Assainies', 'Dakar', '3e B · 41 élèves', 'todo']] },
+{ id: 'i8', m: 12, d: 1, kind: 'requested', time: '10h00 – 11h30', format: 'En classe', demandes: [['Lycée de Mbour', 'Mbour', 'Première S2 · 36 élèves', 'accepted']] },
+{ id: 'i9', m: 12, d: 3, kind: 'available', time: '14h00 – 15h30', format: 'En classe ou en ligne' },
+{ id: 'i10', m: 12, d: 5, kind: 'available', time: '10h00 – 12h00', format: 'En classe' }
+];
+const removed = st.removed || [];
+const items = base.concat(st.added || []).filter((x) => removed.indexOf(x.id) < 0);
+const isPast = (m, d) => m < 11 || (m === 11 && d < 13);
+const DOT = { available: ['transparent', '2px dashed #4E6A2C'], requested: ['#E5A60A', '0'], confirmed: ['#4E6A2C', '0'], done: ['#2B337A', '0'], closed: ['#C9BFA8', '0'] };
+const [label, offset, days] = MONTHS[month];
+const total = Math.ceil((offset + days) / 7) * 7;
+const cells = [];
+for (let i = 0; i < total; i++) {
+const n = i - offset + 1;
+const inMonth = n >= 1 && n <= days;
+const past = inMonth && isPast(month, n);
+const today = month === 11 && n === 13;
+const it = inMonth ? items.find((x) => x.m === month && x.d === n) : null;
+const dayKey = 'day-' + month + '-' + n;
+const canAdd = inMonth && !past && !today && !it;
+const selected = (it && it.id === sel) || sel === dayKey;
+cells.push({
+label: inMonth ? String(n) : '',
+disabled: !it && !canAdd,
+aria: it ? n + ' ' + MONTHS[month][3] : (canAdd ? 'Publier un créneau le ' + n : (inMonth ? String(n) : 'vide')),
+bg: selected ? '#FDE7A6' : (!inMonth ? 'transparent' : (past ? '#F1EBDD' : '#FFFFFF')),
+color: today ? '#B8492A' : (past ? '#4A4A57' : '#1B1F3B'),
+border: today ? '2px solid #B8492A' : (selected ? '2px solid #1B1F3B' : '2px solid transparent'),
+dot: it ? DOT[it.kind][0] : 'transparent', dotBorder: it ? DOT[it.kind][1] : '0',
+pick: it ? () => this.setState({ sel: it.id, justPublished: false }) : () => this.setState({ sel: dayKey, justPublished: false })
+});
+}
+const form = { start: st.start || '10h00', end: st.end || '11h30', format: st.format || 'En classe' };
+const formats = ['En classe', 'En ligne', 'Les deux'].map((lab) => {
+const on = form.format === lab;
+return { label: lab, pressed: on ? 'true' : 'false', bg: on ? '#1B1F3B' : '#FFFFFF', fg: on ? '#FDE7A6' : '#1B1F3B', border: on ? '#1B1F3B' : '#E6DECB', pick: () => this.setState({ format: lab }) };
+});
+const fullDate = (m, d) => WD[new Date(2026, m - 1, d).getDay()] + ' ' + d + ' ' + MONTHS[m][3];
+const K = { confirmed: ['#4E6A2C', '#FFFFFF', 'Confirmée'], done: ['#2B337A', '#FDE7A6', 'Réalisée'], closed: ['#E6DECB', '#1B1F3B', ''] };
+let p = { isNew: false, isAvailable: false, isRequested: false, isMeeting: false };
+let publish = () => {}, remove = () => {};
+if (sel.indexOf('day-') === 0) {
+const [, m, d] = sel.split('-').map(Number);
+p = { ...p, isNew: true, date: fullDate(m, d), pill: 'Jour libre', pillBg: '#FFFFFF', pillFg: '#3B5221', pillBorder: '2px dashed #4E6A2C', accent: '#4E6A2C' };
+publish = () => { const id = 'n' + Date.now(); this.setState({ added: (st.added || []).concat([{ id, m, d, kind: 'available', time: form.start + ' – ' + form.end, format: form.format }]), sel: id, justPublished: true }); };
+} else {
+const x = items.find((y) => y.id === sel) || items[0];
+const common = { date: fullDate(x.m, x.d), time: x.time, format: x.format };
+if (x.kind === 'available') {
+p = { ...p, ...common, isAvailable: true, pill: 'Libre', pillBg: '#FFFFFF', pillFg: '#3B5221', pillBorder: '2px dashed #4E6A2C', accent: '#4E6A2C', justPublished: !!st.justPublished };
+remove = () => this.setState({ removed: removed.concat([x.id]), sel: 'i5' });
+} else if (x.kind === 'requested') {
+const todo = x.demandes.filter((q) => q[3] === 'todo').length;
+p = { ...p, ...common, isRequested: true, pill: 'Demandé', pillBg: '#E5A60A', pillFg: '#1B1F3B', pillBorder: '0', accent: '#E5A60A',
+headline: todo > 1 ? todo + ' écoles demandent ce créneau' : (todo === 1 ? 'Une école demande ce créneau' : 'Accepté, en attente de la Fondation M'),
+demandes: x.demandes.map((q) => ({ school: q[0], city: q[1], classe: q[2], st: q[3] === 'todo' ? 'À traiter' : 'Acceptée', bg: q[3] === 'todo' ? '#E5A60A' : '#4E6A2C', fg: q[3] === 'todo' ? '#1B1F3B' : '#FFFFFF', action: q[3] === 'todo' ? 'Lire et répondre' : 'Voir la demande' })) };
+} else {
+p = { ...p, ...common, isMeeting: true, title: x.title, classe: x.classe, note: x.note, pill: K[x.kind][2] || x.pill, pillBg: K[x.kind][0], pillFg: K[x.kind][1], pillBorder: '0', accent: x.kind === 'closed' ? '#B8AE98' : K[x.kind][0], hasCta: !!x.cta, ctaLabel: x.cta ? x.cta[0] : '', ctaHref: x.cta ? x.cta[1] : '#' };
+}
+}
+return {
+cells, p, form, formats, publish, remove, monthLabel: label,
+setStart: (e) => this.setState({ start: e.target.value }),
+setEnd: (e) => this.setState({ end: e.target.value }),
+prev: () => this.setState({ month: Math.max(10, month - 1) }),
+next: () => this.setState({ month: Math.min(12, month + 1) }),
+prevOpacity: month === 10 ? '0.4' : '1', nextOpacity: month === 12 ? '0.4' : '1'
+};
+}
+}
+</script>
+</body>
+</html>

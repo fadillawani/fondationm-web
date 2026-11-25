@@ -13,6 +13,8 @@ export interface ReasonValues {
 interface ReasonFormProps {
   formLabel: string
   fieldLabel: string
+  /** Complément du libellé en poids 600 gris (maquette). */
+  fieldNote?: string
   placeholder?: string
   maxLength: number
   requiredMessage: string
@@ -27,6 +29,7 @@ interface ReasonFormProps {
 export function ReasonForm({
   formLabel,
   fieldLabel,
+  fieldNote,
   placeholder,
   maxLength,
   requiredMessage,
@@ -57,12 +60,12 @@ export function ReasonForm({
     <form
       noValidate
       aria-label={formLabel}
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-3 rounded-[14px] bg-canvas p-3 lg:p-3.5"
       onSubmit={handleSubmit((values) =>
         onSubmit(values, (message) => setError('reason', { type: 'server', message }, { shouldFocus: true })),
       )}
     >
-      <FormField label={fieldLabel} required error={errors.reason?.message}>
+      <FormField label={fieldLabel} labelNote={fieldNote} required error={errors.reason?.message}>
         {(control) => (
           <Textarea
             {...control}
@@ -75,10 +78,10 @@ export function ReasonForm({
         )}
       </FormField>
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" variant="danger" size="md" loading={submitting}>
+        <Button type="submit" variant="danger" size="md" loading={submitting} className="min-h-12 rounded-[14px] px-[18px] text-[15px] font-black">
           {submitLabel}
         </Button>
-        <Button variant="outline" size="md" onClick={onCancel} disabled={submitting}>
+        <Button variant="outline" size="md" onClick={onCancel} disabled={submitting} className="min-h-12 rounded-[14px] px-[18px] text-[15px]">
           Annuler
         </Button>
       </div>

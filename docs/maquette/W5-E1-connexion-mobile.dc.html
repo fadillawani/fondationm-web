@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>W5 Connexion jeune mobile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#2B337A}a:hover{color:#1B1F3B}
+input{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; min-height: 1000px; box-sizing: border-box; background: #F7F3EA; color: #1B1F3B; font-family: 'Nunito', system-ui, sans-serif; display: flex; flex-direction: column">
+  <section style="background: #E5A60A; padding: 56px 24px 36px; border-radius: 0 0 32px 32px; display: flex; flex-direction: column; gap: 16px">
+    <span style="font-family: 'Lilita One', sans-serif; font-size: 28px">FondationM</span>
+    <span style="font-size: 12px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase">Espace élève</span>
+    <h1 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 36px; line-height: 1.02">Des pros viennent te parler de leur métier</h1>
+    <p style="margin: 0; font-size: 15px; font-weight: 700; line-height: 1.45">Découvre qui va rencontrer ta classe, et retrouve les rencontres déjà vécues.</p>
+  </section>
+  <form style="margin: 24px 16px; background: #FFFFFF; border-radius: 24px; padding: 24px 20px; display: flex; flex-direction: column; gap: 18px">
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <h2 style="margin: 0; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 26px">Content de te voir !</h2>
+      <p style="margin: 0; font-size: 14px; font-weight: 600; color: #4A4A57">Utilise l'identifiant et le code de ta fiche d'accès.</p>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="identm" style="font-size: 13px; font-weight: 800">Identifiant</label>
+      <input id="identm" autocomplete="username" value="khadija.ba.sor" style="height: 50px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 16px; font-weight: 600; color: #1B1F3B">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="codem" style="font-size: 13px; font-weight: 800">Code d'accès ou mot de passe</label>
+      <input id="codem" type="password" autocomplete="current-password" value="motdepasse" style="height: 50px; border-radius: 12px; border: 2px solid #E6DECB; padding: 0 14px; font-size: 16px; font-weight: 600; color: #1B1F3B">
+      <span style="font-size: 13px; font-weight: 700; color: #4A4A57">Première connexion ? Tu choisiras ton mot de passe juste après.</span>
+    </div>
+    <a href="W5-E19-espace-mobile.dc.html" style="min-height: 56px; border-radius: 16px; background: #1B1F3B; color: #FDE7A6; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: 'Lilita One', sans-serif; font-size: 20px">Entrer</a>
+  </form>
+  <p style="margin: 0 24px 32px; text-align: center; font-size: 13px; font-weight: 700; color: #4A4A57">Ton accès t'a été remis par ton établissement. Code oublié ? Demande une nouvelle fiche à ton référent orientation.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1000}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

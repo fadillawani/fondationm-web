@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { errorFromException, errorMessage } from '../../api/errors'
-import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
 import { ChoiceGroup } from '../../components/ui/ChoiceGroup'
 import { FormField } from '../../components/ui/FormField'
@@ -12,7 +11,6 @@ import { Select } from '../../components/ui/Select'
 import {
   atMinutes,
   dayKey,
-  formatDay,
   minutesLabel,
   parseDayKey,
   parseMinutes,
@@ -24,6 +22,11 @@ import { SLOT_FORMAT_LABEL } from './speakerText'
 import { useCreateSlot, type SlotFormats } from './speakerData'
 
 const STEP = 15
+
+/** « 8h00 » (maquette), la valeur du champ reste « 08:00 ». */
+function hourLabel(minutes: number): string {
+  return `${Math.floor(minutes / 60)}h${String(minutes % 60).padStart(2, '0')}`
+}
 const MIN_DURATION = 15
 const MAX_DURATION = 8 * 60
 const LAST_START = 24 * 60 - 2 * STEP
@@ -139,7 +142,7 @@ export function SlotForm({ day, city }: SlotFormProps) {
       className="flex flex-col gap-4"
       onSubmit={handleSubmit(submit)}
     >
-      <h3 className="text-xl">{day ? `Publier un créneau ce jour-là · ${formatDay(day)}` : 'Publier un créneau'}</h3>
+      <h3 className="text-[21px] lg:text-[23px]">{day ? 'Publier un créneau ce jour-là' : 'Publier un créneau'}</h3>
 
       {day === null && (
         <FormField label="Jour" required error={errors.day?.message}>
@@ -154,7 +157,7 @@ export function SlotForm({ day, city }: SlotFormProps) {
               <option value="">Heure</option>
               {START_OPTIONS.map((minutes) => (
                 <option key={minutes} value={minutesLabel(minutes)}>
-                  {minutesLabel(minutes)}
+                  {hourLabel(minutes)}
                 </option>
               ))}
             </Select>
@@ -166,7 +169,7 @@ export function SlotForm({ day, city }: SlotFormProps) {
               <option value="">Heure</option>
               {END_OPTIONS.map((minutes) => (
                 <option key={minutes} value={minutesLabel(minutes)}>
-                  {minutesLabel(minutes)}
+                  {hourLabel(minutes)}
                 </option>
               ))}
             </Select>
@@ -184,7 +187,7 @@ export function SlotForm({ day, city }: SlotFormProps) {
       <Button type="submit" size="md" loading={create.isPending}>
         Publier ce créneau
       </Button>
-      <p className="text-sm font-semibold text-muted">
+      <p className="text-[13px] font-semibold text-muted">
         Visible par toutes les écoles, {where}, tant qu'aucune rencontre n'y est confirmée.
       </p>
 
@@ -193,7 +196,11 @@ export function SlotForm({ day, city }: SlotFormProps) {
           {formError}
         </p>
       )}
-      {published && <Alert tone="success">Créneau publié. Les écoles peuvent le voir dès maintenant.</Alert>}
+      {published && (
+        <p role="status" className="rounded-[12px] bg-[#E8EEDF] px-3.5 py-3 text-sm font-extrabold text-[#3B5221]">
+          Créneau publié. Les écoles peuvent le voir dès maintenant.
+        </p>
+      )}
     </form>
   )
 }

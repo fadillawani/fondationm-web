@@ -80,13 +80,15 @@ src/
     schema.d.ts       généré par npm run api:types — ne pas modifier à la main
   auth/               session : tokenStorage, utilisateur courant, rôles, hooks, gestion des événements
   components/ui/      composants de base (Button, FormField, Input, Modal…)
-  components/layout/  mises en page (barre latérale ≥ 1024 px, navigation basse sur mobile)
+  components/layout/  mises en page (barre latérale ≥ 1024 px, navigation basse blanche sur mobile,
+                      en-tête de page PageTitle, menu du compte UserMenu, thèmes par persona roleTheme)
+  components/calendar/ calendrier mensuel accessible partagé (MonthTable)
   pages/              connexion, accueils provisoires, compte en attente / refusé, mot de passe, 404
     register/         choix du type de compte, inscription établissement et intervenant (schémas Zod)
     status/           frise et récapitulatif de la page d'attente
     foundation/       espace Fondation : comptes à valider (liste, détail, validation, refus)
     speaker/          espace intervenant : agenda, créneaux, demandes reçues
-    school/           espace établissement : annuaire, carte du réseau, demande de rencontre
+    school/           espace établissement : annuaire, carte du réseau, demande de rencontre, mes rencontres
   nav/                compteurs de la navigation (badges)
   routes/             définition des routes et gardes
   lib/                utilitaires (cn, QueryClient, données de référence, dates, erreurs de formulaire)
@@ -113,6 +115,7 @@ src/
 | `/ecole` | connecté, validé, rôle SCHOOL | Redirige vers `/ecole/intervenants` |
 | `/ecole/intervenants` | connecté, validé, rôle SCHOOL | Intervenants disponibles (`?zone=`, `secteur=`, `format=`, `q=`) |
 | `/ecole/intervenants/{id}/demande` | connecté, validé, rôle SCHOOL | Demander une rencontre |
+| `/ecole/rencontres` | connecté, validé, rôle SCHOOL | Mes rencontres (`?mois=AAAA-MM`, `rencontre={id}`) |
 | `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
 
 ## Règles de session

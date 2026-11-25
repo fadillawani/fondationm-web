@@ -22,8 +22,8 @@ const pendingSpeaker = makeMe({
 
 async function fillSpeakerForm(user: User, { withSkills = true } = {}) {
   await user.type(screen.getByLabelText(/^Prénom et nom/), 'Awa Diallo')
-  await user.type(screen.getByLabelText(/^Métier/), 'Ingénieure réseaux')
-  await user.selectOptions(screen.getByLabelText(/^Secteur/), 'DIGITAL')
+  await user.type(screen.getByLabelText(/^Votre métier/), 'Ingénieure réseaux')
+  await user.selectOptions(screen.getByLabelText(/^Votre secteur/), 'DIGITAL')
   await user.type(screen.getByLabelText(/^Pays/), 'Sénégal')
   await user.type(screen.getByLabelText(/^Zone \(ville\)/), 'Dakar')
   if (withSkills) {
@@ -80,7 +80,7 @@ describe('Inscription intervenant', () => {
     await fillSpeakerForm(user)
     await submit(user)
 
-    expect(await screen.findByRole('heading', { name: 'Merci Awa, votre demande est bien arrivée' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Merci Awa, les jeunes vont avoir de la chance' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/compte-en-attente')
     expect(registerBodies).toEqual([
       {

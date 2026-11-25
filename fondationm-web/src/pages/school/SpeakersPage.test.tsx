@@ -38,13 +38,27 @@ describe('Espace établissement — navigation', () => {
 
     const nav = await sidebar()
     expect(nav.getByRole('link', { name: 'Intervenants' })).toHaveAttribute('href', '/ecole/intervenants')
-    for (const label of ['Mes rencontres', "Retours d'expérience", 'Mon établissement']) {
+    expect(nav.getByRole('link', { name: /^Mes rencontres/ })).toHaveAttribute('href', '/ecole/rencontres')
+    for (const label of ["Retours d'expérience", 'Mon établissement']) {
       expect(nav.queryByRole('link', { name: new RegExp(label) })).not.toBeInTheDocument()
       expect(nav.getByText(label).closest('li')).toHaveTextContent('Bientôt')
     }
-    expect(screen.getByText('Espace établissement')).toBeInTheDocument()
-    expect(screen.getByText('Établissement · Dakar')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Plus' })).not.toBeInTheDocument()
+    const [aside] = screen.getAllByRole('complementary')
+    if (aside === undefined) throw new Error('Barre latérale absente')
+    expect(within(aside).getByText('Espace établissement')).toBeInTheDocument()
+    expect(within(aside).getByText('Lycée des Tisserands')).toBeInTheDocument()
+    expect(within(aside).getByText('Dakar')).toBeInTheDocument()
+
+    // Navigation basse (maquette) : 4 entrées aux libellés courts, sans « Déconnexion ».
+    const [, bottom] = screen.getAllByRole('navigation', { name: 'Navigation principale' })
+    if (bottom === undefined) throw new Error('Navigation basse absente')
+    expect(within(bottom).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'Intervenants',
+      'Rencontres',
+      'RetoursBientôt',
+      'ÉtablissementBientôt',
+    ])
+    expect(within(bottom).queryByRole('button')).not.toBeInTheDocument()
   })
 
   it('refuse l’accès à un utilisateur d’un autre rôle', async () => {
@@ -91,7 +105,8 @@ describe('Intervenants disponibles', () => {
       'Cybersécurité',
       'Fibre optique',
     ])
-    expect(card.getByText('Prochain créneau · Lun 30 nov · 9h30')).toBeInTheDocument()
+    expect(card.getByText('Prochain créneau')).toBeInTheDocument()
+    expect(card.getByText('Lun 30 nov · 9h30')).toBeInTheDocument()
     expect(card.getByText('3 créneaux libres')).toBeInTheDocument()
     expect(card.getByRole('link', { name: 'Demander une rencontre à Awa Diallo' })).toHaveAttribute(
       'href',
@@ -141,10 +156,9 @@ describe('Intervenants disponibles', () => {
     setupSchool()
     const { user } = renderApp('/ecole/intervenants', { token: true })
 
-    const map = await screen.findByRole('img', { name: /^Carte schématique du Sénégal/ })
-    expect(map).toHaveAccessibleName(
-      'Carte schématique du Sénégal. Saint-Louis : 3 bénévoles, Dakar : 12 bénévoles, Thiès : 4 bénévoles, Kaolack : 1 bénévole.',
-    )
+    // Libellé de la maquette : villes par nombre décroissant.
+    const map = await screen.findByRole('img', { name: /^Carte du Sénégal/ })
+    expect(map).toHaveAccessibleName('Carte du Sénégal : 12 intervenants à Dakar, 4 à Thiès, 3 à Saint-Louis, 1 à Kaolack')
     expect(screen.getByText('21 bénévoles au Sénégal')).toBeInTheDocument()
     expect(screen.getByText("Carte schématique. La taille du cercle indique le nombre d'intervenants dans la ville.")).toBeInTheDocument()
 
@@ -173,12 +187,15 @@ describe('Intervenants disponibles', () => {
     })
     renderApp('/ecole/intervenants', { token: true })
 
-    const text = await screen.findByText(/a été refusée par l'intervenant/)
-    expect(text).toHaveTextContent(
-      "Votre demande à Moussa Ndiaye (Terminale S2, jeudi 26 novembre) a été refusée par l'intervenant. Choisissez un autre intervenant pour cette classe.",
+    const status = (await screen.findByText(/Choisissez un autre intervenant pour cette classe/)).closest('[role="status"]')
+    expect(status).toHaveTextContent(
+      "Votre demande à Moussa Ndiaye (Terminale S2, 26 nov) a été refusée par l'intervenant. Choisissez un autre intervenant pour cette classe.",
     )
-    expect(screen.getByText('Moussa Ndiaye a refusé votre demande pour la Terminale S2.')).toBeInTheDocument()
-    expect(screen.getByText('Voir la demande')).toHaveTextContent('Bientôt')
+    expect(status).toHaveTextContent('Moussa Ndiaye a refusé votre demande pour la Terminale S2.')
+    expect(screen.getByRole('link', { name: 'Voir la demande' })).toHaveAttribute(
+      'href',
+      '/ecole/rencontres?rencontre=b1000000-0000-4000-8000-000000000001&mois=2026-11',
+    )
     expect(screen.queryByText(/Ancien Refus|Refus Fondation/)).not.toBeInTheDocument()
   })
 

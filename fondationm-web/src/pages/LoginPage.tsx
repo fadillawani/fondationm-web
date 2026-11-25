@@ -113,7 +113,7 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <p className="text-center text-[13px] font-semibold text-muted">
+      <p className="text-center text-[13px] font-bold text-muted">
         <Link to={PATHS.register} className="font-extrabold text-indigo underline underline-offset-2">
           Pas encore de compte ?
         </Link>
