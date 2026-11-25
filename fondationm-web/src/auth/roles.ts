@@ -13,6 +13,8 @@ export const PATHS = {
   rejected: '/compte-refuse',
   mustChangePassword: '/mot-de-passe-obligatoire',
   foundationAccounts: '/fondation/comptes',
+  foundationRequests: '/fondation/demandes',
+  foundationMeetings: '/fondation/rencontres',
   speakerAgenda: '/intervenant/agenda',
   speakerRequests: '/intervenant/demandes',
   schoolSpeakers: '/ecole/intervenants',
@@ -72,13 +74,13 @@ export interface NavItem {
   mobile?: boolean
 }
 
-export type NavBadge = 'pendingAccounts' | 'pendingRequests' | 'upcomingMeetings'
+export type NavBadge = 'pendingAccounts' | 'pendingRequests' | 'upcomingMeetings' | 'awaitingFoundation' | 'meetingsToMark'
 
 const FOUNDATION_NAV: NavItem[] = [
   { label: 'Tableau de bord', short: 'Accueil', icon: 'dashboard' },
   { label: 'Comptes à valider', short: 'Comptes', icon: 'accounts', to: PATHS.foundationAccounts, badge: 'pendingAccounts' },
-  { label: 'Demandes de rencontre', short: 'Demandes', icon: 'requests' },
-  { label: 'Rencontres', short: 'Rencontres', icon: 'meetings' },
+  { label: 'Demandes de rencontre', short: 'Demandes', icon: 'requests', to: PATHS.foundationRequests, badge: 'awaitingFoundation' },
+  { label: 'Rencontres', short: 'Rencontres', icon: 'meetings', to: PATHS.foundationMeetings, badge: 'meetingsToMark' },
   { label: "Retours d'expérience", short: 'Retours', icon: 'feedbacks' },
   // La navigation basse mobile de la maquette n'a que 5 entrées.
   { label: 'Requêtes donateurs', short: 'Requêtes', icon: 'donors', mobile: false },

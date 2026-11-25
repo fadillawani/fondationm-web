@@ -1,3 +1,4 @@
+import { CompactMonth } from '../../components/calendar/CompactMonth'
 import { MonthNav } from '../../components/calendar/MonthNav'
 import { MonthTable } from '../../components/calendar/MonthTable'
 import { cn } from '../../lib/cn'
@@ -106,45 +107,24 @@ export function CompactCalendar({ month, now, byDay, selectedId, onSelect, onMon
   return (
     <section aria-label="Calendrier compact" className="flex flex-col gap-2.5 rounded-[22px] bg-surface p-3.5">
       <MonthNav month={month} onMonth={onMonth} compact />
-      <MonthTable
+      <CompactMonth
         month={month}
         now={now}
-        compact
         caption={`Calendrier compact de ${formatMonth(month)}`}
-        className="border-spacing-0.5 text-center"
-        headerClassName="text-[11px] font-black text-muted"
-        cellClassName={() => 'p-0'}
-        renderDay={(day, { key, inMonth, isToday, isPast }) => {
-          if (!inMonth) return null
-          const meetings = byDay.get(key) ?? []
+        byDay={byDay}
+        isSelected={(meeting) => meeting.id === selectedId}
+        onSelect={onSelect}
+        label={(day, meetings) => {
           const first = meetings[0]
-          const selected = meetings.some((meeting) => meeting.id === selectedId)
-          const look = cn(
-            'flex h-[46px] w-full flex-col items-center justify-center gap-[3px] rounded-[12px] border-2 text-sm font-extrabold',
-            selected ? 'border-ink bg-cream' : isToday ? 'border-terra' : 'border-transparent',
-            !selected && (isPast ? 'bg-[#F1EBDD]' : 'bg-surface'),
-            isToday ? 'text-terra' : isPast ? 'text-muted' : 'text-ink',
-          )
-          if (first === undefined) {
-            return <span className={look}>{day.getDate()}</span>
-          }
           const more = meetings.length > 1 ? ` et ${meetings.length - 1} autre${meetings.length > 2 ? 's' : ''}` : ''
-          return (
-            <button
-              type="button"
-              onClick={() => onSelect(first)}
-              aria-pressed={selected}
-              aria-label={`${day.getDate()} : ${first.speakerName}, ${STATUS_STYLE[first.status].label}${more}`}
-              className={look}
-            >
-              <span>{day.getDate()}</span>
-              <span className="flex items-center gap-0.5">
-                <span aria-hidden="true" className={cn('size-[7px] rounded-pill', STATUS_STYLE[first.status].dot)} />
-                {meetings.length > 1 && <span className="text-[9px] font-black leading-none">{meetings.length}</span>}
-              </span>
-            </button>
-          )
+          return first ? `${day.getDate()} : ${first.speakerName}, ${STATUS_STYLE[first.status].label}${more}` : String(day.getDate())
         }}
+        renderMarker={(meetings) => (
+          <span className="flex items-center gap-0.5">
+            <span aria-hidden="true" className={cn('size-[7px] rounded-pill', meetings[0] ? STATUS_STYLE[meetings[0].status].dot : '')} />
+            {meetings.length > 1 && <span className="text-[9px] font-black leading-none">{meetings.length}</span>}
+          </span>
+        )}
       />
       <p className="text-[11px] font-bold text-muted">
         Les jours passés sont grisés. La pastille indique le statut de la rencontre.

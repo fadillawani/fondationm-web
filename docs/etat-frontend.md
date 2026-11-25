@@ -1,12 +1,9 @@
 # État du frontend — Fondation M
-
-Dernière mise à jour : 24 novembre 2026 — lot F6.1 (rencontres uniquement en classe).
+Dernière mise à jour : 24 novembre 2026 — lot F7 (« Demandes de rencontre » et « Rencontres » de la Fondation).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
-
 ## Avancement
-
-| Lot | Contenu                                                                     | État     |
+| Lot | Contenu                                                                 | État     |
 | --- | --------------------------------------------------------------------------- | -------- |
 | F0  | Configuration, jetons de design, composants de base, client d'API, session, gardes, erreurs, connexion, accueils provisoires | Terminé |
 | F0.1 | Design de la maquette « Marché » appliqué (thème, composants, connexion, mise en page) | Terminé |
@@ -20,10 +17,11 @@ Dernière mise à jour : 24 novembre 2026 — lot F6.1 (rencontres uniquement en
 | F6-bis | Carte du réseau interactive (W1-E3) : villes cliquables au clavier, état unique `?zone=`, chiffres sous filtres | Terminé |
 | F6  | « Mon établissement » (W5-E2) : classes, élèves, fiches d'accès, ajout en série | Terminé |
 | F6.1 | Rencontres uniquement en classe : drapeau `ONLINE_MEETINGS_ENABLED`, aucun choix ni envoi « en ligne » | Terminé |
-| F7+ | Autres écrans métier (retours d'expérience, espace élève, tableau de bord Fondation, donateurs…) | À faire  |
+| F7  | Fondation : « Demandes de rencontre » (avis en parallèle de l'intervenant) et « Rencontres » (calendrier, Réalisée, Annulée) | Terminé |
+| F8+ | Autres écrans métier (retours d'expérience, espace élève, tableau de bord Fondation, donateurs…) | À faire  |
 
-Vérifications au moment de la livraison de F6.1 : `npm run build`, `npm run lint` et `npm test`
-(213 tests, deux passages) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F7 : `npm run build`, `npm run lint` et `npm test`
+(244 tests, deux passages) passent sans erreur ni avertissement.
 
 ## Corrections
 
@@ -50,6 +48,62 @@ Vérifications au moment de la livraison de F6.1 : `npm run build`, `npm run lin
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F7 livre — « Demandes de rencontre » et « Rencontres » de la Fondation (W3-demandes, W3-rencontres)
+
+**Données** : `GET /api/foundation/meetings` sans filtre, toutes les pages (`size=100`, 25 pages au plus, avertissement
+au-delà), une seule requête partagée par les deux pages, les deux pastilles de navigation et le bandeau ; rechargée
+après chaque action (préfixe `['foundation','meetings']`). Lecture défensive (`null` = absent ; une rencontre sans `id`,
+`status` ou début de créneau est ignorée). `awaitingFoundation` n'est pas utilisé : les états sont calculés côté client
+(`pages/foundation/meetings/foundationMeetingState.ts`, fonctions pures testées).
+
+- **`/fondation/demandes`** (« Demandes de rencontre ») : sur-ligne « Avis en parallèle de l'intervenant » (PC et mobile),
+  texte de la maquette.
+  - Onglets (42 px, comptés) : « À traiter » (PENDING + `foundationDecision` PENDING), « Confirmées » (CONFIRMED,
+    COMPLETED), « Refusées ou annulées » (REFUSED dont « Créneau pris », CANCELLED), « Toutes » ;
+    `?onglet=a-traiter|confirmees|refusees|toutes`, `?demande={id}` ; demandes triées par date du créneau.
+  - Liste : créneau court terracotta, pastille (En attente, Confirmée, Réalisée, Refusée, Créneau pris, Annulée),
+    « {École} → {Intervenant} », « classe · ville », « Intervenant : À traiter / Validé / Refusé », « En attente depuis
+    {n} jours » en rouge dès 2 jours (jours de calendrier depuis `createdAt`).
+  - Détail : « Envoyée le {date} », cases École et Intervenant (ville · 2 premières compétences), créneau, classe et
+    élèves, « Le mot de l'école », « Avis de l'intervenant » / « Votre avis », conflit de créneau (autres demandes
+    PENDING du même `slot.id`, écoles nommées, pluriels accordés).
+  - « Valider la demande » (54 px, vert, sans confirmation) ; « Refuser » avec motif facultatif (500 caractères au plus,
+    `{ "reason": "" }` sans motif). Après l'action : bloc « Demande traitée » et demande à traiter suivante.
+  - Blocs de résultat sans promesse d'e-mail : « Rencontre confirmée » (« La rencontre apparaît maintenant dans l'espace
+    de l'école et de l'intervenant… ») avec « Voir dans le calendrier des rencontres », « Votre validation est enregistrée »
+    (« Il manque l'avis de l'intervenant… »), « Refusée par la Fondation M / par l'intervenant » (motif ou « Aucun motif
+    transmis. »), « Refusée automatiquement · créneau pris », « Annulée par la Fondation M », « Rencontre réalisée ».
+  - Mobile : liste, puis détail plein écran avec « Retour à la liste ».
+- **`/fondation/rencontres`** (« Rencontres ») : sur-ligne « Suivi » (PC) / « Suivi du programme » (mobile).
+  - Bandeau jaune : « 1 rencontre passée est encore « confirmée ». » / « {n} rencontres passées sont encore
+    « confirmées ». » + un bouton 44 px par rencontre (« 17 nov · Kaffrine × Awa »). « À marquer » = CONFIRMED dont
+    `slot.endAt` est passé.
+  - Calendrier PC (`MonthTable`, `MonthNav`, `?mois=AAAA-MM`, `?rencontre={id}`) : pastilles « 10h00 · {école courte} ×
+    {premier mot du nom} » aux couleurs des statuts, contour rouge « À marquer », barrées pour annulée / refusée,
+    contour encre de sélection ; les demandes PENDING d'un même créneau forment une pastille « 2 demandes × … » ;
+    nom complet et statut dans l'`aria-label` ; légende. Mobile : calendrier compact (`components/calendar/CompactMonth.tsx`,
+    partagé avec « Mes rencontres » de l'école, rendu inchangé).
+  - Panneau (`aria-live`, bordure de l'état) : date, pastille, école (ville), « avec {intervenant} », heure, classe, lieu
+    (`placeLabel` : « En classe · {lieu} », « En ligne » pour une donnée ancienne), notes de la maquette.
+  - « Marquer « Réalisée » » (54 px, indigo / crème) dès la fin du créneau ; « Marquer « Annulée » » (même avant la date)
+    avec motif facultatif ; note « C'est noté ! … » après « Réalisée ».
+  - Rencontre réalisée : « Retour école » / « Retour intervenant » via `GET /api/foundation/feedbacks?meetingId={id}`
+    (aucun retour = « À rédiger », SUBMITTED = « Soumis », PUBLISHED = « Validé ») ; en cas d'erreur, « Retours
+    indisponibles » et « Réessayer » sans bloquer le panneau ; « Voir les retours d'expérience » « Bientôt ».
+  - Demande PENDING : « Donner mon avis sur la demande » → `/fondation/demandes?demande={id}`.
+- **Navigation Fondation** : « Demandes de rencontre » (pastille « à traiter ») et « Rencontres » (pastille « à marquer »)
+  deviennent des liens ; Tableau de bord, Retours d'expérience et Requêtes donateurs restent « Bientôt » ; navigation
+  basse à 5 entrées inchangée.
+
+**Fichiers** : `src/pages/foundation/meetings/` (`foundationMeetingsData.ts`, `foundationMeetingState.ts`,
+`foundationMeetingState.test.ts`, `foundationMeetingCounts.ts`, `RequestsPage.tsx`, `RequestList.tsx`, `RequestDetail.tsx`,
+`RequestsPage.test.tsx`, `MeetingsPage.tsx`, `MeetingPanel.tsx`, `MeetingsPage.test.tsx`), `src/components/calendar/CompactMonth.tsx`,
+`src/test/foundationMeetingsFixtures.ts` ; modifiés : `src/auth/roles.ts`, `src/nav/badges.ts`, `src/routes/routes.tsx`,
+`src/components/ui/ReasonForm.tsx` (motif facultatif, `cancelLabel`), `src/pages/school/MeetingsCalendar.tsx`
+(passe à `CompactMonth`), `src/pages/school/meetingText.ts` (`placeLabel` accepte `{ format, place }`),
+`src/test/helpers.tsx` (réponse par défaut de `GET /api/foundation/meetings`), `src/pages/foundation/AccountsPage.test.tsx`
+(navigation), `README.md`, `docs/etat-frontend.md`.
 
 ## Ce que F6.1 livre — rencontres uniquement en classe
 
@@ -723,6 +777,22 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     carte filtrée par secteur et recherche), demander une rencontre (créneaux ONLINE seuls non proposés, envoi IN_PERSON,
     lieu obligatoire), mes rencontres (« En classe · {lieu} »), textes d'accueil de l'école et du choix de compte. Les
     données ONLINE existantes restent affichées « En ligne ».
+75. **Rencontres de la Fondation, états calculés** : « À traiter » = PENDING + `foundationDecision` PENDING (onglet et
+    pastille) ; « À marquer » = CONFIRMED et `slot.endAt` passé (bandeau, pastille, « Réalisée » possible) ; conflit =
+    autres PENDING du même `slot.id`. `awaitingFoundation` n'est pas utilisé. Contrastes : encre / `#EF7A0A` 5,71,
+    blanc / `#4E6A2C` 6,14, crème / `#2B337A` 9,24, `#4A4A57` / `#E6DECB` ≈ 6,5, encre / `#9DAA3C` 6,32, blanc /
+    `#B81C1F` 6,51, `#7A4100` / `#FDEBD3` 6,97, `#3B5221` / `#E8EEDF` 7,34, `#8E1518` / `#FBE3E3` 7,57 : aucun échec.
+76. **Onglets des demandes** : « Confirmées » = CONFIRMED + COMPLETED ; « Refusées ou annulées » = REFUSED (dont
+    « Créneau pris ») + CANCELLED (libellé de F3 au lieu de « Refusées »).
+77. **Motif facultatif** (refus, annulation) : `ReasonForm` sans `requiredMessage` ; le texte est envoyé sans espaces
+    autour, `{ "reason": "" }` s'il est vide ; une erreur `fieldErrors.reason` s'affiche sous le champ.
+78. **Textes sans promesse ni prénom deviné** : « La rencontre apparaît maintenant dans l'espace de l'école et de
+    l'intervenant… », « Il manque l'avis de l'intervenant. La rencontre sera confirmée dès son accord. » ; les noms
+    complets restent dans les cases et les libellés ARIA.
+79. **Sélection fixée avant une action** : la demande ou la rencontre est inscrite dans l'URL avant l'appel, pour que
+    le détail reste affiché pendant le rechargement ; le résultat de l'action s'affiche avant la liste rechargée.
+80. **Pastilles du calendrier** : nom court d'école = premier mot distinctif (mots génériques retirés) ; intervenant =
+    premier mot du nom ; demandes PENDING d'un même créneau groupées (« 2 demandes × … »).
 
 ## Écarts
 
@@ -783,6 +853,9 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | Pastilles de la navigation basse | Absentes de la maquette mobile | Conservées (`#B8492A`/blanc) |
 | « Requêtes donateurs » (Fondation) sur mobile | Absente de la navigation basse de la maquette (5 entrées) | Absente aussi |
 | Carte utilisateur école / Fondation | Maquette : nom du référent, « Samirath · Chargée de programme » | Établissement + ville ; « Fondation M » + « Équipe du programme » (données absentes) |
+| Métier de l'intervenant (W3-demandes, W3-rencontres) | Absent de `SpeakerInfo` | « ville · 2 premières compétences » ; panneau « avec {Nom} » sans métier (point ouvert 31) |
+| « Mame Diarra », « Cheikh T. », « Sor » (pastilles W3-rencontres) | Ni prénom séparé ni nom court d'école | Premier mot du nom, mot distinctif de l'école (décision 80, point ouvert 32) |
+| Pastilles « Demandes » / « Rencontres » de la navigation | Aucun compteur | Calculées sur toutes les rencontres (point ouvert 27) |
 | Code d'erreur « e-mail déjà utilisé » | Non documenté (aucun 409 ni code dans le contrat) | Règle de la décision 16. Code réellement observé : `EMAIL_ALREADY_USED` (HTTP 409, message « Cette adresse e-mail est déjà utilisée. ») |
 
 ## Points ouverts
@@ -858,6 +931,19 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     (la politique d'OSM exclut un usage applicatif soutenu), RGPD (chaque tuile envoie l'adresse IP à un tiers :
     mention, sans doute consentement), poids sur réseau mobile, coordonnées réelles des villes, lisibilité moindre
     qu'un schéma à 8 cercles.
+27. **Compteurs de la navigation Fondation** : « à traiter » et « à marquer » chargent toutes les rencontres sur chaque
+    page Fondation. **Backend : un compteur (À traiter / À marquer) éviterait de tout charger.**
+28. **Codes d'erreur des rencontres de la Fondation non documentés** (`validate`, `refuse`, `complete`, `cancel`) :
+    `INVALID_STATUS_TRANSITION`, `SLOT_NOT_AVAILABLE`, `SLOT_PASSED` traités par leur code, les autres par le message du
+    serveur.
+29. **`awaitingFoundation`** de `GET /api/foundation/meetings` n'est pas décrit (inclut-il « validée par la Fondation,
+    en attente de l'intervenant » ?) : non utilisé.
+30. **`reason` vide à vérifier** avec un compte Fondation : le contrat l'accepte (`minLength: 0`) ; si le serveur le
+    refuse, son message s'affiche sous le champ.
+31. **Métier de l'intervenant absent** de `SpeakerInfo` : « ville · compétences » à la place. **Backend : `jobTitle` dans
+    `SpeakerInfo`.**
+32. **Nom court d'école et prénom séparé absents** : « Sor », « Mame » sont dérivés du nom complet ; « Mame Diarra »,
+    « Cheikh T. » de la maquette ne sont pas reproductibles.
 
 ## Écarts de design restants
 
@@ -919,3 +1005,13 @@ attendue (maquette) et la raison.
 | Mon établissement | `pages/school/establishment/AccessPanel.tsx` | « Voir ce que l'élève verra » (PC), « Vue élève » et « Partager la fiche » (mobile) | Omis (F6-Q5) ; « Imprimer la fiche » aussi sur mobile (F6-Q6). |
 | Mon établissement | `pages/school/classes/ClassForm.tsx`, `ClassTabs.tsx`, `AccessPanel.tsx` | Aucune gestion de classe ni changement de classe | Ajoutés sans maquette : « + Nouvelle classe », « Modifier / Supprimer la classe », « Changer de classe », « Retirer l'élève ». |
 | Mon établissement | `pages/school/establishment/StudentTable.tsx` | Ligne : un seul bouton | Le nom devient aussi un bouton (« {nom} : gérer l'accès ») qui ouvre le panneau de l'élève. |
+| Demandes (W3-demandes) | `pages/foundation/meetings/RequestsPage.tsx` | Sur-ligne « E13 » (PC), « E13 · avis en parallèle de l'intervenant » (mobile) | Code d'écran retiré : « Avis en parallèle de l'intervenant » sur PC et mobile. |
+| Demandes | idem | Onglet « Refusées » ; aucune rencontre réalisée ou annulée | « Refusées ou annulées » (CANCELLED compris) ; « Confirmées » compte aussi les réalisées (pastille « Réalisée ») (décision 76). |
+| Demandes | `pages/foundation/meetings/foundationMeetingState.ts` | « L'école et {prénom} sont prévenus », « dès qu'il aura accepté » | Sans promesse d'e-mail ni prénom deviné (décision 78). |
+| Demandes | `pages/foundation/meetings/RequestDetail.tsx` | Case Intervenant « Ingénieur réseaux · Dakar » | « Dakar · Réseaux, Télécoms » (métier absent du contrat). |
+| Demandes | idem | Bloc « Rencontre réalisée », bloc d'annulation | Ajoutés (états absents de la maquette). |
+| Rencontres (W3-rencontres) | `pages/foundation/meetings/MeetingsPage.tsx` | Sur-ligne « E15 · suivi » / « E15 · suivi du programme » | « Suivi » / « Suivi du programme ». |
+| Rencontres | idem | Boutons du bandeau mobile 40 px | 44 px (cible tactile). |
+| Rencontres | idem | Flèches de mois atténuées (opacité 0,4) aux bornes | Mois non bornés, pas d'opacité. |
+| Rencontres | `pages/foundation/meetings/MeetingPanel.tsx` | Mobile : bouton « Voir les retours (école : … · intervenant : …) » | Cases « Retour école » / « Retour intervenant » et « Voir les retours d'expérience · Bientôt » (écran non livré), comme sur PC. |
+| Rencontres | idem | « avec Amadou Baila, ingénieur réseaux » | « avec Amadou Baila » (métier absent). |

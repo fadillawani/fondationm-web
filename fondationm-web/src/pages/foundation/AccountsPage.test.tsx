@@ -73,7 +73,9 @@ describe('Espace Fondation — navigation', () => {
       'href',
       '/fondation/comptes',
     )
-    for (const label of ['Tableau de bord', 'Demandes de rencontre', 'Rencontres', "Retours d'expérience", 'Requêtes donateurs']) {
+    expect(nav.getByRole('link', { name: /^Demandes de rencontre/ })).toHaveAttribute('href', '/fondation/demandes')
+    expect(nav.getByRole('link', { name: /^Rencontres/ })).toHaveAttribute('href', '/fondation/rencontres')
+    for (const label of ['Tableau de bord', "Retours d'expérience", 'Requêtes donateurs']) {
       expect(nav.queryByRole('link', { name: new RegExp(label) })).not.toBeInTheDocument()
       expect(nav.getByText(label).closest('li')).toHaveTextContent('Bientôt')
     }
@@ -93,8 +95,8 @@ describe('Espace Fondation — navigation', () => {
     expect(within(bottom).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       'AccueilBientôt',
       'Comptes',
-      'DemandesBientôt',
-      'RencontresBientôt',
+      'Demandes',
+      'Rencontres',
       'RetoursBientôt',
     ])
     expect(within(bottom).getByRole('link', { name: 'Comptes à valider' })).toHaveAttribute('href', '/fondation/comptes')
