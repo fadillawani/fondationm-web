@@ -17,6 +17,7 @@ export const PATHS = {
   speakerRequests: '/intervenant/demandes',
   schoolSpeakers: '/ecole/intervenants',
   schoolMeetings: '/ecole/rencontres',
+  schoolEstablishment: '/ecole/etablissement',
 } as const
 
 /** Demande de rencontre auprès d'un intervenant. */
@@ -56,7 +57,7 @@ export const ROLE_LABEL: Record<Role, string> = {
   STUDENT: 'Élève',
 }
 
-export type NavIcon = 'home' | 'dashboard' | 'accounts' | 'requests' | 'meetings' | 'feedbacks' | 'donors'
+export type NavIcon = 'home' | 'school' | 'dashboard' | 'accounts' | 'requests' | 'meetings' | 'feedbacks' | 'donors'
 
 export interface NavItem {
   label: string
@@ -93,7 +94,7 @@ const SCHOOL_NAV: NavItem[] = [
   { label: 'Intervenants', short: 'Intervenants', icon: 'accounts', to: PATHS.schoolSpeakers },
   { label: 'Mes rencontres', short: 'Rencontres', icon: 'meetings', to: PATHS.schoolMeetings, badge: 'upcomingMeetings' },
   { label: "Retours d'expérience", short: 'Retours', icon: 'feedbacks' },
-  { label: 'Mon établissement', short: 'Établissement', icon: 'home' },
+  { label: 'Mon établissement', short: 'Établissement', icon: 'school', to: PATHS.schoolEstablishment },
 ]
 
 export function navItemsFor(role: Role): NavItem[] {

@@ -56,7 +56,9 @@ describe('Demander une rencontre', () => {
     expect(screen.getByRole('radio', { name: /30 novembre/ })).toBeChecked()
     expect(summaryValue('Date')).toBe('Lundi 30 novembre, 9h30 – 11h00')
     await user.click(screen.getByRole('radio', { name: /Terminale S2/ }))
-    await user.click(within(screen.getByRole('group', { name: 'Format de la rencontre' })).getByRole('button', { name: 'En classe' }))
+    // En classe seulement (F6.1) : aucun choix de format, même pour un créneau BOTH.
+    expect(screen.queryByRole('group', { name: 'Format de la rencontre' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/En ligne/)).not.toBeInTheDocument()
     await user.type(form().getByLabelText(/^Où aura lieu la rencontre \?/), '  Salle 12  ')
     await user.type(form().getByLabelText('Un mot pour Awa (facultatif)'), 'Nos élèves ont hâte.')
 
@@ -93,28 +95,42 @@ describe('Demander une rencontre', () => {
     await user.click(screen.getByRole('radio', { name: /30 novembre/ }))
     await user.click(screen.getByRole('radio', { name: /Première L/ }))
     await user.click(submit)
-    expect(await screen.findByText('Choisissez le format de la rencontre.')).toBeInTheDocument()
-
-    await user.click(within(screen.getByRole('group', { name: 'Format de la rencontre' })).getByRole('button', { name: 'En classe' }))
-    await user.click(submit)
+    // Le lieu est obligatoire : la rencontre se fait en classe.
     expect(await screen.findByText('Indiquez où aura lieu la rencontre.')).toBeInTheDocument()
+    expect(screen.queryByText('Choisissez le format de la rencontre.')).not.toBeInTheDocument()
     expect(calls('POST', '/api/school/meetings')).toHaveLength(0)
   })
 
-  it('impose le format d’un créneau en ligne et n’envoie ni lieu ni message vides', async () => {
+  it('ne propose pas un créneau en ligne seul, propose BOTH et IN_PERSON, et n’envoie pas de message vide', async () => {
     const bodies: unknown[] = []
     setupSchool({}, { 'POST /api/school/meetings': recordBodies(bodies, () => jsonResponse(201, {})) })
     const { user } = renderApp(PATH, { token: true })
     await ready()
 
-    await user.click(screen.getByRole('radio', { name: /2 décembre/ }))
-    expect(screen.getByText('En ligne (format du créneau)')).toBeInTheDocument()
-    expect(screen.queryByRole('group', { name: 'Format de la rencontre' })).not.toBeInTheDocument()
+    // Créneaux de l'intervenant : 30 novembre (BOTH), 2 décembre (ONLINE), 4 décembre (IN_PERSON).
+    expect(screen.getByRole('radio', { name: /30 novembre/ })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /4 décembre/ })).toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: /2 décembre/ })).not.toBeInTheDocument()
+    expect(ONLINE_SLOT?.formats).toBe('ONLINE')
+
+    await user.click(screen.getByRole('radio', { name: /4 décembre/ }))
     await user.click(screen.getByRole('radio', { name: /Première L/ }))
+    await user.type(form().getByLabelText(/^Où aura lieu la rencontre \?/), 'CDI')
+    expect(summaryValue('Lieu')).toBe('En classe · CDI')
     await user.click(screen.getByRole('button', { name: 'Envoyer la demande' }))
 
     expect(await screen.findByRole('status', { name: 'Demande envoyée' })).toBeInTheDocument()
-    expect(bodies).toEqual([{ classId: CLASSES[1]?.id, slotId: ONLINE_SLOT?.id, format: 'ONLINE' }])
+    expect(bodies).toEqual([{ classId: CLASSES[1]?.id, slotId: AWA_SLOTS[2]?.id, format: 'IN_PERSON', place: 'CDI' }])
+  })
+
+  it('indique l’absence de créneau en classe quand il ne reste que des créneaux en ligne', async () => {
+    setupSchool({ slots: AWA_SLOTS.filter((slot) => slot.formats === 'ONLINE') })
+    renderApp(PATH, { token: true })
+
+    expect(await screen.findByText(/Cet intervenant n'a pas de créneau en classe disponible pour le moment\./)).toBeInTheDocument()
+    expect(screen.queryAllByRole('radio', { name: /décembre|novembre/ })).toHaveLength(0)
+    const links = screen.getAllByRole('link', { name: "Changer d'intervenant" })
+    expect(links.every((link) => link.getAttribute('href') === '/ecole/intervenants')).toBe(true)
   })
 
   it('crée une classe quand l’école n’en a pas, puis la sélectionne', async () => {

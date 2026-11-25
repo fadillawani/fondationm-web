@@ -8,6 +8,7 @@ import { AgendaPage } from '../pages/speaker/AgendaPage'
 import { RequestsPage } from '../pages/speaker/RequestsPage'
 import { HomePage } from '../pages/HomePage'
 import { MeetingRequestPage } from '../pages/school/MeetingRequestPage'
+import { EstablishmentPage } from '../pages/school/establishment/EstablishmentPage'
 import { MeetingsPage } from '../pages/school/MeetingsPage'
 import { SpeakersPage } from '../pages/school/SpeakersPage'
 import { MustChangePasswordPage } from '../pages/MustChangePasswordPage'
@@ -47,6 +48,7 @@ function rolePages(role: Role): RouteObject[] {
       { path: PATHS.schoolSpeakers, element: <SpeakersPage /> },
       { path: `${PATHS.schoolSpeakers}/:id/demande`, element: <MeetingRequestPage /> },
       { path: PATHS.schoolMeetings, element: <MeetingsPage /> },
+      { path: PATHS.schoolEstablishment, element: <EstablishmentPage /> },
     ]
   }
   return [{ path: ROLE_HOME[role], element: <HomePage /> }]

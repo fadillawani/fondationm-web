@@ -1,10 +1,14 @@
+import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
+
 /** Colonne de gauche commune à l'inscription et à la connexion (maquettes W1-E1, W2-E1). */
 export const SCHOOL_COLUMN = {
   tone: 'terra',
   eyebrow: 'Espace établissement',
   title: 'Ouvrez les métiers à vos élèves',
-  intro:
-    'Des professionnels bénévoles viennent dans vos classes, ou en ligne, pour parler de leur métier. La Fondation M accompagne chaque rencontre.',
+  // Maquette : « … dans vos classes, ou en ligne, … » ; en classe seulement pour le moment (F6.1).
+  intro: ONLINE_MEETINGS_ENABLED
+    ? 'Des professionnels bénévoles viennent dans vos classes, ou en ligne, pour parler de leur métier. La Fondation M accompagne chaque rencontre.'
+    : 'Des professionnels bénévoles viennent dans vos classes pour parler de leur métier. La Fondation M accompagne chaque rencontre.',
   mobileIntro: 'Des professionnels bénévoles rencontrent vos classes. La Fondation M accompagne chaque rencontre.',
   steps: [
     'Créez le compte de votre établissement',

@@ -17,6 +17,7 @@ import {
   startOfDay,
   toOffsetIso,
 } from '../../lib/dateTime'
+import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
 import { useNow } from '../../lib/useNow'
 import { SLOT_FORMAT_LABEL } from './speakerText'
 import { useCreateSlot, type SlotFormats } from './speakerData'
@@ -85,7 +86,8 @@ interface SlotFormProps {
 export function SlotForm({ day, city }: SlotFormProps) {
   const now = useNow()
   const create = useCreateSlot()
-  const [formats, setFormats] = useState<SlotFormats>('BOTH')
+  // Rencontres en classe seulement (F6.1) : le créneau est publié IN_PERSON, sans choix de format.
+  const [formats, setFormats] = useState<SlotFormats>(ONLINE_MEETINGS_ENABLED ? 'BOTH' : 'IN_PERSON')
   const [formError, setFormError] = useState<string | null>(null)
   const [published, setPublished] = useState(false)
   const {
@@ -177,12 +179,14 @@ export function SlotForm({ day, city }: SlotFormProps) {
         </FormField>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <span aria-hidden="true" className="text-[13px] font-extrabold text-ink">
-          Format
-        </span>
-        <ChoiceGroup label="Format" value={formats} onChange={setFormats} options={FORMAT_OPTIONS} />
-      </div>
+      {ONLINE_MEETINGS_ENABLED && (
+        <div className="flex flex-col gap-1.5">
+          <span aria-hidden="true" className="text-[13px] font-extrabold text-ink">
+            Format
+          </span>
+          <ChoiceGroup label="Format" value={formats} onChange={setFormats} options={FORMAT_OPTIONS} />
+        </div>
+      )}
 
       <Button type="submit" size="md" loading={create.isPending}>
         Publier ce créneau

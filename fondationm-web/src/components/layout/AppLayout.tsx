@@ -15,11 +15,13 @@ import {
   LogoutIcon,
   MeetingsIcon,
   RequestsIcon,
+  SchoolIcon,
 } from './icons'
 import { ROLE_THEME, type RoleTheme } from './roleTheme'
 
 const ICONS: Record<NavIcon, ComponentType<{ className?: string }>> = {
   home: HomeIcon,
+  school: SchoolIcon,
   dashboard: DashboardIcon,
   accounts: AccountsIcon,
   requests: RequestsIcon,

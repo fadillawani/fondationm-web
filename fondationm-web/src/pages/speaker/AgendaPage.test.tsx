@@ -139,7 +139,7 @@ describe('Mon agenda', () => {
     expect(within(screen.getByRole('region', { name: 'Détail' })).getByRole('form', { name: 'Publier un créneau' })).toBeInTheDocument()
   })
 
-  it('publie un créneau avec formats et décalage horaire, puis recharge', async () => {
+  it('publie un créneau en classe (sans choix de format) avec le décalage horaire, puis recharge', async () => {
     const bodies: unknown[] = []
     const { store, calls } = setupSpeaker(defaultData(), {
       'POST /api/speaker/slots': recordBodies(bodies, () => {
@@ -154,14 +154,15 @@ describe('Mon agenda', () => {
     const form = within(panel().getByRole('form', { name: 'Publier un créneau' }))
     expect(form.getByText('Publier un créneau ce jour-là')).toBeInTheDocument()
     expect(panel().getByText('Mer. 25 nov.')).toBeInTheDocument()
-    expect(form.getByRole('button', { name: 'En classe ou en ligne' })).toHaveAttribute('aria-pressed', 'true')
+    // En classe seulement (F6.1) : pas de champ « Format ».
+    expect(form.queryByRole('group', { name: 'Format' })).not.toBeInTheDocument()
+    expect(form.queryByText(/en ligne/i)).not.toBeInTheDocument()
     expect(within(form.getByLabelText(/^De/)).getByRole('option', { name: '10h00' })).toHaveValue('10:00')
     expect(form.getByText(/Visible par toutes les écoles, celles de Dakar en premier/)).toBeInTheDocument()
 
     const slotCallsBefore = calls('GET', '/api/speaker/slots').length
     await user.selectOptions(form.getByLabelText(/^De/), '10:00')
     await user.selectOptions(form.getByLabelText(/^À/), '11:30')
-    await user.click(form.getByRole('button', { name: 'En classe' }))
     await user.click(form.getByRole('button', { name: 'Publier ce créneau' }))
 
     expect(await form.findByText('Créneau publié. Les écoles peuvent le voir dès maintenant.')).toBeInTheDocument()
@@ -213,6 +214,15 @@ describe('Mon agenda', () => {
     expect(calls('POST', '/api/speaker/slots')).toHaveLength(0)
   })
 
+  it('affiche « En ligne » pour un créneau en ligne hérité', async () => {
+    const data = defaultData()
+    setupSpeaker({ ...data, slots: data.slots.map((slot) => (slot.id === FREE_SLOT.id ? { ...slot, formats: 'ONLINE' } : slot)) })
+    const { user } = renderApp('/intervenant/agenda', { token: true })
+
+    await user.click((await calendar()).getByRole('button', { name: 'Libre, Jeudi 26 novembre, 10h00 – 11h30' }))
+    expect(panel().getByText('En ligne')).toBeInTheDocument()
+  })
+
   it('retire un créneau libre après confirmation', async () => {
     const { store, calls } = setupSpeaker(defaultData(), {
       [`DELETE /api/speaker/slots/${FREE_SLOT.id}`]: () => {
@@ -225,7 +235,9 @@ describe('Mon agenda', () => {
     await user.click((await calendar()).getByRole('button', { name: 'Libre, Jeudi 26 novembre, 10h00 – 11h30' }))
     const detail = panel()
     expect(detail.getByRole('heading', { name: 'Créneau libre · 10h00 – 11h30' })).toBeInTheDocument()
-    expect(detail.getByText('En classe ou en ligne')).toBeInTheDocument()
+    // Créneau BOTH : « En classe » tant que les rencontres en ligne sont désactivées.
+    expect(detail.getByText('En classe')).toBeInTheDocument()
+    expect(detail.queryByText(/en ligne/i)).not.toBeInTheDocument()
     await user.click(detail.getByRole('button', { name: 'Retirer ce créneau' }))
 
     const dialog = within(screen.getByRole('dialog', { name: 'Retirer ce créneau ?' }))

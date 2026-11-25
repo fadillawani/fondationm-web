@@ -6,6 +6,7 @@ import { Link, useParams } from 'react-router'
 import { z } from 'zod'
 import { errorFromException, errorMessage } from '../../api/errors'
 import { PATHS } from '../../auth/roles'
+import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
 import { BackIcon } from '../../components/layout/icons'
 import { Alert } from '../../components/ui/Alert'
 import { Button } from '../../components/ui/Button'
@@ -19,7 +20,7 @@ import { buttonClass } from '../../components/ui/styles'
 import { Textarea } from '../../components/ui/Textarea'
 import { cn } from '../../lib/cn'
 import { formatDayMonth, formatSlot, formatTimeRange, formatWeekday, parseIso } from '../../lib/dateTime'
-import { NewClassForm } from './NewClassForm'
+import { ClassForm } from './classes/ClassForm'
 import {
   useClasses,
   useCreateMeeting,
@@ -72,6 +73,8 @@ function firstName(fullName: string): string {
 
 function formatOf(slot: AvailableSlot | undefined, chosen: string): MeetingFormat | null {
   if (slot === undefined) return null
+  // En classe seulement (F6.1) : toujours IN_PERSON (seuls des créneaux IN_PERSON ou BOTH sont proposés).
+  if (!ONLINE_MEETINGS_ENABLED) return 'IN_PERSON'
   if (slot.formats !== 'BOTH') return slot.formats
   return chosen === 'IN_PERSON' || chosen === 'ONLINE' ? chosen : null
 }
@@ -162,7 +165,8 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
   const [formError, setFormError] = useState<string | null>(null)
   const [sent, setSent] = useState<SentState | null>(null)
   const prenom = firstName(speaker.fullName)
-  const slots = speaker.slots
+  // Un créneau en ligne seul n'est pas proposé tant que les rencontres en ligne sont désactivées (F6.1).
+  const slots = ONLINE_MEETINGS_ENABLED ? speaker.slots : speaker.slots.filter((entry) => entry.formats !== 'ONLINE')
   const classList = classes.data?.items ?? []
 
   const {
@@ -200,9 +204,9 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
   const chosenClass: SchoolClass | undefined = classList.find((entry) => entry.id === values.classId)
   const format = formatOf(slot, values.format ?? '')
 
-  function classCreated(created: SchoolClass) {
+  function classCreated(id: string) {
     setAddingClass(false)
-    setValue('classId', created.id, { shouldValidate: true })
+    setValue('classId', id, { shouldValidate: true })
   }
 
   const submit = handleSubmit((form) => {
@@ -262,7 +266,16 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
     <form noValidate aria-label="Demander une rencontre" onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
       <Step number={1} title="Quand ?">
         {slots.length === 0 ? (
-          <p className="font-semibold text-muted">{prenom} n'a pas de créneau libre pour l'instant.</p>
+          ONLINE_MEETINGS_ENABLED ? (
+            <p className="font-semibold text-muted">{prenom} n'a pas de créneau libre pour l'instant.</p>
+          ) : (
+            <p className="font-semibold text-muted">
+              Cet intervenant n'a pas de créneau en classe disponible pour le moment.{' '}
+              <Link to={PATHS.schoolSpeakers} className="font-black text-indigo underline underline-offset-2">
+                Changer d'intervenant
+              </Link>
+            </p>
+          )
         ) : (
           <fieldset aria-describedby={errors.slotId ? 'erreur-creneau' : undefined}>
             <legend className="sr-only">Créneau</legend>
@@ -321,7 +334,7 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
                 <p className="font-semibold text-muted">
                   Vous n'avez pas encore de classe. Ajoutez-en une pour envoyer votre demande.
                 </p>
-                <NewClassForm onCreated={classCreated} />
+                <ClassForm onSaved={classCreated} />
               </>
             ) : (
               <>
@@ -345,7 +358,7 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
                   </div>
                 </fieldset>
                 {addingClass ? (
-                  <NewClassForm onCreated={classCreated} onCancel={() => setAddingClass(false)} />
+                  <ClassForm onSaved={classCreated} onCancel={() => setAddingClass(false)} />
                 ) : (
                   <Button variant="ghost" size="md" className="self-start" onClick={() => setAddingClass(true)}>
                     + Ajouter une classe
@@ -363,7 +376,7 @@ function RequestForm({ speaker }: { speaker: SpeakerDetail }) {
       </Step>
 
       <Step number={3} title="Présentez vos élèves">
-        {slot !== undefined && (
+        {ONLINE_MEETINGS_ENABLED && slot !== undefined && (
           <div className="flex flex-col gap-1.5">
             <span aria-hidden="true" className="text-[13px] font-extrabold text-ink">
               Format

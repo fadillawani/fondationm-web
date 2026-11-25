@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { PageTitle } from '../../components/layout/PageTitle'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { errorMessage } from '../../api/errors'
 import { useCurrentUser } from '../../auth/currentUserContext'
 import { Alert } from '../../components/ui/Alert'
@@ -13,11 +13,13 @@ import { Spinner } from '../../components/ui/Spinner'
 import { parseIso } from '../../lib/dateTime'
 import { normalizeName, sameName } from '../../lib/normalize'
 import { SECTORS, type Sector } from '../../lib/referenceData'
+import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
 import { useNow } from '../../lib/useNow'
-import { NetworkSection } from './NetworkSection'
+import { NetworkSection, type ChosenCity } from './NetworkSection'
 import { useSchoolMeetings, type SchoolMeeting } from './meetingsData'
 import { RefusalBanner } from './RefusalBanner'
 import {
+  countByCity,
   useDirectory,
   useSpeakerStats,
   type CityCount,
@@ -31,6 +33,23 @@ import { FILTER_SECTORS, sectorName } from './sectorStyle'
 const MY_ZONE = 'ma-zone'
 const ALL_ZONES = 'toutes'
 const REFUSAL_WINDOW_MS = 14 * 24 * 60 * 60 * 1000
+/** Titre de la liste « À {ville} », cible du lien « et {n} autres personnes » du panneau. */
+const CITY_LIST_ID = 'liste-ville'
+
+/**
+ * Chiffres par ville sous filtres : les villes des statistiques gardent leur place (0 si aucun intervenant ne
+ * correspond), suivies des villes trouvées seulement dans l'annuaire filtré.
+ */
+function mergeCounts(stats: readonly CityCount[], filtered: readonly CityCount[]): CityCount[] {
+  const merged = stats.map((entry) => ({
+    ...entry,
+    count: filtered.find((item) => sameName(item.city, entry.city) && (!item.country || !entry.country || sameName(item.country, entry.country)))?.count ?? 0,
+  }))
+  for (const item of filtered) {
+    if (!merged.some((entry) => sameName(entry.city, item.city))) merged.push(item)
+  }
+  return merged.toSorted((a, b) => b.count - a.count)
+}
 
 type SectorChoice = Sector | 'TOUS'
 type FormatChoice = MeetingFormat | 'TOUS'
@@ -65,21 +84,25 @@ function SpeakerGrid({ speakers, showCity }: { speakers: readonly SpeakerSummary
 
 interface SectionProps {
   title: string
+  /** Identifiant du titre (cible de lien, focus géré : tabIndex -1). */
+  headingId?: string
   filter: DirectoryFilter
   exclude?: (speaker: SpeakerSummary) => boolean
   showCity?: boolean
   emptyText: string
   /** Lignes compactes sur mobile (maquette : « Autres zones · en ligne »). */
   compactOnMobile?: boolean
+  /** Sous la liste, vide ou non (F6.1 : « Voir les intervenants des autres zones »). */
+  footer?: ReactNode
 }
 
-function DirectorySection({ title, filter, exclude, showCity, emptyText, compactOnMobile = false }: SectionProps) {
+function DirectorySection({ title, headingId: givenId, filter, exclude, showCity, emptyText, compactOnMobile = false, footer }: SectionProps) {
   const directory = useDirectory(filter)
   const speakers = (directory.data?.items ?? []).filter((speaker) => !exclude?.(speaker))
-  const headingId = `section-${normalizeName(title).replace(/[^a-z0-9]+/g, '-')}`
+  const headingId = givenId ?? `section-${normalizeName(title).replace(/[^a-z0-9]+/g, '-')}`
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-4">
-      <h2 id={headingId} className="text-xl uppercase text-ink lg:text-2xl">
+      <h2 id={headingId} tabIndex={givenId ? -1 : undefined} className="scroll-mt-4 text-xl uppercase text-ink outline-none lg:text-2xl">
         {title.split(' · ')[0]}{' '}
         <span className="font-sans text-[13px] font-extrabold normal-case text-muted lg:text-[15px]">
           {title.includes(' · ')
@@ -120,6 +143,7 @@ function DirectorySection({ title, filter, exclude, showCity, emptyText, compact
           )}
         </>
       )}
+      {!directory.isPending && !directory.isError && footer}
     </section>
   )
 }
@@ -133,7 +157,6 @@ export function SpeakersPage() {
   const stats = useSpeakerStats()
   const meetings = useSchoolMeetings()
   const [sheet, setSheet] = useState<Sheet>(null)
-  const [selectedCity, setSelectedCity] = useState<CityCount | null>(null)
 
   const school = user.details?.kind === 'school' ? user.details : null
   const myCity = school?.city ?? ''
@@ -141,14 +164,25 @@ export function SpeakersPage() {
   const zoneParam = params.get('zone') ?? MY_ZONE
   const zone = zoneParam === MY_ZONE && !myCity ? ALL_ZONES : zoneParam
   const sector = SECTORS.find((value) => value === params.get('secteur'))
-  const format = (['IN_PERSON', 'ONLINE'] as const).find((value) => value === params.get('format'))
+  // En classe seulement (F6.1) : le paramètre `format` est ignoré et aucun filtre de format n'est envoyé (point ouvert 13).
+  const format = ONLINE_MEETINGS_ENABLED ? (['IN_PERSON', 'ONLINE'] as const).find((value) => value === params.get('format')) : undefined
   const q = params.get('q')?.trim() || undefined
   const [search, setSearch] = useState(q ?? '')
 
-  const byCity = stats.data?.byCity ?? []
+  // Chiffres de la carte : statistiques sans filtre ; sous filtre (secteur ou recherche ; format s'il est réactivé), comptage des
+  // intervenants réellement chargés, avec la requête de la liste « Toutes les zones » (cache partagé).
+  const filtered = sector !== undefined || format !== undefined || q !== undefined
+  const allFilter: DirectoryFilter = {
+    ...(sector ? { sector } : {}),
+    ...(q ? { q } : {}),
+    ...(format ? { format } : {}),
+  }
+  const matching = useDirectory(allFilter, filtered)
+  const statsByCity = stats.data?.byCity ?? []
+  const byCity = filtered && matching.data ? mergeCounts(statsByCity, countByCity(matching.data.items)) : statsByCity
+  const total = filtered && matching.data ? matching.data.items.length : (stats.data?.total ?? 0)
+  const partial = filtered && matching.data?.truncated === true
   const otherCities = byCity.filter((entry) => !sameName(entry.city, myCity))
-  const myCityEntry = byCity.find((entry) => sameName(entry.city, myCity)) ?? (myCity ? { city: myCity, country: myCountry, count: 0 } : null)
-  const panelCity = selectedCity ?? myCityEntry ?? byCity[0] ?? null
   const refusal = latestRefusal(meetings.data?.items ?? [], now)
 
   function update(changes: Record<string, string | null>) {
@@ -172,6 +206,13 @@ export function SpeakersPage() {
   const isMine = (speaker: SpeakerSummary) =>
     sameName(speaker.city, myCity) && (!myCountry || !speaker.country || sameName(speaker.country, myCountry))
   const zoneCity = zone === MY_ZONE || zone === ALL_ZONES ? null : byCity.find((entry) => sameName(entry.city, zone))
+  // Un seul état : la ville choisie se déduit de `?zone=` (carte, pastilles, select, feuille mobile, listes).
+  const selected: ChosenCity | null =
+    zone === MY_ZONE ? { city: myCity, country: myCountry } : zone === ALL_ZONES ? null : { city: zoneCity?.city ?? zone, country: zoneCity?.country ?? '' }
+  const cityFilter: DirectoryFilter | null = selected
+    ? { ...allFilter, city: selected.city, ...(selected.country ? { country: selected.country } : {}) }
+    : null
+  const people = useDirectory(cityFilter ?? allFilter, cityFilter !== null)
   const zoneLabel =
     zone === MY_ZONE ? `${myCity} (ma zone)` : zone === ALL_ZONES ? 'Toutes les zones' : (zoneCity?.city ?? zone)
   const sectorValue: SectorChoice = sector ?? 'TOUS'
@@ -181,6 +222,10 @@ export function SpeakersPage() {
     ...(myCity ? [{ value: MY_ZONE, label: `${myCity} (ma zone)` }] : []),
     { value: ALL_ZONES, label: 'Toutes les zones' },
     ...otherCities.map((entry) => ({ value: entry.city, label: entry.city })),
+    // Ville choisie sur la carte sans intervenant dans les statistiques : option ajoutée pour rester synchronisé.
+    ...(selected && zone !== MY_ZONE && !otherCities.some((entry) => sameName(entry.city, selected.city))
+      ? [{ value: zone, label: selected.city }]
+      : []),
   ]
   const sectorOptions: { value: SectorChoice; label: string }[] = [
     { value: 'TOUS', label: 'Tous' },
@@ -195,6 +240,33 @@ export function SpeakersPage() {
   const setSector = (value: SectorChoice) => update({ secteur: value === 'TOUS' ? null : value })
   const setFormat = (value: FormatChoice) => update({ format: value === 'TOUS' ? null : value })
   const setZone = (value: string) => update({ zone: value === MY_ZONE ? null : value })
+
+  // En classe seulement (F6.1) : plus de section « Autres zones · disponibles en ligne » ; un lien vers toutes les zones.
+  const allZonesSearch = new URLSearchParams(params)
+  allZonesSearch.set('zone', ALL_ZONES)
+  const otherZonesLink = (
+    <Link
+      to={{ search: `?${allZonesSearch.toString()}` }}
+      replace
+      className="inline-flex min-h-touch items-center self-start text-sm font-extrabold text-indigo underline underline-offset-2 hover:text-ink"
+    >
+      Voir les intervenants des autres zones
+    </Link>
+  )
+
+  /**
+   * Carte et pastilles (Carte-Q1) : la ville de l'école donne « ma zone » ; une autre ville, `?zone={ville}` ;
+   * re-cliquer la ville choisie revient à « ma zone » (ou « Toutes les zones » sans ville d'école).
+   */
+  const selectCity = (city: string) => {
+    const isSchoolCity = myCity !== '' && sameName(city, myCity)
+    if (selected !== null && sameName(selected.city, city)) {
+      if (zone === MY_ZONE) return
+      setZone(myCity ? MY_ZONE : ALL_ZONES)
+      return
+    }
+    setZone(isSchoolCity ? MY_ZONE : city)
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -251,18 +323,20 @@ export function SpeakersPage() {
           </span>
           <ChoiceGroup label="Secteur" value={sectorValue} onChange={setSector} options={sectorOptions} look="filter" />
         </div>
-        <label className="flex flex-col gap-1.5 text-xs font-black uppercase tracking-[0.08em] text-muted">
-          Format
-          <Select
-            className="h-11 font-bold normal-case tracking-normal"
-            value={formatValue} onChange={(event) => setFormat(event.target.value === 'IN_PERSON' ? 'IN_PERSON' : event.target.value === 'ONLINE' ? 'ONLINE' : 'TOUS')}>
-            {formatOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-        </label>
+        {ONLINE_MEETINGS_ENABLED && (
+          <label className="flex flex-col gap-1.5 text-xs font-black uppercase tracking-[0.08em] text-muted">
+            Format
+            <Select
+              className="h-11 font-bold normal-case tracking-normal"
+              value={formatValue} onChange={(event) => setFormat(event.target.value === 'IN_PERSON' ? 'IN_PERSON' : event.target.value === 'ONLINE' ? 'ONLINE' : 'TOUS')}>
+              {formatOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          </label>
+        )}
       </section>
 
       {/* B8 — pastilles-filtres mobiles (40 px) ; la zone est mise en avant en indigo / crème. */}
@@ -281,13 +355,15 @@ export function SpeakersPage() {
         >
           Secteur{sector ? ` · ${sectorName(sector)}` : ''}
         </button>
-        <button
-          type="button"
-          onClick={() => setSheet('format')}
-          className="inline-flex min-h-10 shrink-0 items-center rounded-pill border-2 border-line bg-surface px-3 text-[13px] font-extrabold text-ink"
-        >
-          Format{format ? ` · ${FORMAT_LABEL[format]}` : ''}
-        </button>
+        {ONLINE_MEETINGS_ENABLED && (
+          <button
+            type="button"
+            onClick={() => setSheet('format')}
+            className="inline-flex min-h-10 shrink-0 items-center rounded-pill border-2 border-line bg-surface px-3 text-[13px] font-extrabold text-ink"
+          >
+            Format{format ? ` · ${FORMAT_LABEL[format]}` : ''}
+          </button>
+        )}
       </div>
 
       <Modal
@@ -296,7 +372,7 @@ export function SpeakersPage() {
         onClose={() => setSheet(null)}
       >
         <ul className="flex flex-col gap-2">
-          {(sheet === 'zone' ? zoneOptions : sheet === 'secteur' ? sectorOptions : formatOptions).map((option) => {
+          {(sheet === 'zone' ? zoneOptions : sheet === 'secteur' ? sectorOptions : sheet === 'format' ? formatOptions : []).map((option) => {
             const current = sheet === 'zone' ? zone : sheet === 'secteur' ? sectorValue : formatValue
             return (
               <li key={option.value}>
@@ -329,11 +405,15 @@ export function SpeakersPage() {
         <>
           <NetworkSection
             byCity={byCity}
-            total={stats.data.total}
+            total={total}
+            filtered={filtered}
+            partial={partial}
             myCity={myCity}
             myCountry={myCountry}
-            selected={panelCity}
-            onSelect={setSelectedCity}
+            selected={selected}
+            people={people.data ? { items: people.data.items, total: people.data.items.length } : null}
+            listAnchor={CITY_LIST_ID}
+            onSelect={selectCity}
           />
         </>
       ) : null}
@@ -342,10 +422,12 @@ export function SpeakersPage() {
         <>
           <DirectorySection
             title={`À ${myCity} · {n}`}
-            filter={{ ...common, city: myCity, ...(myCountry ? { country: myCountry } : {}), ...(format ? { format } : {}) }}
+            headingId={CITY_LIST_ID}
+            filter={cityFilter ?? allFilter}
             emptyText={`Aucun intervenant à ${myCity} pour ces critères.`}
+            footer={ONLINE_MEETINGS_ENABLED ? undefined : otherZonesLink}
           />
-          {format !== 'IN_PERSON' && (
+          {ONLINE_MEETINGS_ENABLED && format !== 'IN_PERSON' && (
             <DirectorySection
               title="Autres zones · disponibles en ligne"
               filter={{ ...common, format: 'ONLINE' }}
@@ -359,19 +441,15 @@ export function SpeakersPage() {
       ) : zone === ALL_ZONES ? (
         <DirectorySection
           title="Toutes les zones · {n}"
-          filter={{ ...common, ...(format ? { format } : {}) }}
+          filter={allFilter}
           showCity
           emptyText="Aucun intervenant ne correspond à ces critères."
         />
       ) : (
         <DirectorySection
           title={`À ${zoneCity?.city ?? zone} · {n}`}
-          filter={{
-            ...common,
-            city: zoneCity?.city ?? zone,
-            ...(zoneCity?.country ? { country: zoneCity.country } : {}),
-            ...(format ? { format } : {}),
-          }}
+          headingId={CITY_LIST_ID}
+          filter={cityFilter ?? allFilter}
           emptyText={`Aucun intervenant à ${zoneCity?.city ?? zone} pour ces critères.`}
         />
       )}
