@@ -75,3 +75,71 @@
     display: none;
   }
 }
+
+/*
+ * Vitrine « / » (F14, décision 147) : animations légères, uniquement sur transform et opacity, toutes coupées par
+ * prefers-reduced-motion. L'état par défaut est l'état final : sans JavaScript ou animations réduites, tout est visible.
+ */
+@keyframes vitrine-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes vitrine-sway {
+  from {
+    transform: rotate(-2.5deg);
+  }
+  to {
+    transform: rotate(2.5deg);
+  }
+}
+
+@keyframes vitrine-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Le fil jaune se dessine une fois (cadre de découpe qui s'élargit de gauche à droite). */
+  .vitrine-draw {
+    transform-box: fill-box;
+    transform-origin: left center;
+    animation: vitrine-draw 1.5s ease-out 0.3s both;
+  }
+
+  .vitrine-sway {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: vitrine-sway 3.6s ease-in-out infinite alternate;
+  }
+
+  .vitrine-slide {
+    animation: vitrine-slide 48s linear infinite;
+  }
+
+  .vitrine .vitrine-lift,
+  .vitrine .vitrine-card {
+    transition: translate 0.2s ease-out;
+  }
+
+  /* Apparition au défilement : seulement si useReveal a posé .vitrine-anime ; un élément focalisé reste visible. */
+  .vitrine-anime [data-reveal] {
+    transition:
+      opacity 0.7s ease-out,
+      transform 0.7s ease-out,
+      translate 0.2s ease-out;
+  }
+
+  .vitrine-anime [data-reveal]:not(.is-visible):not(:focus-within) {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}

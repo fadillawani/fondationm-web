@@ -85,6 +85,8 @@ src/
                       en-tête de page PageTitle, menu du compte UserMenu, thèmes par persona roleTheme)
   components/calendar/ calendrier mensuel accessible partagé (MonthTable)
   pages/              connexion, compte en attente / refusé, mot de passe, 404, puis un dossier par espace
+    home/             vitrine publique « / » (textes, menu « Se connecter », illustrations SVG,
+                      animations légères coupées par prefers-reduced-motion)
     register/         choix du type de compte, inscription établissement et intervenant (schémas Zod)
     status/           frise et récapitulatif de la page d'attente
     foundation/       espace Fondation : comptes à valider (liste, détail, validation, refus)
@@ -108,7 +110,8 @@ src/
 
 | Route | Accès | Page |
 | --- | --- | --- |
-| `/connexion` | public (connecté → accueil) | Connexion établissement (et page par défaut) |
+| `/` | public sans jeton ; connecté → son espace | Vitrine « Les Tisseurs de Destin » : projet, fonctionnement, accès par profil (aucun appel à l'API) |
+| `/connexion` | public (connecté → accueil) | Connexion établissement (page par défaut des pages protégées sans jeton) |
 | `/connexion/intervenant` | public (connecté → accueil) | Connexion intervenant |
 | `/connexion/fondation` | public (connecté → accueil) | Connexion de l'équipe Fondation M |
 | `/connexion/donateur` | public (connecté → accueil) | Connexion donateur |

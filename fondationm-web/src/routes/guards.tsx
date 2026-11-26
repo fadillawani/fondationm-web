@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, type ReactNode } from 'react'
-import { Navigate, Outlet } from 'react-router'
+import { Navigate, Outlet, useLocation } from 'react-router'
 import { errorMessage } from '../api/errors'
 import type { Role } from '../auth/currentUser'
 import { CurrentUserContext, useCurrentUser } from '../auth/currentUserContext'
@@ -10,6 +10,7 @@ import { ROLE_HOME, destinationFor, loginPathFor } from '../auth/roles'
 import { tokenStorage } from '../auth/tokenStorage'
 import { CenteredLayout } from '../components/layout/CenteredLayout'
 import { ErrorState } from '../components/ui/ErrorState'
+import { HomePage } from '../pages/home/HomePage'
 import { Spinner } from '../components/ui/Spinner'
 
 export function GuestOnly({ children }: { children: ReactNode }) {
@@ -19,6 +20,7 @@ export function GuestOnly({ children }: { children: ReactNode }) {
 
 export function RequireAuth() {
   const token = tokenStorage.get()
+  const { pathname } = useLocation()
   const me = useQuery({ ...meQuery, enabled: token !== null })
   const queryClient = useQueryClient()
 
@@ -31,7 +33,8 @@ export function RequireAuth() {
     [queryClient],
   )
 
-  if (token === null) return <Navigate to={loginPathFor(lastRole.get())} replace />
+  // Visiteur sans jeton : la vitrine à « / » (F14, décision 137), la connexion de son dernier rôle ailleurs.
+  if (token === null) return pathname === '/' ? <HomePage /> : <Navigate to={loginPathFor(lastRole.get())} replace />
 
   if (me.isPending) {
     return (
