@@ -1,6 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router'
 import type { Role } from '../auth/currentUser'
-import { PATHS, ROLE_HOME } from '../auth/roles'
+import { PATHS, ROLE_HOME, profilePath } from '../auth/roles'
 import { AppLayout } from '../components/layout/AppLayout'
 import { RootLayout } from '../components/layout/RootLayout'
 import { AccountsPage } from '../pages/foundation/AccountsPage'
@@ -16,12 +16,13 @@ import { AgendaPage } from '../pages/speaker/AgendaPage'
 import { ImpactPage as DonorImpactPage } from '../pages/donor/ImpactPage'
 import { RequestsPage as DonorRequestsOwnPage } from '../pages/donor/RequestsPage'
 import { RequestsPage } from '../pages/speaker/RequestsPage'
-import { HomePage } from '../pages/HomePage'
+import { StudentHomePage } from '../pages/student/StudentHomePage'
 import { MeetingRequestPage } from '../pages/school/MeetingRequestPage'
 import { EstablishmentPage } from '../pages/school/establishment/EstablishmentPage'
 import { MeetingsPage } from '../pages/school/MeetingsPage'
 import { SpeakersPage } from '../pages/school/SpeakersPage'
 import { MustChangePasswordPage } from '../pages/MustChangePasswordPage'
+import { ProfilePage } from '../pages/profile/ProfilePage'
 import { DonorLoginPage } from '../pages/login/DonorLoginPage'
 import { FoundationLoginPage } from '../pages/login/FoundationLoginPage'
 import { SchoolLoginPage } from '../pages/login/SchoolLoginPage'
@@ -76,7 +77,8 @@ function rolePages(role: Role): RouteObject[] {
       { path: PATHS.donorRequests, element: <DonorRequestsOwnPage /> },
     ]
   }
-  return [{ path: ROLE_HOME[role], element: <HomePage /> }]
+  // Élève (F11) : l'accueil provisoire est remplacé par « Mon espace ».
+  return [{ path: ROLE_HOME.STUDENT, element: <StudentHomePage /> }]
 }
 
 export const routes: RouteObject[] = [
@@ -129,7 +131,7 @@ export const routes: RouteObject[] = [
               children: [
                 {
                   element: <AppLayout />,
-                  children: rolePages(role),
+                  children: [...rolePages(role), { path: profilePath(role), element: <ProfilePage /> }],
                 },
               ],
             }),

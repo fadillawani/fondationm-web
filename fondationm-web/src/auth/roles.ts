@@ -58,6 +58,11 @@ export const ROLE_HOME: Record<Role, string> = {
   STUDENT: '/eleve',
 }
 
+/** « Mon profil » de chaque espace (F13). */
+export function profilePath(role: Role): string {
+  return `${ROLE_HOME[role]}/profil`
+}
+
 /** Page de connexion de chaque persona ; sans rôle connu, celle de l'établissement. */
 export function loginPathFor(role: Role | null): string {
   switch (role) {
@@ -122,6 +127,9 @@ const SCHOOL_NAV: NavItem[] = [
   { label: 'Mon établissement', short: 'Établissement', icon: 'school', to: PATHS.schoolEstablishment },
 ]
 
+/** Une seule entrée : pas de navigation basse sur mobile (décision 112) ; l'avatar ouvre le menu du compte. */
+const STUDENT_NAV: NavItem[] = [{ label: 'Les rencontres de ma classe', short: 'Rencontres', icon: 'meetings', to: ROLE_HOME.STUDENT, mobile: false }]
+
 const DONOR_NAV: NavItem[] = [
   { label: "Rapport d'impact", short: 'Impact', icon: 'dashboard', to: PATHS.donorImpact },
   { label: 'Mes requêtes', short: 'Requêtes', icon: 'requests', to: PATHS.donorRequests, badge: 'myOpenRequests' },
@@ -132,6 +140,7 @@ export function navItemsFor(role: Role): NavItem[] {
   if (role === 'SCHOOL') return SCHOOL_NAV
   if (role === 'SPEAKER') return SPEAKER_NAV
   if (role === 'DONOR') return DONOR_NAV
+  if (role === 'STUDENT') return STUDENT_NAV
   return [{ to: ROLE_HOME[role], label: 'Accueil', short: 'Accueil', icon: 'home' }]
 }
 
@@ -141,6 +150,7 @@ export const ROLE_TAGLINE: Partial<Record<Role, string>> = {
   SPEAKER: 'Espace intervenant',
   SCHOOL: 'Espace établissement',
   DONOR: 'Espace donateur',
+  STUDENT: 'Espace élève',
 }
 
 export interface AccountCard {
@@ -148,6 +158,9 @@ export interface AccountCard {
   /** Nombre d'initiales affichées. */
   initials: number
   detail: string
+  /** Photo (intervenant) ou logo (école), F13 ; jamais pour les autres rôles. */
+  photoUrl?: string | null
+  photoKind?: 'photo' | 'logo'
 }
 
 /** Carte utilisateur du bas de la barre latérale. */
@@ -159,11 +172,16 @@ export function accountCard(user: CurrentUser): AccountCard {
   }
   if (user.role === 'SCHOOL' && user.details?.kind === 'school') {
     // Maquette : nom du référent + « {Établissement} · {ville} » ; le référent est absent du contrat.
-    return { name: user.displayName, initials: 2, detail: user.details.city || user.email }
+    return { name: user.displayName, initials: 2, detail: user.details.city || user.email, photoUrl: user.details.photoUrl, photoKind: 'logo' }
   }
   if (user.role === 'SPEAKER' && user.details?.kind === 'speaker') {
     const detail = [user.details.jobTitle, user.details.city].filter(Boolean).join(' · ')
-    return { name: user.displayName, initials: 2, detail: detail || user.email }
+    return { name: user.displayName, initials: 2, detail: detail || user.email, photoUrl: user.details.photoUrl, photoKind: 'photo' }
+  }
+  if (user.role === 'STUDENT') {
+    // Maquette : « Terminale S2 · Lycée de Sor » ; aucun établissement dans le profil, l'e-mail généré n'est pas montré.
+    const classTitle = user.details?.kind === 'student' ? user.details.classTitle : ''
+    return { name: user.displayName, initials: 2, detail: classTitle || 'Élève' }
   }
   return { name: user.displayName, initials: 1, detail: user.email }
 }

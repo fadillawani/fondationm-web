@@ -3,6 +3,7 @@ import { schoolRequestPath } from '../../auth/roles'
 import { cn } from '../../lib/cn'
 import { formatCompactDay, formatTime, parseIso } from '../../lib/dateTime'
 import { initialsOf } from '../../lib/initials'
+import { Avatar } from '../../components/ui/Avatar'
 import type { SpeakerSummary } from './schoolData'
 import { sectorName, sectorStyle } from './sectorStyle'
 
@@ -24,8 +25,9 @@ export function SpeakerAvatar({
   className?: string
 }) {
   return (
-    <span
-      aria-hidden="true"
+    <Avatar
+      photoUrl={speaker.photoUrl}
+      kind="photo"
       className={cn(
         'inline-flex shrink-0 items-center justify-center font-display leading-none',
         AVATAR_SIZES[size],
@@ -34,7 +36,7 @@ export function SpeakerAvatar({
       )}
     >
       {initialsOf(speaker.fullName)}
-    </span>
+    </Avatar>
   )
 }
 

@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, unwrap } from '../../api/client'
-import { errorFromException, invalidResponseError } from '../../api/errors'
+import { ApiError, ERROR_CODES, errorFromException, invalidResponseError } from '../../api/errors'
 import { FETCH_PAGE_SIZE, fetchAllPages } from '../../api/paging'
 import { asRecord, integer, oneOf, text } from '../../api/wire'
 import type { FeedbackRole } from './feedbackText'
@@ -170,9 +170,14 @@ export function useSaveFeedback(role: FeedbackRole) {
       try {
         return await sent(send(role, 'POST', meetingId, body))
       } catch (error) {
+        // FEEDBACK_ALREADY_EXISTS (doublon documenté) ou erreur sans champ : relecture, puis un seul PATCH (décision 93).
         if (errorFromException(error).fieldErrors.length > 0) throw error
         const written = await queryClient.fetchQuery({ ...writtenFeedbacksQuery(role), staleTime: 0 })
         const duplicate = written.items.find((feedback) => feedback.meetingId === meetingId)
+        if (duplicate?.status === 'PUBLISHED') {
+          // Retour déjà validé : aucun PATCH, message du code FEEDBACK_PUBLISHED (décision 127).
+          throw new ApiError({ status: 409, code: ERROR_CODES.FEEDBACK_PUBLISHED, message: '' })
+        }
         if (duplicate?.status !== 'SUBMITTED') throw error
         return sent(send(role, 'PATCH', meetingId, body))
       }

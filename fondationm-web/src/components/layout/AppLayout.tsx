@@ -2,9 +2,10 @@ import type { ComponentType } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { useCurrentUser } from '../../auth/currentUserContext'
 import { useLogout } from '../../auth/hooks'
-import { ROLE_TAGLINE, accountCard, navItemsFor, type NavIcon, type NavItem } from '../../auth/roles'
+import { ROLE_TAGLINE, accountCard, navItemsFor, profilePath, type NavIcon, type NavItem } from '../../auth/roles'
 import { cn } from '../../lib/cn'
 import { initialsOf } from '../../lib/initials'
+import { Avatar } from '../ui/Avatar'
 import { useNavBadges } from '../../nav/badges'
 import {
   AccountsIcon,
@@ -121,17 +122,28 @@ export function AppLayout() {
         </nav>
         <div className="flex flex-col gap-2">
           <div className={cn('flex items-center gap-3 rounded-2xl p-3.5', theme.card)}>
-            <span
-              aria-hidden="true"
+            <Avatar
+              photoUrl={card.photoUrl}
+              kind={card.photoKind ?? 'photo'}
               className={cn('inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] font-display text-lg', theme.avatar)}
             >
               {initialsOf(card.name, card.initials)}
-            </span>
+            </Avatar>
             <div className="flex min-w-0 flex-col">
               <span className="truncate text-sm font-black text-white">{card.name}</span>
               <span className="truncate text-xs font-bold text-canvas">{card.detail}</span>
             </div>
           </div>
+          <NavLink
+            to={profilePath(user.role)}
+            className={cn(
+              'inline-flex min-h-touch items-center gap-2 self-start rounded-[12px] px-3.5 text-sm font-extrabold focus-visible:outline-2 focus-visible:outline-offset-2',
+              theme.link,
+              theme.focus,
+            )}
+          >
+            Mon profil
+          </NavLink>
           <button
             type="button"
             onClick={logout}
@@ -147,12 +159,14 @@ export function AppLayout() {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0">
+      {/* Sans entrée mobile (élève), pas de navigation basse ni de marge réservée. */}
+      <div className={cn('flex min-w-0 flex-1 flex-col lg:pb-0', mobileItems.length > 0 && 'pb-24')}>
         <main id="contenu" tabIndex={-1} className="mx-auto w-full max-w-[1180px] flex-1 px-4 pb-6 pt-[18px] lg:px-8 lg:pb-10 lg:pt-7">
           <Outlet />
         </main>
       </div>
 
+      {mobileItems.length > 0 && (
       <nav
         aria-label="Navigation principale"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface px-2 pb-[max(22px,env(safe-area-inset-bottom))] pt-2 lg:hidden"
@@ -189,6 +203,7 @@ export function AppLayout() {
           })}
         </ul>
       </nav>
+      )}
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { Initials } from '../../components/ui/Initials'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { errorFromException, errorMessage } from '../../api/errors'
@@ -146,7 +147,10 @@ function MeetingDetail({ item, meeting }: { item: AgendaItem; meeting: Meeting }
   return (
     <>
       <div className="flex flex-col gap-1">
-        <h3 className="text-[21px] lg:text-[23px]">{meeting.schoolName}</h3>
+        <div className="flex items-center gap-3">
+          <Initials name={meeting.schoolName} tone="school" photoUrl={meeting.schoolPhotoUrl} />
+          <h3 className="text-[21px] lg:text-[23px]">{meeting.schoolName}</h3>
+        </div>
         {classLine(meeting) && <p className="text-[13px] font-bold text-muted lg:text-sm">{classLine(meeting)}</p>}
       </div>
       <dl className="grid grid-cols-[64px_1fr] gap-x-3 gap-y-1.5 text-sm">

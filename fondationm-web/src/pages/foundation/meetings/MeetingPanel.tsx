@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Initials } from '../../../components/ui/Initials'
 import { Link } from 'react-router'
 import { errorFromException } from '../../../api/errors'
 import { PATHS, foundationFeedbackPath } from '../../../auth/roles'
@@ -107,9 +108,12 @@ export function MeetingPanel({ meeting: listed, group, now, onPin }: MeetingPane
           {look.label}
         </span>
       </div>
-      <div className="flex flex-col gap-0.5">
-        <h2 className="text-xl leading-[1.1] lg:text-[23px]">{school}</h2>
-        <span className="text-[13px] font-extrabold text-muted lg:text-sm">avec {meeting.speakerName}</span>
+      <div className="flex items-center gap-3">
+        <Initials name={meeting.schoolName} tone="school" photoUrl={meeting.schoolPhotoUrl} />
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <h2 className="text-xl leading-[1.1] lg:text-[23px]">{school}</h2>
+          <span className="text-[13px] font-extrabold text-muted lg:text-sm">avec {meeting.speakerName}</span>
+        </div>
       </div>
       <span className="text-[13px] font-extrabold lg:hidden">{[time, classe].filter(Boolean).join(' · ')}</span>
       <dl className="hidden grid-cols-[64px_1fr] gap-x-3 gap-y-1.5 text-sm lg:grid">

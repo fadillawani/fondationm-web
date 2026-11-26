@@ -136,7 +136,8 @@ describe('Retour d’expérience de l’école (W1-E6)', () => {
     store.written.push(feedbackJson(COMPLETED_TO_WRITE.id, { status: 'PUBLISHED' }))
     await user.click(screen.getByRole('button', { name: 'Partager mon retour' }))
 
-    expect(await screen.findByText('Un retour existe déjà.')).toBeInTheDocument()
+    expect(await screen.findByText('Ce retour a déjà été validé par la Fondation M : il ne peut plus être modifié.')).toBeInTheDocument()
+    expect(await screen.findByText('Retour validé')).toBeInTheDocument()
     expect(bodies.map((body) => body.method)).toEqual(['POST'])
   })
 

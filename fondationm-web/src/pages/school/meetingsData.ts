@@ -3,6 +3,7 @@ import { api, unwrap } from '../../api/client'
 import { FETCH_PAGE_SIZE, fetchAllPages } from '../../api/paging'
 import { asRecord, integer, oneOf, text } from '../../api/wire'
 import { parseIso } from '../../lib/dateTime'
+import { readPhotoUrl } from '../../lib/photo'
 import { useNow } from '../../lib/useNow'
 import { useAwaitingFeedbacks, useWrittenFeedbacks } from '../feedback/feedbackData'
 
@@ -19,6 +20,8 @@ export interface SchoolMeeting {
   speakerId: string | null
   speakerName: string
   speakerCity: string
+  /** Photo de l'intervenant (F13), facultative. */
+  speakerPhotoUrl: string | null
   classTitle: string
   studentCount: number | null
   startAt: string
@@ -54,6 +57,7 @@ export function readSchoolMeeting(value: unknown): SchoolMeeting | null {
     speakerId: speaker && text(speaker, 'id'),
     speakerName: (speaker && text(speaker, 'fullName')) ?? 'Intervenant',
     speakerCity: (speaker && text(speaker, 'city')) ?? '',
+    speakerPhotoUrl: readPhotoUrl(speaker),
     classTitle: (schoolClass && text(schoolClass, 'title')) ?? '',
     studentCount: schoolClass && integer(schoolClass, 'studentCount'),
     startAt,

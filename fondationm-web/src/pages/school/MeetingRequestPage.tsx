@@ -32,6 +32,7 @@ import {
   type SpeakerDetail,
 } from './schoolData'
 import { initialsOf } from '../../lib/initials'
+import { Avatar } from '../../components/ui/Avatar'
 
 const FORMAT_LABEL: Record<MeetingFormat, string> = { IN_PERSON: 'En classe', ONLINE: 'En ligne' }
 
@@ -502,12 +503,13 @@ export function MeetingRequestPage() {
             aria-labelledby="vous-invitez"
             className="flex items-start gap-3.5 rounded-[22px] bg-green p-[18px] text-white lg:gap-[18px] lg:rounded-[24px] lg:p-[22px]"
           >
-            <span
-              aria-hidden="true"
+            <Avatar
+              photoUrl={speaker.data.photoUrl}
+              kind="photo"
               className="inline-flex size-14 shrink-0 items-center justify-center rounded-[18px] bg-cream font-display text-[22px] text-green lg:size-[72px] lg:rounded-[22px] lg:text-[28px]"
             >
               {initialsOf(speaker.data.fullName)}
-            </span>
+            </Avatar>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <p id="vous-invitez" className="text-[11px] font-black uppercase tracking-[0.1em] text-cream lg:text-xs">
                 Vous invitez

@@ -14,6 +14,7 @@ import { Textarea } from '../../components/ui/Textarea'
 import { cn } from '../../lib/cn'
 import { MINUTE_MS, formatCompactDay, formatTime, parseIso } from '../../lib/dateTime'
 import { initialsOf } from '../../lib/initials'
+import { Avatar } from '../../components/ui/Avatar'
 import { clearDraft, readDraft, saveDraft } from './feedbackDraft'
 import { useSaveFeedback, type MyFeedback } from './feedbackData'
 import { FeedbackContent } from './FeedbackContent'
@@ -37,6 +38,9 @@ export interface FeedbackMeetingContext {
   /** École : l'intervenant ; intervenant : l'établissement. */
   partnerName: string
   partnerDetail: string
+  /** Photo de l'intervenant (école) ou logo de l'établissement (intervenant), F13. */
+  partnerPhotoUrl?: string | null
+  partnerPhotoKind: 'photo' | 'logo'
   classTitle: string
   studentCount: number | null
   startAt: string | null
@@ -136,9 +140,13 @@ function MeetingAside({ role, context, others }: { role: FeedbackRole; context: 
           <span className="rounded-pill bg-indigo px-2.5 py-1 text-xs font-black text-cream">Réalisée</span>
         </div>
         <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-orange font-display text-[17px] text-ink">
+          <Avatar
+            photoUrl={context.partnerPhotoUrl}
+            kind={context.partnerPhotoKind}
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-orange font-display text-[17px] text-ink"
+          >
             {initialsOf(context.partnerName)}
-          </span>
+          </Avatar>
           <span className="flex min-w-0 flex-col">
             <span className="font-black">{context.partnerName}</span>
             {context.partnerDetail && <span className="text-[13px] font-bold text-muted">{context.partnerDetail}</span>}
@@ -191,9 +199,13 @@ function MobileMeetingCard({ context }: { context: FeedbackMeetingContext }) {
   const when = start ? `${formatCompactDay(start)} · ${start.getHours()}h` : null
   return (
     <div className="flex items-center gap-3 rounded-[18px] bg-surface p-3 lg:hidden">
-      <span aria-hidden="true" className="inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-orange font-display text-[17px] text-ink">
+      <Avatar
+            photoUrl={context.partnerPhotoUrl}
+            kind={context.partnerPhotoKind}
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-orange font-display text-[17px] text-ink"
+          >
         {initialsOf(context.partnerName)}
-      </span>
+      </Avatar>
       <span className="flex min-w-0 flex-col">
         <span className="font-black">{context.partnerName}</span>
         <span className="text-[13px] font-bold text-muted">{[context.classTitle, when].filter(Boolean).join(' · ')}</span>
