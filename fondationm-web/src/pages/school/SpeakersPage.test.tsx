@@ -32,7 +32,7 @@ describe('Espace établissement — navigation', () => {
     expect(router.state.location.pathname).toBe('/ecole/intervenants')
   })
 
-  it('affiche les entrées, les entrées « Bientôt » et la carte de l’établissement', async () => {
+  it('affiche les entrées et la carte de l’établissement', async () => {
     setupSchool()
     renderApp('/ecole/intervenants', { token: true })
 
@@ -40,8 +40,8 @@ describe('Espace établissement — navigation', () => {
     expect(nav.getByRole('link', { name: 'Intervenants' })).toHaveAttribute('href', '/ecole/intervenants')
     expect(nav.getByRole('link', { name: /^Mes rencontres/ })).toHaveAttribute('href', '/ecole/rencontres')
     expect(nav.getByRole('link', { name: 'Mon établissement' })).toHaveAttribute('href', '/ecole/etablissement')
-    expect(nav.queryByRole('link', { name: /Retours d'expérience/ })).not.toBeInTheDocument()
-    expect(nav.getByText("Retours d'expérience").closest('li')).toHaveTextContent('Bientôt')
+    expect(nav.getByRole('link', { name: "Retours d'expérience" })).toHaveAttribute('href', '/ecole/retours')
+    expect(nav.queryByText('Bientôt')).not.toBeInTheDocument()
     const [aside] = screen.getAllByRole('complementary')
     if (aside === undefined) throw new Error('Barre latérale absente')
     expect(within(aside).getByText('Espace établissement')).toBeInTheDocument()
@@ -54,7 +54,7 @@ describe('Espace établissement — navigation', () => {
     expect(within(bottom).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       'Intervenants',
       'Rencontres',
-      'RetoursBientôt',
+      'Retours',
       'Établissement',
     ])
     expect(within(bottom).queryByRole('button')).not.toBeInTheDocument()

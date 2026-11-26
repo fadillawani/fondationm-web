@@ -3,6 +3,7 @@ import { useCallback } from 'react'
 import { useNavigate } from 'react-router'
 import { api, unwrap } from '../api/client'
 import { invalidResponseError } from '../api/errors'
+import { clearAllDrafts } from '../pages/feedback/feedbackDraft'
 import type { components } from '../api/schema'
 import { toCurrentUser, type CurrentUser } from './currentUser'
 import { lastRole } from './lastRole'
@@ -52,6 +53,8 @@ export function useMe() {
  */
 export function endSession(queryClient: QueryClient): void {
   tokenStorage.clear()
+  // Brouillons de retours d'expérience (F9) : rien ne reste sur un ordinateur partagé.
+  clearAllDrafts()
   void queryClient.cancelQueries()
 }
 

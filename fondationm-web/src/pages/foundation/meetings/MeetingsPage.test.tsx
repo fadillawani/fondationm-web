@@ -170,8 +170,10 @@ describe('Rencontres (Fondation)', () => {
 
     expect(await panel().findByText('Soumis')).toBeInTheDocument()
     expect(panel().getByText('Validé')).toBeInTheDocument()
-    expect(panel().getByText("Voir les retours d'expérience")).toBeInTheDocument()
-    expect(panel().getByText('Bientôt')).toBeInTheDocument()
+    expect(panel().getByRole('link', { name: "Voir les retours d'expérience" })).toHaveAttribute(
+      'href',
+      `/fondation/retours?onglet=tous&rencontre=${COMPLETED.id}`,
+    )
   })
 
   it('affiche « Retours indisponibles » et « Réessayer » si les retours ne se chargent pas', async () => {

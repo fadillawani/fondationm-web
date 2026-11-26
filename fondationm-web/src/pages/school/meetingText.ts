@@ -1,4 +1,4 @@
-import { PATHS } from '../../auth/roles'
+import { PATHS, feedbackFormPath } from '../../auth/roles'
 import { dayKey, parseIso } from '../../lib/dateTime'
 import type { FeedbackState, MeetingStatus, SchoolMeeting } from './meetingsData'
 
@@ -59,7 +59,7 @@ export interface MeetingNote {
   text: string
   /** Texte court du mobile (maquette), s'il diffère. */
   mobileText?: string
-  cta?: { label: string; to: string | null }
+  cta?: { label: string; to: string }
 }
 
 /** Bloc de message du détail (textes de la maquette W1-E5 ; deux cas absents validés). */
@@ -119,8 +119,7 @@ export function meetingNote(meeting: SchoolMeeting, feedback: FeedbackState | un
         title: 'Comment cela s’est-il passé ?',
         text: `Racontez-nous ce que vous et vos élèves avez vécu avec ${prenom}.`,
         mobileText: `Racontez-nous ce que vous avez vécu avec ${prenom}.`,
-        // « Retours d'expérience » n'existe pas encore : bouton affiché « Bientôt ».
-        cta: feedback === 'À rédiger' ? { label: 'Partager votre retour d’expérience', to: null } : undefined,
+        cta: feedback === 'À rédiger' ? { label: 'Partager votre retour d’expérience', to: feedbackFormPath('school', meeting.id) } : undefined,
       }
   }
 }

@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { PATHS } from '../../../auth/roles'
+import { PATHS, foundationFeedbackPath } from '../../../auth/roles'
 import { cn } from '../../../lib/cn'
 import { plural } from '../meetings/foundationMeetingState'
 import type { Indicators, Moment } from './dashboardData'
@@ -265,10 +265,12 @@ export function MomentCard({ moment, now }: { moment: Moment; now: Date }) {
           {moment.author}, {moment.context}
         </span>
       </div>
-      <span className="inline-flex min-h-12 items-center gap-2 self-start rounded-[14px] bg-ink px-[18px] text-sm font-black text-cream lg:self-center">
+      <Link
+        to={moment.meetingId === null ? PATHS.foundationFeedbacks : foundationFeedbackPath(moment.meetingId)}
+        className="inline-flex min-h-12 items-center gap-2 self-start rounded-[14px] bg-ink px-[18px] text-sm font-black text-cream lg:self-center"
+      >
         Lire les retours
-        <span className="rounded-pill bg-cream px-2 py-0.5 text-[11px] text-ink">Bientôt</span>
-      </span>
+      </Link>
     </section>
   )
 }

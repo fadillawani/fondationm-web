@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react'
 
 interface ModalProps {
   open: boolean
@@ -6,18 +6,23 @@ interface ModalProps {
   onClose: () => void
   children: ReactNode
   footer?: ReactNode
+  /** Élément qui reçoit le focus à l'ouverture (par défaut, le premier élément focalisable). */
+  initialFocus?: RefObject<HTMLElement | null>
 }
 
-export function Modal({ open, title, onClose, children, footer }: ModalProps) {
+export function Modal({ open, title, onClose, children, footer, initialFocus }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const titleId = useId()
 
   useEffect(() => {
     const dialog = dialogRef.current
     if (dialog === null) return
-    if (open && !dialog.open) dialog.showModal()
+    if (open && !dialog.open) {
+      dialog.showModal()
+      initialFocus?.current?.focus()
+    }
     if (!open && dialog.open) dialog.close()
-  }, [open])
+  }, [open, initialFocus])
 
   return (
     <dialog

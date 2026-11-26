@@ -41,8 +41,8 @@ describe('Espace intervenant — navigation', () => {
       'href',
       '/intervenant/demandes',
     )
-    expect(nav.queryByRole('link', { name: /Mon impact/ })).not.toBeInTheDocument()
-    expect(nav.getByText('Mon impact').closest('li')).toHaveTextContent('Bientôt')
+    expect(nav.getByRole('link', { name: 'Mon impact' })).toHaveAttribute('href', '/intervenant/impact')
+    expect(nav.queryByText('Bientôt')).not.toBeInTheDocument()
     const [aside] = screen.getAllByRole('complementary')
     if (aside === undefined) throw new Error('Barre latérale absente')
     expect(within(aside).getByText('Espace intervenant')).toBeInTheDocument()
@@ -53,7 +53,7 @@ describe('Espace intervenant — navigation', () => {
     expect(within(bottom).getAllByRole('listitem')).toHaveLength(3)
     expect(within(bottom).getByRole('link', { name: 'Mon agenda' })).toBeInTheDocument()
     expect(within(bottom).getByRole('link', { name: 'Demandes reçues 2 en attente' })).toHaveTextContent('Demandes')
-    expect(within(bottom).getByText('Mon impact').closest('li')).toHaveTextContent('Bientôt')
+    expect(within(bottom).getByRole('link', { name: 'Mon impact' })).toHaveAttribute('href', '/intervenant/impact')
   })
 
   it('refuse l’accès à un utilisateur d’un autre rôle', async () => {

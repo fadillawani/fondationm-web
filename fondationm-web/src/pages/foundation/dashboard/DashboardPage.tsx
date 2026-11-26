@@ -1,11 +1,10 @@
-import { useRef, type KeyboardEvent } from 'react'
 import { useSearchParams } from 'react-router'
 import { errorMessage } from '../../../api/errors'
 import { PATHS } from '../../../auth/roles'
 import { PageTitle } from '../../../components/layout/PageTitle'
 import { ErrorState } from '../../../components/ui/ErrorState'
+import { PeriodTabs } from '../../../components/ui/PeriodTabs'
 import { Spinner } from '../../../components/ui/Spinner'
-import { cn } from '../../../lib/cn'
 import { formatDayMonth, parseIso } from '../../../lib/dateTime'
 import { useNow } from '../../../lib/useNow'
 import { useDonorRequests } from '../donors/donorsData'
@@ -30,46 +29,6 @@ function Loading({ label }: { label: string }) {
   return (
     <div className="flex justify-center py-8 text-terra">
       <Spinner label={label} />
-    </div>
-  )
-}
-
-/** Sélecteur « Ce trimestre / Cette année » (contrôle segmenté de la maquette) : onglets, flèches. */
-function PeriodTabs({ value, onChange }: { value: PeriodKind; onChange: (kind: PeriodKind) => void }) {
-  const refs = useRef<Partial<Record<PeriodKind, HTMLButtonElement | null>>>({})
-  function move(event: KeyboardEvent<HTMLButtonElement>, index: number) {
-    const delta = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0
-    if (delta === 0) return
-    event.preventDefault()
-    const next = PERIODS[(index + delta + PERIODS.length) % PERIODS.length]
-    if (next === undefined) return
-    onChange(next)
-    refs.current[next]?.focus()
-  }
-  return (
-    <div role="tablist" aria-label="Période" className="flex gap-1 self-start rounded-[14px] bg-surface p-1">
-      {PERIODS.map((kind, index) => {
-        const active = kind === value
-        return (
-          <button
-            key={kind}
-            ref={(node) => {
-              refs.current[kind] = node
-            }}
-            type="button"
-            role="tab"
-            id={`periode-${kind}`}
-            aria-selected={active}
-            aria-controls={PANEL_ID}
-            tabIndex={active ? 0 : -1}
-            onClick={() => onChange(kind)}
-            onKeyDown={(event) => move(event, index)}
-            className={cn('min-h-touch rounded-[10px] px-3.5 text-sm font-black', active ? 'bg-ink text-cream' : 'text-ink')}
-          >
-            {PERIOD_LABEL[kind]}
-          </button>
-        )
-      })}
     </div>
   )
 }
@@ -123,7 +82,7 @@ export function DashboardPage() {
           detail: 'passées, encore « confirmées »',
           to: PATHS.foundationMeetings,
         },
-        { key: 'retours', count: snap.submittedFeedbacks, label: 'retours à valider', detail: 'avant partage aux donateurs' },
+        { key: 'retours', count: snap.submittedFeedbacks, label: 'retours à valider', detail: 'avant partage aux donateurs', to: PATHS.foundationFeedbacks },
         {
           key: 'requetes',
           count: snap.openDonorRequests,
@@ -159,7 +118,7 @@ export function DashboardPage() {
           subtitle={total === null ? undefined : actionsSentence(total)}
           mobileSubtitle={total === null ? undefined : actionsSentence(total)}
         />
-        <PeriodTabs value={kind} onChange={choosePeriod} />
+        <PeriodTabs value={kind} onChange={choosePeriod} panelId={PANEL_ID} />
       </div>
 
       <section aria-labelledby="a-faire" className="flex flex-col gap-2 lg:gap-3">

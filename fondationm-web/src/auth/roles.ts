@@ -17,12 +17,33 @@ export const PATHS = {
   foundationDonorRequests: '/fondation/requetes',
   foundationRequests: '/fondation/demandes',
   foundationMeetings: '/fondation/rencontres',
+  foundationFeedbacks: '/fondation/retours',
   speakerAgenda: '/intervenant/agenda',
   speakerRequests: '/intervenant/demandes',
+  speakerImpact: '/intervenant/impact',
+  speakerFeedbacks: '/intervenant/retours',
   schoolSpeakers: '/ecole/intervenants',
   schoolMeetings: '/ecole/rencontres',
   schoolEstablishment: '/ecole/etablissement',
+  schoolFeedbacks: '/ecole/retours',
+  donorImpact: '/donateur/impact',
+  donorRequests: '/donateur/requetes',
 } as const
+
+/** Nouvelle requête du donateur, objet prérempli (complément, question sur un retour). */
+export function donorNewRequestPath(subject: string): string {
+  return `${PATHS.donorRequests}?vue=nouvelle&objet=${encodeURIComponent(subject)}`
+}
+
+/** Formulaire de retour d'expérience d'une rencontre (école ou intervenant). */
+export function feedbackFormPath(role: 'school' | 'speaker', meetingId: string): string {
+  return `${role === 'school' ? PATHS.schoolFeedbacks : PATHS.speakerFeedbacks}/${encodeURIComponent(meetingId)}`
+}
+
+/** Retours d'une rencontre dans l'espace Fondation (onglet « Tous » : la rencontre y est toujours). */
+export function foundationFeedbackPath(meetingId: string): string {
+  return `${PATHS.foundationFeedbacks}?onglet=tous&rencontre=${encodeURIComponent(meetingId)}`
+}
 
 /** Demande de rencontre auprès d'un intervenant. */
 export function schoolRequestPath(speakerId: string): string {
@@ -76,14 +97,14 @@ export interface NavItem {
   mobile?: boolean
 }
 
-export type NavBadge = 'pendingAccounts' | 'pendingRequests' | 'upcomingMeetings' | 'awaitingFoundation' | 'meetingsToMark' | 'openDonorRequests'
+export type NavBadge = 'pendingAccounts' | 'pendingRequests' | 'upcomingMeetings' | 'awaitingFoundation' | 'meetingsToMark' | 'openDonorRequests' | 'feedbacksToValidate' | 'myOpenRequests'
 
 const FOUNDATION_NAV: NavItem[] = [
   { label: 'Tableau de bord', short: 'Accueil', icon: 'dashboard', to: PATHS.foundationDashboard },
   { label: 'Comptes à valider', short: 'Comptes', icon: 'accounts', to: PATHS.foundationAccounts, badge: 'pendingAccounts' },
   { label: 'Demandes de rencontre', short: 'Demandes', icon: 'requests', to: PATHS.foundationRequests, badge: 'awaitingFoundation' },
   { label: 'Rencontres', short: 'Rencontres', icon: 'meetings', to: PATHS.foundationMeetings, badge: 'meetingsToMark' },
-  { label: "Retours d'expérience", short: 'Retours', icon: 'feedbacks' },
+  { label: "Retours d'expérience", short: 'Retours', icon: 'feedbacks', to: PATHS.foundationFeedbacks, badge: 'feedbacksToValidate' },
   // La navigation basse mobile de la maquette n'a que 5 entrées.
   { label: 'Requêtes donateurs', short: 'Requêtes', icon: 'donors', mobile: false, to: PATHS.foundationDonorRequests, badge: 'openDonorRequests' },
 ]
@@ -91,20 +112,26 @@ const FOUNDATION_NAV: NavItem[] = [
 const SPEAKER_NAV: NavItem[] = [
   { label: 'Mon agenda', short: 'Agenda', icon: 'meetings', to: PATHS.speakerAgenda },
   { label: 'Demandes reçues', short: 'Demandes', icon: 'requests', to: PATHS.speakerRequests, badge: 'pendingRequests' },
-  { label: 'Mon impact', short: 'Mon impact', icon: 'feedbacks' },
+  { label: 'Mon impact', short: 'Mon impact', icon: 'feedbacks', to: PATHS.speakerImpact },
 ]
 
 const SCHOOL_NAV: NavItem[] = [
   { label: 'Intervenants', short: 'Intervenants', icon: 'accounts', to: PATHS.schoolSpeakers },
   { label: 'Mes rencontres', short: 'Rencontres', icon: 'meetings', to: PATHS.schoolMeetings, badge: 'upcomingMeetings' },
-  { label: "Retours d'expérience", short: 'Retours', icon: 'feedbacks' },
+  { label: "Retours d'expérience", short: 'Retours', icon: 'feedbacks', to: PATHS.schoolFeedbacks },
   { label: 'Mon établissement', short: 'Établissement', icon: 'school', to: PATHS.schoolEstablishment },
+]
+
+const DONOR_NAV: NavItem[] = [
+  { label: "Rapport d'impact", short: 'Impact', icon: 'dashboard', to: PATHS.donorImpact },
+  { label: 'Mes requêtes', short: 'Requêtes', icon: 'requests', to: PATHS.donorRequests, badge: 'myOpenRequests' },
 ]
 
 export function navItemsFor(role: Role): NavItem[] {
   if (role === 'FOUNDATION') return FOUNDATION_NAV
   if (role === 'SCHOOL') return SCHOOL_NAV
   if (role === 'SPEAKER') return SPEAKER_NAV
+  if (role === 'DONOR') return DONOR_NAV
   return [{ to: ROLE_HOME[role], label: 'Accueil', short: 'Accueil', icon: 'home' }]
 }
 
@@ -113,7 +140,7 @@ export const ROLE_TAGLINE: Partial<Record<Role, string>> = {
   FOUNDATION: 'Pilotage du programme',
   SPEAKER: 'Espace intervenant',
   SCHOOL: 'Espace établissement',
-  DONOR: 'Espace mécène',
+  DONOR: 'Espace donateur',
 }
 
 export interface AccountCard {

@@ -88,10 +88,14 @@ src/
     status/           frise et récapitulatif de la page d'attente
     foundation/       espace Fondation : comptes à valider (liste, détail, validation, refus)
     speaker/          espace intervenant : agenda, créneaux, demandes reçues
-    school/           espace établissement : annuaire, carte du réseau, demande de rencontre, mes rencontres
+    school/           espace établissement : annuaire, carte du réseau, demande de rencontre, mes rencontres,
+                      liste des retours d'expérience (feedbacks/)
+    donor/            espace donateur : rapport d'impact, retours publiés, mes requêtes
+    feedback/         retours d'expérience de l'école et de l'intervenant : format du commentaire (feedbackFormat),
+                      règles du formulaire, brouillon de l'onglet, formulaire et lecture partagés
   nav/                compteurs de la navigation (badges)
   routes/             définition des routes et gardes
-  lib/                utilitaires (cn, QueryClient, données de référence, dates, erreurs de formulaire)
+  lib/                utilitaires (cn, QueryClient, données de référence, dates, périodes, erreurs de formulaire)
   styles/theme.css    jetons de design (couleurs, rayons, ombres, espacements, polices)
   test/               configuration et utilitaires de test (API simulée, aucun appel réseau)
 ```
@@ -117,20 +121,30 @@ src/
 | `/fondation/demandes` | connecté, validé, rôle FOUNDATION | Demandes de rencontre (`?onglet=a-traiter\|confirmees\|refusees\|toutes`, `demande={id}`) |
 | `/fondation/rencontres` | connecté, validé, rôle FOUNDATION | Rencontres (`?mois=AAAA-MM`, `rencontre={id}`) |
 | `/fondation/requetes` | connecté, validé, rôle FOUNDATION | Requêtes donateurs et comptes donateurs (`?onglet=requetes\|donateurs`, `requete={id}`) |
+| `/fondation/retours` | connecté, validé, rôle FOUNDATION | Retours d'expérience à valider (`?onglet=a-valider\|valides\|tous`, `rencontre={id}`, `partie=ecole\|intervenant`) |
 | `/intervenant` | connecté, validé, rôle SPEAKER | Redirige vers `/intervenant/agenda` |
 | `/intervenant/agenda` | connecté, validé, rôle SPEAKER | Mon agenda (`?mois=AAAA-MM`) |
 | `/intervenant/demandes` | connecté, validé, rôle SPEAKER | Demandes reçues (`?onglet=`, `page=`, `demande=`) |
+| `/intervenant/impact` | connecté, validé, rôle SPEAKER | Mon impact, réduit à « Mes retours d'expérience » |
+| `/intervenant/retours/{meetingId}` | connecté, validé, rôle SPEAKER | Retour d'expérience d'une rencontre réalisée |
 | `/ecole` | connecté, validé, rôle SCHOOL | Redirige vers `/ecole/intervenants` |
 | `/ecole/intervenants` | connecté, validé, rôle SCHOOL | Intervenants disponibles (`?zone=`, `secteur=`, `q=` ; `format=` ignoré tant que les rencontres sont en classe seulement, `src/lib/features.ts`) |
 | `/ecole/intervenants/{id}/demande` | connecté, validé, rôle SCHOOL | Demander une rencontre |
 | `/ecole/rencontres` | connecté, validé, rôle SCHOOL | Mes rencontres (`?mois=AAAA-MM`, `rencontre={id}`) |
 | `/ecole/etablissement` | connecté, validé, rôle SCHOOL | Mon établissement : classes, élèves, fiches d'accès (`?classe={id}`) |
-| `/donateur`, `/eleve` | connecté, validé, rôle correspondant | Accueils provisoires |
+| `/ecole/retours` | connecté, validé, rôle SCHOOL | Retours d'expérience : à rédiger, soumis, validés |
+| `/ecole/retours/{meetingId}` | connecté, validé, rôle SCHOOL | Retour d'expérience d'une rencontre réalisée |
+| `/donateur` | connecté, validé, rôle DONOR | Redirige vers `/donateur/impact` |
+| `/donateur/impact` | connecté, validé, rôle DONOR | Rapport d'impact (`?periode=trimestre\|annee`, `filtre=ecoles\|intervenants`, `retour={id}`) |
+| `/donateur/requetes` | connecté, validé, rôle DONOR | Mes requêtes (`?requete={id}`, `vue=nouvelle`, `objet=`) |
+| `/eleve` | connecté, validé, rôle STUDENT | Accueil provisoire |
 
 ## Règles de session
 
 - Le jeton JWT est conservé dans `sessionStorage`, uniquement via `auth/tokenStorage.ts`.
 - Le rôle, le statut et `mustChangePassword` viennent toujours de `GET /api/me`, jamais du jeton.
 - Un 401 hors `POST /api/auth/login` déconnecte et affiche « Session expirée ».
+- Les brouillons de retours d'expérience (« Finir plus tard ») sont gardés dans `sessionStorage` sous
+  `fondationm.retour.{compte}.{rencontre}`, jamais avec le jeton, et effacés à la fin de session.
 - `PASSWORD_CHANGE_REQUIRED` et `ACCOUNT_NOT_VALIDATED` (403) relisent `/api/me` puis redirigent vers la
   page correspondante.

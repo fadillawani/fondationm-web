@@ -1,3 +1,5 @@
+import { Link } from 'react-router'
+import { feedbackFormPath } from '../../auth/roles'
 import { initialsOf } from '../../lib/initials'
 import type { SchoolMeeting } from './meetingsData'
 import { clockInSentence, sentenceDate, whenLabel } from './meetingText'
@@ -61,11 +63,12 @@ export function FeedbackBanner({ meeting }: { meeting: SchoolMeeting }) {
         <span className="hidden lg:inline">Comment s'est-elle passée pour vous{classe} ?</span>
         <span className="lg:hidden">Comment s'est-elle passée ?</span>
       </p>
-      {/* « Retours d'expérience » n'existe pas encore : bouton affiché, non cliquable. */}
-      <span className="flex min-h-[46px] cursor-not-allowed items-center justify-center gap-2 rounded-[14px] bg-terra px-[18px] text-[15px] font-black text-white lg:min-h-touch lg:rounded-[12px] lg:text-sm">
+      <Link
+        to={feedbackFormPath('school', meeting.id)}
+        className="flex min-h-[46px] items-center justify-center gap-2 rounded-[14px] bg-terra px-[18px] text-[15px] font-black text-white lg:min-h-touch lg:rounded-[12px] lg:text-sm"
+      >
         Partager mon retour
-        <span className="rounded-pill bg-white px-2 py-0.5 text-[11px] font-black uppercase text-terra">Bientôt</span>
-      </span>
+      </Link>
     </section>
   )
 }

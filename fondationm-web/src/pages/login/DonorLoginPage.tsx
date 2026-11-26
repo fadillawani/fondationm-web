@@ -15,7 +15,7 @@ export function DonorLoginPage() {
     >
       <LoginForm
         title="Bon retour parmi nous"
-        subtitle="Utilisez l'accès reçu par e-mail de la Fondation M."
+        subtitle="Utilisez l'accès remis par la Fondation M."
         variant="success"
         footer={
           <>

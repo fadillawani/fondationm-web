@@ -93,7 +93,7 @@ describe('Tableau de bord (Fondation)', () => {
       '/fondation/demandes',
     )
     expect(cards.getByRole('link', { name: /1\s*rencontres à marquer\s*passées, encore « confirmées »/ })).toHaveAttribute('href', '/fondation/rencontres')
-    expect(cards.getByText('retours à valider').closest('div')).toHaveTextContent('Bientôt')
+    expect(cards.getByRole('link', { name: /4\s*retours à valider\s*avant partage aux donateurs/ })).toHaveAttribute('href', '/fondation/retours')
     expect(await cards.findByRole('link', { name: /1\s*requête donateur\s*M\. Diaw, depuis le 12 novembre/ })).toHaveAttribute('href', '/fondation/requetes')
   })
 
@@ -163,7 +163,13 @@ describe('Tableau de bord (Fondation)', () => {
       feedbacks: [
         feedback({ id: 'a', comment: 'Ancien.', publishedAt: '2026-11-01T10:00:00+01:00' }),
         feedback({ id: 'b', comment: '   ', publishedAt: '2026-11-23T10:00:00+01:00' }),
-        feedback({ id: 'c', authorRole: 'SCHOOL', comment: 'Nos élèves en parlent encore.', publishedAt: '2026-11-21T10:00:00+01:00' }),
+        feedback({
+          id: 'c',
+          meeting: { id: 'm-thiaroye', slotStartAt: '2026-11-04T14:00:00+01:00' },
+          authorRole: 'SCHOOL',
+          comment: ['[Classe] 30 présents sur 32', '[Émotions] Fierté', '[Moment marquant] Nos élèves en parlent encore.'].join('\n\n'),
+          publishedAt: '2026-11-21T10:00:00+01:00',
+        }),
       ],
     })
     renderApp('/fondation/tableau-de-bord', { token: true })
@@ -171,7 +177,7 @@ describe('Tableau de bord (Fondation)', () => {
     const moment = within(await screen.findByRole('region', { name: 'Le moment de la semaine' }))
     expect(moment.getByText('« Nos élèves en parlent encore. »')).toBeInTheDocument()
     expect(moment.getByText('Lycée de Thiaroye, après sa rencontre avec Amadou Baila')).toBeInTheDocument()
-    expect(moment.getByText('Bientôt')).toBeInTheDocument()
+    expect(moment.getByRole('link', { name: 'Lire les retours' })).toHaveAttribute('href', '/fondation/retours?onglet=tous&rencontre=m-thiaroye')
   })
 
   it('isole l’erreur d’un bloc et propose « Réessayer »', async () => {

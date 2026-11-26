@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { feedbackFormPath } from '../../auth/roles'
 import { cn } from '../../lib/cn'
 import { parseIso } from '../../lib/dateTime'
 import { initialsOf } from '../../lib/initials'
@@ -108,22 +109,20 @@ export function MeetingDetail({ meeting, jobTitle, feedback, upcoming }: Meeting
           <span className={cn('rounded-pill px-2.5 py-1 text-xs font-black', FEEDBACK_STYLE[feedback])}>{feedback}</span>
         </div>
       )}
+      {feedback && feedback !== 'À rédiger' && meeting.status === 'COMPLETED' && (
+        <Link to={feedbackFormPath('school', meeting.id)} className="inline-flex min-h-touch items-center self-start text-sm font-black text-indigo underline underline-offset-2">
+          {feedback === 'Soumis' ? 'Voir ou modifier mon retour' : 'Lire mon retour'}
+        </Link>
+      )}
 
-      {note.cta &&
-        (note.cta.to === null ? (
-          <span className="flex min-h-[50px] cursor-not-allowed items-center justify-center gap-2 rounded-[14px] bg-terra px-3 text-center font-display text-[17px] text-white lg:min-h-[52px] lg:rounded-2xl lg:text-lg"
-          >
-            {note.cta.label}
-            <span className="rounded-pill bg-white px-2 py-0.5 font-sans text-[11px] font-black uppercase text-terra">Bientôt</span>
-          </span>
-        ) : (
-          <Link
-            to={note.cta.to}
-            className="flex min-h-[50px] items-center justify-center rounded-[14px] bg-terra px-3 text-center font-display text-[17px] text-white lg:min-h-[52px] lg:rounded-2xl lg:text-lg"
-          >
-            {note.cta.label}
-          </Link>
-        ))}
+      {note.cta && (
+        <Link
+          to={note.cta.to}
+          className="flex min-h-[50px] items-center justify-center rounded-[14px] bg-terra px-3 text-center font-display text-[17px] text-white lg:min-h-[52px] lg:rounded-2xl lg:text-lg"
+        >
+          {note.cta.label}
+        </Link>
+      )}
     </section>
   )
 }

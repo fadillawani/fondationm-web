@@ -2,6 +2,8 @@ import type { Role } from '../auth/currentUser'
 import { navItemsFor, type NavBadge } from '../auth/roles'
 import { usePendingTotal } from '../pages/foundation/accounts'
 import { useOpenDonorRequestCount } from '../pages/foundation/donors/donorRequestCount'
+import { useOpenMyRequestCount } from '../pages/donor/donorData'
+import { useFeedbacksToValidateCount } from '../pages/foundation/feedbacks/foundationFeedbacksData'
 import { useFoundationMeetingCounts } from '../pages/foundation/meetings/foundationMeetingCounts'
 import { useUpcomingMeetingsCount } from '../pages/school/meetingsData'
 import { usePendingRequestCount } from '../pages/speaker/speakerData'
@@ -17,5 +19,7 @@ export function useNavBadges(role: Role): Record<NavBadge, number | undefined> {
     awaitingFoundation: foundation.awaiting,
     meetingsToMark: foundation.toMark,
     openDonorRequests: useOpenDonorRequestCount(badges.has('openDonorRequests')),
+    feedbacksToValidate: useFeedbacksToValidateCount(badges.has('feedbacksToValidate')),
+    myOpenRequests: useOpenMyRequestCount(badges.has('myOpenRequests')),
   }
 }

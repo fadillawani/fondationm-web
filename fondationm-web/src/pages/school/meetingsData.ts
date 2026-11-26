@@ -4,6 +4,7 @@ import { FETCH_PAGE_SIZE, fetchAllPages } from '../../api/paging'
 import { asRecord, integer, oneOf, text } from '../../api/wire'
 import { parseIso } from '../../lib/dateTime'
 import { useNow } from '../../lib/useNow'
+import { useAwaitingFeedbacks, useWrittenFeedbacks } from '../feedback/feedbackData'
 
 export const MEETING_STATUSES = ['PENDING', 'CONFIRMED', 'REFUSED', 'CANCELLED', 'COMPLETED'] as const
 export type MeetingStatus = (typeof MEETING_STATUSES)[number]
@@ -82,44 +83,16 @@ export function useSchoolMeetings(enabled = true) {
   return useQuery({ ...schoolMeetingsQuery, enabled })
 }
 
-function readAwaitingId(value: unknown): string | null {
-  const record = asRecord(value)
-  return record === null ? null : text(record, 'meetingId')
-}
-
-function readFeedback(value: unknown): { meetingId: string; state: FeedbackState } | null {
-  const record = asRecord(value)
-  const meeting = record && asRecord(record.meeting)
-  const meetingId = meeting && text(meeting, 'id')
-  const status = record && text(record, 'status')
-  if (!meetingId) return null
-  if (status === 'PUBLISHED') return { meetingId, state: 'Validé' }
-  if (status === 'SUBMITTED') return { meetingId, state: 'Soumis' }
-  return null
-}
-
-/** Retours d'expérience : en attente (« À rédiger ») et rédigés (« Soumis » / « Validé »), par rencontre. */
+/**
+ * Retours d'expérience : en attente (« À rédiger ») et rédigés (« Soumis » / « Validé »), par rencontre. Mêmes
+ * requêtes que les pages « Retours d'expérience » (F9).
+ */
 export function useFeedbackStates() {
-  const awaiting = useQuery({
-    queryKey: ['school', 'feedbacks', 'en-attente'],
-    queryFn: () =>
-      fetchAllPages(
-        (page) =>
-          unwrap(api.GET('/api/school/feedbacks/awaiting', { params: { query: { page, size: FETCH_PAGE_SIZE } } })),
-        readAwaitingId,
-      ),
-  })
-  const written = useQuery({
-    queryKey: ['school', 'feedbacks', 'rediges'],
-    queryFn: () =>
-      fetchAllPages(
-        (page) => unwrap(api.GET('/api/school/feedbacks', { params: { query: { page, size: FETCH_PAGE_SIZE } } })),
-        readFeedback,
-      ),
-  })
+  const awaiting = useAwaitingFeedbacks('school')
+  const written = useWrittenFeedbacks('school')
   const states = new Map<string, FeedbackState>()
-  for (const entry of written.data?.items ?? []) states.set(entry.meetingId, entry.state)
-  for (const id of awaiting.data?.items ?? []) states.set(id, 'À rédiger')
+  for (const entry of written.data?.items ?? []) states.set(entry.meetingId, entry.status === 'PUBLISHED' ? 'Validé' : 'Soumis')
+  for (const entry of awaiting.data?.items ?? []) states.set(entry.meetingId, 'À rédiger')
   return states
 }
 
