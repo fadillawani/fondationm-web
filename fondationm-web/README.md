@@ -126,7 +126,7 @@ src/
 | `/intervenant` | connecté, validé, rôle SPEAKER | Redirige vers `/intervenant/agenda` |
 | `/intervenant/agenda` | connecté, validé, rôle SPEAKER | Mon agenda (`?mois=AAAA-MM`) |
 | `/intervenant/demandes` | connecté, validé, rôle SPEAKER | Demandes reçues (`?onglet=`, `page=`, `demande=`) |
-| `/intervenant/impact` | connecté, validé, rôle SPEAKER | Mon impact, réduit à « Mes retours d'expérience » |
+| `/intervenant/impact` | connecté, validé, rôle SPEAKER | Mon impact : chiffres calculés côté client, émotions de mes retours, « Mes retours d'expérience » |
 | `/intervenant/retours/{meetingId}` | connecté, validé, rôle SPEAKER | Retour d'expérience d'une rencontre réalisée |
 | `/ecole` | connecté, validé, rôle SCHOOL | Redirige vers `/ecole/intervenants` |
 | `/ecole/intervenants` | connecté, validé, rôle SCHOOL | Intervenants disponibles (`?zone=`, `secteur=`, `q=` ; `format=` ignoré tant que les rencontres sont en classe seulement, `src/lib/features.ts`) |

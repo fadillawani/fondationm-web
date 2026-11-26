@@ -1,5 +1,5 @@
 # État du frontend — Fondation M
-Dernière mise à jour : 25 novembre 2026 — lot F11 (espace élève : « Les rencontres de ma classe », connexion élève vérifiée).
+Dernière mise à jour : 26 novembre 2026 — lot F12 (« Mon impact » de l'intervenant, calculé côté client).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 ## Avancement
@@ -22,10 +22,11 @@ Dernière mise à jour : 25 novembre 2026 — lot F11 (espace élève : « Les r
 | F9  | Retours d'expérience : formulaires école (W1-E6) et intervenant (W2-E10), « Mon impact » réduit, validation par la Fondation (W3-retours) | Terminé |
 | F10 | Espace donateur : « Rapport d'impact » (W4-impact), « Mes requêtes » (W4-requetes), connexion alignée (W4-connexion) | Terminé |
 | F11 | Espace élève : « Mon espace » (W5-E19, mobile déduit), connexion élève vérifiée (W5-E1) ; accueil provisoire retiré | Terminé |
-| F12+ | Autres écrans (« Mon impact » complet de l'intervenant…) | À faire  |
+| F12 | « Mon impact » de l'intervenant (W2-impact) : chiffres calculés côté client, émotions de ses retours | Terminé |
+| F13+ | Écrans restants à définir | À faire  |
 
-Vérifications au moment de la livraison de F11 : `npm run build`, `npm run lint` et `npm test`
-(354 tests dans 43 fichiers, deux passages) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F12 : `npm run build`, `npm run lint` et `npm test`
+(366 tests dans 45 fichiers, deux passages) passent sans erreur ni avertissement.
 
 Les sections « Ce que Fn livre » décrivent chaque lot à sa livraison. Les entrées et boutons « Bientôt » qu'elles citent
 sont tous devenus des liens depuis (F5 à F10) : il n'en reste aucun dans l'application (décision 106). Les accueils
@@ -56,6 +57,39 @@ provisoires de F0 ont tous été remplacés (le dernier, celui de l'élève, en 
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F12 livre — « Mon impact » de l'intervenant (W2-impact)
+
+- **Aucune API d'impact pour l'intervenant** : tout est calculé côté client (`pages/speaker/speakerImpact.ts`, fonctions
+  pures testées) à partir de `GET /api/speaker/meetings` (requête de l'agenda) et de `GET /api/speaker/feedbacks`
+  (requête de F9), toutes deux déjà en cache : **aucun appel nouveau**. Seules les rencontres COMPLETED comptent.
+- **En-tête** : sur-ligne « Depuis {mois année} » (début de la première rencontre réalisée, fuseau du navigateur ; absente
+  sans rencontre réalisée), « Mon impact », « Ce que vous avez transmis, et ce que ces rencontres vous ont laissé. ».
+- **3 cartes** (`ImpactSummary.tsx`) :
+  - « {n} élèves rencontrés » (terracotta) : somme des effectifs déclarés des classes distinctes, « Effectif déclaré des
+    classes, pas un comptage des présents. » ;
+  - « {n} rencontres réalisées » (indigo), « dans {n} établissements » ;
+  - « {durée} de transmission » (vert, somme des créneaux), « {durée} en moyenne » (« — » sans durée).
+  - Notes sous les cartes : « Effectif inconnu pour {n} classes. », « Durée inconnue pour {n} rencontres. », « {n}
+    rencontre(s) passée(s) en attente de confirmation par la Fondation M, pas encore comptée(s). » (CONFIRMED au créneau
+    passé) ; « Vos chiffres apparaîtront après votre première rencontre réalisée. » sans rencontre ; « Chiffres partiels »
+    au-delà de 25 pages.
+- **« Ce que vous avez ressenti »** : « Les émotions qui reviennent dans vos retours. », pastilles « Fierté · 5 » (tous mes
+  retours rédigés, Soumis et Validés ; une fois par retour ; fréquence décroissante puis ordre alphabétique), « D'après
+  {n} retours sur {m} rencontres réalisées. » ; sans émotion : « — Aucune émotion notée dans vos retours pour
+  l'instant. ».
+- **« Mes retours d'expérience »** (F9) : inchangé, sous les deux blocs.
+- **Erreurs par bloc** : rencontres et retours ont chacun leur chargement, leur erreur et « Réessayer ».
+- **Retirés** : « dont 112 filles », « 5 thèmes abordés », « Les thèmes que vous avez abordés », « Le mot du Lycée de
+  Pikine, transmis par la Fondation M ».
+- **Mobile** : les 3 cartes en colonne, les pastilles d'émotions, puis les retours ; navigation basse inchangée.
+
+### Fichiers de F12
+
+- **Nouveaux** : `src/pages/speaker/speakerImpact.ts`, `ImpactSummary.tsx` ; tests `speakerImpact.test.ts`,
+  `ImpactPage.test.tsx`.
+- **Modifiés** : `src/pages/speaker/ImpactPage.tsx` (en-tête, blocs ; « Mes retours d'expérience » de F9 déplacé dans
+  `MyStories`, rendu inchangé), `docs/etat-frontend.md`, `fondationm-web/README.md`.
 
 ## Ce que F11 livre — espace élève (W5-E19, W5-E1)
 
@@ -1148,6 +1182,24 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
      sélection encre sur blanc 16,08 (la bordure jaune de la maquette, 2,14:1, est sous le seuil non textuel de 3:1).
 119. **Profil élève** : `StudentDetails` (prénom, nom, `classId`, classe) dans un type `UserDetails` réservé à
      l'utilisateur connecté ; `ProfileDetails` (comptes à valider, F2) inchangé. Accueil provisoire supprimé.
+120. **« Mon impact » calculé côté client** : fonctions pures sur les rencontres et les retours déjà chargés (aucun appel
+     nouveau) ; seules les rencontres COMPLETED comptent ; les CONFIRMED au créneau passé (fin, sinon début, avant
+     maintenant, fuseau du navigateur) sont comptées à part et annoncées (« {n} rencontre(s) passée(s) en attente de
+     confirmation par la Fondation M, pas encore comptée(s). »).
+121. **Classes et établissements distincts sans identifiant** : établissement = nom + ville + pays, classe = établissement +
+     intitulé, sans casse ni accents ; effectif = le plus grand effectif déclaré connu de la classe ; une classe sans
+     effectif n'est pas comptée (et signalée). Risques connus : deux classes homonymes d'une même école sont fusionnées
+     (effectif sous-estimé) ; la correspondance casse si une école change de nom.
+122. **Trois cartes** (élèves, rencontres, transmission), sans quatrième inventée ; « dans {n} établissements » en
+     sous-ligne ; durée = somme des créneaux lisibles (fin après début), moyenne arrondie à la minute, créneaux illisibles
+     exclus et signalés ; « 0 h » et « — » sans rencontre.
+123. **Émotions** : tous mes retours rédigés (Soumis et Validés), lus par le parseur de F9 ; une émotion compte une fois
+     par retour ; tri par fréquence puis ordre alphabétique (français) ; un retour en texte brut n'apporte rien ; une
+     étiquette inconnue est comptée telle quelle ; aucune note moyenne affichée.
+124. **Période** : « Depuis {mois année} » d'après la première rencontre réalisée ; pas de sélecteur (absent de la maquette).
+125. **Contrastes de F12** (calculés) : blanc sur terracotta 5,22, blanc sur indigo 11,31, crème sur indigo 9,24, blanc sur
+     vert 6,14, crème sur vert 5,01, pastilles d'émotion blanc sur terracotta 5,22, sur-ligne terracotta sur `#F7F3EA`
+     4,71, gris sur blanc 8,72 ; la crème de la maquette sur terracotta (4,26:1) est remplacée par `#FFF0C4` (4,60:1).
 
 ## Écarts
 
@@ -1246,6 +1298,11 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 | « En ligne, en salle informatique » (W5-E19) | Rencontres en classe (F6.1) ; `format` peut encore valoir ONLINE | « En classe · {lieu} » ; ONLINE affiché tel quel (décision 116) |
 | Rencontre annulée de la classe | Jamais renvoyée (CONFIRMED et COMPLETED seulement) | Disparaît ; phrase dans « Bon à savoir » (point ouvert 60) |
 | « Prête à découvrir son métier ? », « Faut-il être fort en maths » | — | Phrases neutres en genre (décisions 111 et 115) |
+| « dont 112 filles » (W2-impact) | L'intervenant ne voit pas les chiffres de classe saisis par l'école | Retiré (point ouvert 65) |
+| « 5 thèmes abordés », « Les thèmes que vous avez abordés » (W2-impact) | Aucune donnée de thème | Retirés (point ouvert 64) |
+| « Le mot du Lycée de Pikine, transmis par la Fondation M » (W2-impact) | Aucun canal de message | Retiré (points ouverts 43 et 66) |
+| Élèves rencontrés, établissements (W2-impact) | Ni identifiant d'école ni de classe dans `SpeakerMeetingResponse` | Clés dérivées (décision 121, point ouvert 63) |
+| Quatrième carte (thèmes) | — | Trois cartes (décision 122) |
 
 ## Points ouverts
 
@@ -1358,8 +1415,8 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 44. **Note moyenne école** : l'école n'envoie pas de note ; `averageRating.school` restera « — » au tableau de bord.
 45. **Rencontres réalisées sans retour** absentes de « Retours d'expérience » (Fondation) : il faudrait joindre les
     rencontres COMPLETED. **Backend : une liste « attendus » côté Fondation.**
-46. **Lot « Mon impact » complet** (W2-impact) : élèves rencontrés, filles, heures, thèmes, émotions des retours, mot de
-    l'école. Les données manquent dans le contrat.
+46. **Lot « Mon impact » complet** (W2-impact) : livré en F12 pour ce que le contrat permet (élèves, rencontres, heures,
+    émotions, calculés côté client) ; filles, thèmes et mot de l'école restent impossibles (points ouverts 64 à 66).
 47. **Auteur d'un retour** (nom et fonction du référent, métier de l'intervenant) absent de `FoundationFeedbackResponse`.
 48. **Texte non modéré lu par les donateurs** : malgré la ligne d'aide, un prénom d'élève peut être écrit ; la Fondation
     publie sans pouvoir modifier. **Backend ou produit : modération ou refus à prévoir.**
@@ -1390,6 +1447,14 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
     à valider avec le design.
 62. **Établissement absent du profil élève** : « Lycée de Sor » de la carte utilisateur n'est pas reproductible.
     **Backend : `schoolName` dans `StudentProfileResponse`.**
+63. **Identifiants d'école et de classe absents de `SpeakerMeetingResponse`** : « Mon impact » distingue établissements et
+    classes par nom + ville + pays + intitulé ; deux classes homonymes d'une même école sont fusionnées (effectif
+    sous-estimé) et la correspondance casse si une école change de nom. **Backend : `school.id` et `schoolClass.id`.**
+64. **Thèmes abordés** (W2-impact) : aucune donnée (ni sur la rencontre, ni dans le retour). **Backend ou produit : thèmes
+    choisis à la demande ou dans le retour.**
+65. **Nombre de filles rencontrées** : l'école le saisit dans son retour (F9), mais l'intervenant n'y a pas accès.
+    **Backend : un agrégat par intervenant (filles, présents) sans exposer le retour de l'école.**
+66. **« Le mot de la classe » transmis par la Fondation** : aucun canal (suite du point 43).
 
 ## Écarts de design restants
 
@@ -1492,3 +1557,7 @@ attendue (maquette) et la raison.
 | Mon espace | idem | « Bon à savoir » dans la barre latérale | Dans la page, sous les listes (barre latérale commune à toutes les personas). |
 | Mon espace | idem | Pastille de secteur, « Son parcours » | Retirés (décision 113). |
 | Mon espace (mobile) | idem, `components/layout/AppLayout.tsx` | Aucune maquette mobile | Liste puis détail plein écran ; pas de navigation basse (une seule entrée) ; menu de l'avatar pour se déconnecter. |
+| Mon impact (W2-impact) | `pages/speaker/ImpactSummary.tsx` | Quatre cartes (élèves dont filles, rencontres, heures, thèmes) | Trois cartes, sans « dont {n} filles » ni thèmes (décision 122). |
+| Mon impact | idem | Sous-ligne crème `#FDE7A6` sur la carte terracotta | Contraste 4,26:1 : `#FFF0C4` (4,60:1). |
+| Mon impact | `pages/speaker/ImpactPage.tsx` | « Les thèmes que vous avez abordés », citation « Le mot du Lycée … » | Retirés (aucune donnée, aucun canal). |
+| Mon impact | `pages/speaker/ImpactSummary.tsx` | — | Ajoutés : notes de fiabilité (effectif ou durée inconnus), rencontres en attente de confirmation, « D'après {n} retours sur {m} rencontres réalisées. ». |

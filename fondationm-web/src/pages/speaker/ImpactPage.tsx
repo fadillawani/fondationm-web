@@ -11,7 +11,10 @@ import { useAwaitingFeedbacks, useWrittenFeedbacks, type MyFeedback } from '../f
 import { FeedbackContent } from '../feedback/FeedbackContent'
 import { StepBadge } from '../feedback/FeedbackParts'
 import { stepOf } from '../feedback/feedbackText'
+import { useNow } from '../../lib/useNow'
+import { EmotionsBlock, ImpactCards } from './ImpactSummary'
 import { useMeetings, type Meeting } from './speakerData'
+import { computeImpact, sinceLabel } from './speakerImpact'
 
 const time = (iso: string | null) => parseIso(iso)?.getTime() ?? 0
 
@@ -65,34 +68,22 @@ function StoryCard({ feedback, meeting }: { feedback: MyFeedback; meeting: Meeti
   )
 }
 
-/**
- * « Mon impact » (maquette W2-impact), réduit à la section « Mes retours d'expérience » (décision 96) : les chiffres,
- * thèmes et émotions viendront dans un lot ultérieur.
- */
-export function ImpactPage() {
+/** « Mes retours d'expérience » (F9), inchangé : rencontres à raconter et récits repliés. */
+function MyStories() {
   const awaiting = useAwaitingFeedbacks('speaker')
   const written = useWrittenFeedbacks('speaker')
   const meetings = useMeetings()
-  const header = <PageTitle title="Mon impact" subtitle="Ce que vous avez transmis, et ce que ces rencontres vous ont laissé." />
 
   if (awaiting.isPending || written.isPending) {
     return (
-      <div className="flex flex-col gap-4">
-        {header}
-        <div className="flex justify-center py-10 text-terra">
-          <Spinner label="Chargement de vos retours…" size="lg" />
-        </div>
+      <div className="flex justify-center py-10 text-terra">
+        <Spinner label="Chargement de vos retours…" size="lg" />
       </div>
     )
   }
   if (awaiting.isError || written.isError) {
     const failed = awaiting.isError ? awaiting : written
-    return (
-      <div className="flex flex-col gap-4">
-        {header}
-        <ErrorState message={errorMessage(failed.error)} onRetry={() => void failed.refetch()} retrying={failed.isFetching} />
-      </div>
-    )
+    return <ErrorState message={errorMessage(failed.error)} onRetry={() => void failed.refetch()} retrying={failed.isFetching} />
   }
 
   const byId = new Map((meetings.data?.items ?? []).map((meeting) => [meeting.id, meeting]))
@@ -100,8 +91,64 @@ export function ImpactPage() {
   const stories = written.data.items.toSorted((a, b) => time(b.startAt) - time(a.startAt))
 
   return (
+    <>
+      {(awaiting.data.truncated || written.data.truncated) && <Alert tone="warning">Tous vos retours n'ont pas pu être chargés.</Alert>}
+      {toWrite.length + stories.length === 0 && (
+        <p className="rounded-[18px] bg-surface p-4 font-bold text-muted">
+          Aucune rencontre réalisée pour l’instant. Vous pourrez la raconter dès que la Fondation M l’aura marquée comme réalisée.
+        </p>
+      )}
+      <ul className="flex flex-col gap-3">
+        {toWrite.map((entry) => {
+          const school = entry.partnerName ?? byId.get(entry.meetingId)?.schoolName ?? 'Établissement'
+          return (
+            <li key={entry.meetingId} className="flex flex-col gap-2 rounded-[20px] border-2 border-yellow bg-cream p-4 lg:flex-row lg:items-center lg:gap-4">
+              <span className="flex flex-1 flex-col">
+                <span className="text-xs font-black uppercase text-[#7A4100]">
+                  {dayOf(entry.startAt) ?? 'Date inconnue'} · À rédiger
+                </span>
+                <span className="font-black">{[school, entry.classTitle].filter(Boolean).join(' · ')}</span>
+                {entry.studentCount !== null && <span className="text-[13px] font-bold text-ink">{entry.studentCount} élèves</span>}
+              </span>
+              <Link
+                to={feedbackFormPath('speaker', entry.meetingId)}
+                className="inline-flex min-h-touch items-center justify-center rounded-[14px] bg-terra px-4 text-sm font-black text-white"
+              >
+                Raconter cette rencontre{' '}
+                <span className="sr-only">: {school}</span>
+              </Link>
+            </li>
+          )
+        })}
+        {stories.map((feedback) => (
+          <StoryCard key={feedback.id} feedback={feedback} meeting={byId.get(feedback.meetingId)} />
+        ))}
+      </ul>
+    </>
+  )
+}
+
+/**
+ * « Mon impact » (maquette W2-impact) : indicateurs calculés côté client (F12, décision 120), « Ce que vous avez
+ * ressenti », puis « Mes retours d'expérience » (F9). Chaque bloc a son chargement et son erreur.
+ */
+export function ImpactPage() {
+  const now = useNow()
+  const meetings = useMeetings()
+  const since = meetings.data === undefined ? null : sinceLabel(computeImpact(meetings.data.items, now).firstStart)
+
+  return (
     <div className="flex flex-col gap-4 lg:gap-5">
-      {header}
+      <PageTitle kicker={since ?? undefined} title="Mon impact" subtitle="Ce que vous avez transmis, et ce que ces rencontres vous ont laissé." />
+      <section aria-label="Mes chiffres">
+        <ImpactCards />
+      </section>
+      <section aria-labelledby="ressenti" className="flex flex-col gap-2.5">
+        <h2 id="ressenti" className="text-2xl">
+          Ce que vous avez ressenti
+        </h2>
+        <EmotionsBlock />
+      </section>
       <section aria-labelledby="mes-retours" className="flex flex-col gap-3">
         <div className="flex flex-col gap-0.5">
           <h2 id="mes-retours" className="text-2xl">
@@ -109,38 +156,7 @@ export function ImpactPage() {
           </h2>
           <p className="text-sm font-bold text-muted">Une rencontre, une histoire</p>
         </div>
-        {(awaiting.data.truncated || written.data.truncated) && <Alert tone="warning">Tous vos retours n'ont pas pu être chargés.</Alert>}
-        {toWrite.length + stories.length === 0 && (
-          <p className="rounded-[18px] bg-surface p-4 font-bold text-muted">
-            Aucune rencontre réalisée pour l’instant. Vous pourrez la raconter dès que la Fondation M l’aura marquée comme réalisée.
-          </p>
-        )}
-        <ul className="flex flex-col gap-3">
-          {toWrite.map((entry) => {
-            const school = entry.partnerName ?? byId.get(entry.meetingId)?.schoolName ?? 'Établissement'
-            return (
-              <li key={entry.meetingId} className="flex flex-col gap-2 rounded-[20px] border-2 border-yellow bg-cream p-4 lg:flex-row lg:items-center lg:gap-4">
-                <span className="flex flex-1 flex-col">
-                  <span className="text-xs font-black uppercase text-[#7A4100]">
-                    {dayOf(entry.startAt) ?? 'Date inconnue'} · À rédiger
-                  </span>
-                  <span className="font-black">{[school, entry.classTitle].filter(Boolean).join(' · ')}</span>
-                  {entry.studentCount !== null && <span className="text-[13px] font-bold text-ink">{entry.studentCount} élèves</span>}
-                </span>
-                <Link
-                  to={feedbackFormPath('speaker', entry.meetingId)}
-                  className="inline-flex min-h-touch items-center justify-center rounded-[14px] bg-terra px-4 text-sm font-black text-white"
-                >
-                  Raconter cette rencontre{' '}
-                  <span className="sr-only">: {school}</span>
-                </Link>
-              </li>
-            )
-          })}
-          {stories.map((feedback) => (
-            <StoryCard key={feedback.id} feedback={feedback} meeting={byId.get(feedback.meetingId)} />
-          ))}
-        </ul>
+        <MyStories />
         <p className="text-[13px] font-bold text-muted">Vos retours validés par la Fondation M rejoignent le rapport d’impact lu par les donateurs.</p>
       </section>
     </div>
