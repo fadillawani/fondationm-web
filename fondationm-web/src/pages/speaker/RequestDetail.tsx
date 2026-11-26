@@ -1,3 +1,4 @@
+import { Initials } from '../../components/ui/Initials'
 import { useState } from 'react'
 import { ONLINE_MEETINGS_ENABLED } from '../../lib/features'
 import { errorMessage } from '../../api/errors'
@@ -103,9 +104,12 @@ export function RequestDetail({ meeting, all, inMyZone, onProcessed, onConflict 
       </header>
 
       <div className="flex flex-col gap-1">
-        <h2 id={`demande-${meeting.id}`} className="text-[25px] leading-tight text-ink lg:text-[28px]">
-          {meeting.schoolName}
-        </h2>
+        <div className="flex items-center gap-3">
+          <Initials name={meeting.schoolName} tone="school" photoUrl={meeting.schoolPhotoUrl} />
+          <h2 id={`demande-${meeting.id}`} className="text-[25px] leading-tight text-ink lg:text-[28px]">
+            {meeting.schoolName}
+          </h2>
+        </div>
         <p className="flex flex-wrap items-center gap-2 text-sm font-extrabold text-muted">
           {meeting.schoolCity}
           {inMyZone && (

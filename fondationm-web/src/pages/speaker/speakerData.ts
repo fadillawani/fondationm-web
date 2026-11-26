@@ -1,3 +1,4 @@
+import { readPhotoUrl } from '../../lib/photo'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, unwrap } from '../../api/client'
 import { errorFromException } from '../../api/errors'
@@ -33,6 +34,8 @@ export interface Meeting {
   schoolName: string
   schoolCity: string
   schoolCountry: string
+  /** Logo de l'établissement (F13), facultatif. */
+  schoolPhotoUrl: string | null
   classTitle: string
   studentCount: number | null
   slot: { id: string | null; startAt: string; endAt: string } | null
@@ -78,6 +81,7 @@ export function readMeeting(value: unknown): Meeting | null {
     schoolName: (school && text(school, 'name')) ?? 'Établissement',
     schoolCity: (school && text(school, 'city')) ?? '',
     schoolCountry: (school && text(school, 'country')) ?? '',
+    schoolPhotoUrl: readPhotoUrl(school),
     classTitle: (schoolClass && text(schoolClass, 'title')) ?? '',
     studentCount: schoolClass && integer(schoolClass, 'studentCount'),
     slot: readMeetingSlot(asRecord(record.slot)),

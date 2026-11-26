@@ -1,9 +1,11 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useCurrentUser } from '../../auth/currentUserContext'
 import { useLogout } from '../../auth/hooks'
-import { accountCard } from '../../auth/roles'
+import { Link } from 'react-router'
+import { accountCard, profilePath } from '../../auth/roles'
 import { cn } from '../../lib/cn'
 import { initialsOf } from '../../lib/initials'
+import { Avatar } from '../ui/Avatar'
 import { LogoutIcon } from './icons'
 import { ROLE_THEME } from './roleTheme'
 
@@ -48,7 +50,9 @@ export function UserMenu({ className }: { className?: string }) {
           ROLE_THEME[user.role].avatar,
         )}
       >
-        <span aria-hidden="true">{initialsOf(card.name, card.initials)}</span>
+        <Avatar photoUrl={card.photoUrl} kind={card.photoKind ?? 'photo'} className="inline-flex size-full items-center justify-center rounded-[14px]">
+          {initialsOf(card.name, card.initials)}
+        </Avatar>
       </button>
       <div
         id={menuId}
@@ -57,10 +61,17 @@ export function UserMenu({ className }: { className?: string }) {
       >
         <p className="truncate px-1 font-black">{card.name}</p>
         {card.detail && <p className="truncate px-1 text-sm font-bold text-muted">{card.detail}</p>}
+        <Link
+          to={profilePath(user.role)}
+          onClick={() => setOpen(false)}
+          className="mt-2 flex min-h-touch w-full items-center gap-2 rounded-field px-2 font-extrabold hover:bg-canvas"
+        >
+          Mon profil
+        </Link>
         <button
           type="button"
           onClick={logout}
-          className="mt-2 flex min-h-touch w-full items-center gap-2 rounded-field px-2 font-extrabold hover:bg-canvas"
+          className="flex min-h-touch w-full items-center gap-2 rounded-field px-2 font-extrabold hover:bg-canvas"
         >
           <LogoutIcon className="size-5" />
           Se déconnecter

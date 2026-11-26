@@ -142,7 +142,7 @@ export function AccountDetail({ account, onProcessed, onConflict }: AccountDetai
       </header>
 
       <div className="flex items-center gap-3.5">
-        <Initials name={account.name} tone={account.role === 'SCHOOL' ? 'school' : 'speaker'} size="detail" />
+        <Initials name={account.name} tone={account.role === 'SCHOOL' ? 'school' : 'speaker'} size="detail" photoUrl={account.details?.photoUrl} />
         <div className="min-w-0">
           <h2 id={`compte-${account.id}`} className="text-[23px] leading-tight text-ink lg:text-[28px]">
             {account.name}

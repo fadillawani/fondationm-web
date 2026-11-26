@@ -14,6 +14,7 @@ function speaker(id: string, city: string, country = 'Sénégal'): SpeakerSummar
     organization: '',
     sector: null,
     motivation: '',
+    photoUrl: null,
   }
 }
 

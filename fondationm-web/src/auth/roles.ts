@@ -58,6 +58,11 @@ export const ROLE_HOME: Record<Role, string> = {
   STUDENT: '/eleve',
 }
 
+/** « Mon profil » de chaque espace (F13). */
+export function profilePath(role: Role): string {
+  return `${ROLE_HOME[role]}/profil`
+}
+
 /** Page de connexion de chaque persona ; sans rôle connu, celle de l'établissement. */
 export function loginPathFor(role: Role | null): string {
   switch (role) {
@@ -153,6 +158,9 @@ export interface AccountCard {
   /** Nombre d'initiales affichées. */
   initials: number
   detail: string
+  /** Photo (intervenant) ou logo (école), F13 ; jamais pour les autres rôles. */
+  photoUrl?: string | null
+  photoKind?: 'photo' | 'logo'
 }
 
 /** Carte utilisateur du bas de la barre latérale. */
@@ -164,11 +172,11 @@ export function accountCard(user: CurrentUser): AccountCard {
   }
   if (user.role === 'SCHOOL' && user.details?.kind === 'school') {
     // Maquette : nom du référent + « {Établissement} · {ville} » ; le référent est absent du contrat.
-    return { name: user.displayName, initials: 2, detail: user.details.city || user.email }
+    return { name: user.displayName, initials: 2, detail: user.details.city || user.email, photoUrl: user.details.photoUrl, photoKind: 'logo' }
   }
   if (user.role === 'SPEAKER' && user.details?.kind === 'speaker') {
     const detail = [user.details.jobTitle, user.details.city].filter(Boolean).join(' · ')
-    return { name: user.displayName, initials: 2, detail: detail || user.email }
+    return { name: user.displayName, initials: 2, detail: detail || user.email, photoUrl: user.details.photoUrl, photoKind: 'photo' }
   }
   if (user.role === 'STUDENT') {
     // Maquette : « Terminale S2 · Lycée de Sor » ; aucun établissement dans le profil, l'e-mail généré n'est pas montré.

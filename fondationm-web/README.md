@@ -79,7 +79,8 @@ src/
     events.ts         événements de session émis par le client
     schema.d.ts       généré par npm run api:types — ne pas modifier à la main
   auth/               session : tokenStorage, utilisateur courant, rôles, hooks, gestion des événements
-  components/ui/      composants de base (Button, FormField, Input, Modal…)
+  components/ui/      composants de base (Button, FormField, Input, Modal, Avatar : photo ou initiales…)
+  components/account/ formulaire de changement de mot de passe partagé (obligatoire et « Mon profil »)
   components/layout/  mises en page (barre latérale ≥ 1024 px, navigation basse blanche sur mobile,
                       en-tête de page PageTitle, menu du compte UserMenu, thèmes par persona roleTheme)
   components/calendar/ calendrier mensuel accessible partagé (MonthTable)
@@ -92,6 +93,8 @@ src/
                       liste des retours d'expérience (feedbacks/)
     donor/            espace donateur : rapport d'impact, retours publiés, mes requêtes
     student/          espace élève : les rencontres de ma classe (lecture seule)
+    profile/          « Mon profil » de chaque espace : informations, mot de passe, photo ou logo
+                      (contrôle du fichier, envoi signé direct à Cloudinary, enregistrement)
     feedback/         retours d'expérience de l'école et de l'intervenant : format du commentaire (feedbackFormat),
                       règles du formulaire, brouillon de l'onglet, formulaire et lecture partagés
   nav/                compteurs de la navigation (badges)
@@ -139,12 +142,19 @@ src/
 | `/donateur/impact` | connecté, validé, rôle DONOR | Rapport d'impact (`?periode=trimestre\|annee`, `filtre=ecoles\|intervenants`, `retour={id}`) |
 | `/donateur/requetes` | connecté, validé, rôle DONOR | Mes requêtes (`?requete={id}`, `vue=nouvelle`, `objet=`) |
 | `/eleve` | connecté, validé, rôle STUDENT | Mon espace : les rencontres de ma classe (`?rencontre={id}`) |
+| `/ecole/profil`, `/intervenant/profil` | connecté, validé, rôle de l'espace | Mon profil : photo ou logo, informations modifiables, mot de passe |
+| `/fondation/profil`, `/donateur/profil`, `/eleve/profil` | connecté, validé, rôle de l'espace | Mon profil : informations en lecture seule, mot de passe |
 
 ## Règles de session
 
 - Le jeton JWT est conservé dans `sessionStorage`, uniquement via `auth/tokenStorage.ts`.
 - Le rôle, le statut et `mustChangePassword` viennent toujours de `GET /api/me`, jamais du jeton.
 - Un 401 hors `POST /api/auth/login` déconnecte et affiche « Session expirée ».
+- Après un changement de mot de passe, le nouveau jeton remplace l'ancien dans `sessionStorage` avant
+  tout autre appel ; la session continue.
+- Photo et logo : aucune clé Cloudinary dans le code ni dans `.env` ; tout vient de
+  `POST /api/me/photo/signature`. L'envoi à Cloudinary part sans le jeton de l'application. Seules les
+  images `https://res.cloudinary.com/` sont affichées, jamais côté donateur.
 - Les brouillons de retours d'expérience (« Finir plus tard ») sont gardés dans `sessionStorage` sous
   `fondationm.retour.{compte}.{rencontre}`, jamais avec le jeton, et effacés à la fin de session.
 - `PASSWORD_CHANGE_REQUIRED` et `ACCOUNT_NOT_VALIDATED` (403) relisent `/api/me` puis redirigent vers la

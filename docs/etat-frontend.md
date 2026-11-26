@@ -1,5 +1,5 @@
 # État du frontend — Fondation M
-Dernière mise à jour : 26 novembre 2026 — lot F12 (« Mon impact » de l'intervenant, calculé côté client).
+Dernière mise à jour : 26 novembre 2026 — lot F13 (« Mon profil » : informations, mot de passe, photo ou logo ; codes d'erreur du contrat).
 
 **Source de vérité du design : `docs/maquette/` (fichiers `.dc.html`, voir `docs/maquette/LISEZ-MOI.md`).** Elle prime sur toute consigne écrite, sauf contrainte du backend ou règle d'accessibilité (contraste ≥ 4,5:1), signalées dans ce document.
 ## Avancement
@@ -23,10 +23,11 @@ Dernière mise à jour : 26 novembre 2026 — lot F12 (« Mon impact » de l'int
 | F10 | Espace donateur : « Rapport d'impact » (W4-impact), « Mes requêtes » (W4-requetes), connexion alignée (W4-connexion) | Terminé |
 | F11 | Espace élève : « Mon espace » (W5-E19, mobile déduit), connexion élève vérifiée (W5-E1) ; accueil provisoire retiré | Terminé |
 | F12 | « Mon impact » de l'intervenant (W2-impact) : chiffres calculés côté client, émotions de ses retours | Terminé |
-| F13+ | Écrans restants à définir | À faire  |
+| F13 | « Mon profil » de chaque espace (sans maquette) : informations, mot de passe, photo de l'intervenant et logo de l'école (Cloudinary) ; avatars partagés ; codes d'erreur du contrat traduits | Terminé |
+| F14+ | Écrans restants à définir | À faire  |
 
-Vérifications au moment de la livraison de F12 : `npm run build`, `npm run lint` et `npm test`
-(366 tests dans 45 fichiers, deux passages) passent sans erreur ni avertissement.
+Vérifications au moment de la livraison de F13 : `npm run build`, `npm run lint` et `npm test`
+(427 tests dans 49 fichiers, deux passages) passent sans erreur ni avertissement.
 
 Les sections « Ce que Fn livre » décrivent chaque lot à sa livraison. Les entrées et boutons « Bientôt » qu'elles citent
 sont tous devenus des liens depuis (F5 à F10) : il n'en reste aucun dans l'application (décision 106). Les accueils
@@ -57,6 +58,94 @@ provisoires de F0 ont tous été remplacés (le dernier, celui de l'élève, en 
   page. Correctif : `endSession` efface le jeton et annule les requêtes ; `RequireAuth` vide le cache
   quand l'espace connecté se démonte (décision 46). Test ajouté : aucune requête sans jeton après la
   déconnexion depuis l'annuaire.
+
+## Ce que F13 livre — « Mon profil », mot de passe, photo et logo
+
+- **Routes** : `/ecole/profil`, `/intervenant/profil`, `/fondation/profil`, `/donateur/profil`, `/eleve/profil`
+  (`profilePath(role)`), sous les mêmes gardes que l'espace. **Aucune maquette** : composants et jetons existants.
+- **Accès** : lien « Mon profil » au-dessus de « Se déconnecter » dans la barre latérale (PC) et dans le menu de l'avatar
+  (mobile).
+- **Contenu par rôle** (décision 132) :
+  - intervenant : « Ma photo », « Mes informations » (nom, ville, e-mail, secteur en lecture ; métier, structure,
+    secteur, motivation, téléphone, compétences modifiables), « Mot de passe » ;
+  - école : « Logo de l'établissement », « Mon établissement » (nom, ville, e-mail, type en lecture ; type, fonction,
+    téléphone modifiables), « Mot de passe » ;
+  - élève (nom, classe, identifiant), donateur (nom, e-mail), Fondation (e-mail) : lecture seule, puis « Mot de passe ».
+- **Enregistrement du profil** : PATCH des seuls champs modifiés, compétences de l'intervenant par leur propre PUT
+  (seulement si elles ont changé) ; bouton inactif tant que rien n'a changé ; « Profil enregistré. » (`aria-live`) ;
+  erreurs du serveur sous chaque champ, les autres dans l'alerte.
+- **Mot de passe** : formulaire extrait de F1 (`components/account/PasswordChangeForm.tsx`), même validation et mêmes
+  textes ; sur « Mon profil », la page reste ouverte : « Votre mot de passe est modifié. » (« Ton … » pour l'élève).
+  Le nouveau jeton remplace l'ancien avant tout autre appel (décision 128).
+- **Photo / logo** (décisions 129 à 131) :
+  - « Choisir une image » (JPG, PNG ou WebP, 5 Mo au plus) ; aperçu dans le cadre final (photo en `object-cover`,
+    logo en `object-contain` sur fond blanc), sans recadrage ;
+  - texte de visibilité : « Votre photo sera visible des établissements avec lesquels vous êtes en relation, et des
+    élèves de la classe concernée. » ; « Votre logo sera visible des intervenants et de la Fondation M avec qui vous
+    préparez des rencontres. » (vrai : le logo apparaît dans les demandes et l'agenda de l'intervenant, et chez la
+    Fondation) ;
+  - « Enregistrer la photo » / « Enregistrer le logo » : signature (`POST /api/me/photo/signature`), envoi direct à
+    Cloudinary avec barre « Envoi : n % » et « Annuler l'envoi », puis `PUT /api/me/photo` ;
+  - erreurs : « Choisissez une image JPG, PNG ou WebP. », « L'image dépasse 5 Mo. », « Le délai est dépassé,
+    recommencez. » (signature expirée), échec d'envoi (réseau ou refus) ;
+  - si l'image est chez Cloudinary mais le PUT échoue : « Réessayer l'enregistrement » (PUT seul) ou « Ne pas garder
+    cette image » ;
+  - « Retirer la photo » / « Retirer le logo » : confirmation (focus sur « Annuler »), `DELETE /api/me/photo` ;
+  - annonces « Photo enregistrée. », « Photo retirée. », « Envoi annulé. » (`aria-live`) ;
+  - quitter la page pendant un envoi ou avec un formulaire modifié : garde de sortie unique (« Quitter pendant
+    l'envoi ? » / « Quitter sans enregistrer ? »).
+- **Avatars** (décision 130) : photo ou logo à la place des initiales, à taille égale, partout où l'autre partie est
+  montrée : carte utilisateur et menu, annuaire et « Vous invitez », bandeaux et détail des rencontres de l'école,
+  demandes et agenda de l'intervenant, demandes, rencontres, retours et comptes de la Fondation, formulaire de retour,
+  « Mon espace » de l'élève. **Jamais côté donateur.**
+- **Codes d'erreur** : voir la section « Codes d'erreur du contrat (F13) » ci-dessous.
+
+### Fichiers de F13
+
+- **Nouveaux** : `src/lib/photo.ts`, `src/components/ui/Avatar.tsx`, `src/components/account/PasswordChangeForm.tsx`,
+  `src/pages/profile/` (`ProfilePage.tsx`, `ProfileForms.tsx`, `PhotoField.tsx`, `photoUpload.ts`, `profileData.ts`) ;
+  tests `src/components/ui/Avatar.test.tsx`, `src/pages/profile/photoUpload.test.ts`, `ProfilePage.test.tsx`,
+  `src/pages/donor/DonorNoPhoto.test.tsx` ; aide de test `src/test/fakeXhr.ts`.
+- **Contrat** : `openapi.json` (remplacé par la version du backend) et `src/api/schema.d.ts` (régénéré).
+- **Modifiés** :
+  - erreurs : `src/api/errors.ts`, `errors.test.ts` ;
+  - session : `src/auth/hooks.ts` (`useChangePassword({ redirect })`), `src/auth/roles.ts` (`profilePath`, photo de la
+    carte), `src/pages/MustChangePasswordPage.tsx` (formulaire partagé, tests de F1 inchangés) ;
+  - mise en page : `src/components/layout/AppLayout.tsx`, `UserMenu.tsx`, `src/components/ui/Initials.tsx`,
+    `src/routes/routes.tsx` ;
+  - lecteurs de `photoUrl` : `src/lib/profiles.ts`, `src/pages/school/schoolData.ts`, `meetingsData.ts`,
+    `src/pages/speaker/speakerData.ts`, `src/pages/foundation/meetings/foundationMeetingsData.ts`,
+    `src/pages/foundation/feedbacks/foundationFeedbacksData.ts`, `src/pages/student/studentData.ts` ;
+  - avatars : `src/pages/school/SpeakerCard.tsx`, `MeetingRequestPage.tsx`, `MeetingBanners.tsx`, `MeetingDetail.tsx`,
+    `src/pages/speaker/RequestDetail.tsx`, `AgendaItemDetail.tsx`, `src/pages/foundation/AccountList.tsx`,
+    `AccountDetail.tsx`, `meetings/RequestDetail.tsx`, `meetings/MeetingPanel.tsx`,
+    `feedbacks/FeedbackPairViews.tsx`, `src/pages/feedback/FeedbackEditor.tsx`, `FeedbackFormPage.tsx`,
+    `src/pages/student/StudentHomePage.tsx` ;
+  - F9 : `src/pages/feedback/feedbackData.ts`, tests `SchoolFeedbackPage.test.tsx`, `src/test/feedbackFixtures.ts` ;
+    `src/pages/school/schoolData.test.ts` (champ `photoUrl: null` dans la donnée de test) ;
+  - `docs/etat-frontend.md`, `fondationm-web/README.md`.
+
+## Codes d'erreur du contrat (F13)
+
+Le contrat documente désormais le schéma `ApiError` et ses codes. Tous sont dans `ERROR_CODES` (`src/api/errors.ts`)
+et lus dans le corps de la réponse ; le statut HTTP ne sert qu'à défaut de corps lisible.
+
+- **Messages techniques fixes** (toujours les nôtres, même si le serveur en envoie un). **Nouveaux en F13** :
+  `INTERNAL_ERROR` (« Le serveur a rencontré un problème. Réessayez dans un instant. », avec « Réessayer »),
+  `METHOD_NOT_ALLOWED`, `NOT_ACCEPTABLE`, `UNSUPPORTED_MEDIA_TYPE`, `PAYLOAD_TOO_LARGE`. Déjà traduits avant F13 :
+  `INVALID_CREDENTIALS`, `UNAUTHENTICATED`, `ACCOUNT_NOT_VALIDATED`, `FORBIDDEN`, `NOT_FOUND`,
+  `PASSWORD_CHANGE_REQUIRED`, `VALIDATION_ERROR`, `RATE_LIMITED`.
+- **Codes métier sans message français avant F13** (texte de repli si le serveur n'envoie pas de message ; le message
+  du serveur, plus précis, reste prioritaire) : `EMAIL_ALREADY_USED`, `INVALID_STATUS_TRANSITION`, `CLASS_NOT_EMPTY`,
+  `CLASS_FULL`, `STUDENT_COUNT_TOO_LOW`, `SLOT_OVERLAP`, `SLOT_NOT_AVAILABLE`, `CLASS_SLOT_OVERLAP`, `SLOT_PASSED`,
+  `CLASS_HAS_MEETINGS`, `SLOT_HAS_PENDING_MEETINGS`, `MEETING_NOT_STARTED`, `MEETING_NOT_COMPLETED`,
+  `FEEDBACK_ALREADY_EXISTS`, `FEEDBACK_PUBLISHED`. Textes dans `FALLBACK_MESSAGES` ; un test par code (avec et sans
+  message du serveur).
+- **`SERVER_ERROR`** : ancien nom, gardé comme synonyme d'`INTERNAL_ERROR` ; un 5xx sans corps lisible donne
+  désormais `INTERNAL_ERROR`.
+- **F9** : le doublon de retour garde le comportement validé (relecture de la liste, puis un seul PATCH si le retour
+  est Soumis) ; un retour déjà Validé lève `FEEDBACK_PUBLISHED` (« Ce retour a déjà été validé par la Fondation M : il
+  ne peut plus être modifié. ») sans aucun PATCH (décision 127).
 
 ## Ce que F12 livre — « Mon impact » de l'intervenant (W2-impact)
 
@@ -1200,11 +1289,48 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 125. **Contrastes de F12** (calculés) : blanc sur terracotta 5,22, blanc sur indigo 11,31, crème sur indigo 9,24, blanc sur
      vert 6,14, crème sur vert 5,01, pastilles d'émotion blanc sur terracotta 5,22, sur-ligne terracotta sur `#F7F3EA`
      4,71, gris sur blanc 8,72 ; la crème de la maquette sur terracotta (4,26:1) est remplacée par `#FFF0C4` (4,60:1).
+126. **Codes d'erreur du contrat** : tous les codes de `ApiError` sont connus ; codes techniques à message fixe, codes
+     métier au message du serveur d'abord puis repli français (`FALLBACK_MESSAGES`) ; `INTERNAL_ERROR` remplace
+     `SERVER_ERROR` (gardé en synonyme) et propose « Réessayer ».
+127. **F9 et les codes** : comportement validé inchangé (relecture, puis un seul PATCH) ; le cas « déjà validé » porte le
+     code `FEEDBACK_PUBLISHED` (aucun PATCH envoyé) ; la donnée de test renvoie ce code sur un PATCH refusé.
+128. **Formulaire de mot de passe partagé** : extrait de F1 sans changement de comportement (tests de F1 inchangés) ;
+     `useChangePassword({ redirect })` enregistre le nouveau jeton (sessionStorage) avant de relire `/api/me`, de sorte
+     qu'aucune requête ne part avec l'ancien (testé) ; sur « Mon profil », pas de redirection.
+129. **Contrôle du fichier, sans recadrage** : JPG, PNG ou WebP, 5 Mo au plus ; type MIME, extension et premiers octets
+     doivent concorder ; formats et taille annoncés par la signature vérifiés aussi. Le fichier part tel quel
+     (`c_limit` 800 chez Cloudinary) ; aperçu dans le cadre final ; aucun canvas.
+130. **Avatar commun** (`components/ui/Avatar.tsx`) : n'affiche que `https://res.cloudinary.com/` (≤ 300 caractères,
+     `lib/photo.ts`) ; photo en `object-cover`, logo en `object-contain` sur fond blanc ; mêmes classes que les initiales
+     (aucun décalage) ; initiales en repli (absente, non sûre, image en erreur) ; `alt=""` (le nom est écrit à côté).
+     `photoUrl` est facultatif partout. **Jamais côté donateur** (testé même si `photoUrl` arrive).
+131. **Envoi à Cloudinary** : aucune clé ni secret dans le code ou le `.env` ; tout vient de la signature. Corps
+     `multipart` avec exactement les paramètres signés (sans `resource_type` ni `cloud_name`), `XMLHttpRequest` sans
+     jeton de l'application (progression, annulation). Signature expirée (« Stale request ») : « Le délai est dépassé,
+     recommencez. », sans nouvel essai automatique. Échec du PUT : réessai du PUT seul.
+132. **Profil modifiable ou non** : intervenant et école modifient ce que leur `PATCH` accepte (sauf nom, ville, pays,
+     e-mail : « écrivez à la Fondation M ») ; élève, donateur et Fondation en lecture seule. PATCH limité aux champs
+     modifiés ; compétences par leur PUT.
+133. **Une seule garde de sortie par page** (`useBlocker`) : `ProfilePage` l'arme si un formulaire est modifié ou si un
+     envoi d'image est en cours ; `PhotoField` le lui signale (`onBusyChange`).
+134. **Lien « Mon profil »** : barre latérale (au-dessus de « Se déconnecter ») et menu de l'avatar, dans tous les espaces.
+135. **Contrastes de F13** (calculés) : gris sur blanc 8,72, gris sur `#F7F3EA` 7,87, encre sur `#F7F3EA` 14,52, encre sur
+     blanc 16,08, vert sur vert pâle 5,21, rouge sur rouge pâle 5,33, barre de progression verte sur blanc 6,14 (seuil
+     non textuel 3) ; initiales inchangées (crème sur indigo 9,24, encre sur orange 5,71, terracotta foncé sur crème
+     6,27). **Échec signalé** : cadre blanc du logo sur carte blanche 1,00:1 (bordure `#E6DECB` 1,30:1) ; non textuel et
+     décoratif (le logo porte l'information), laissé tel quel.
 
 ## Écarts
 
 - `--legacy-peer-deps` remplacé par l'exécution `npx` isolée (voir décision 3).
 - L'élève n'a pas de navigation basse sur mobile (une seule entrée, décision 112).
+- **« Mon profil » sans maquette** (F13) : composants et jetons existants, à valider avec le design.
+- **Pas de recadrage** de la photo ni du logo (F13, décision 129) : l'image part telle quelle ; une photo est coupée
+  au centre par `object-cover`, un logo jamais.
+- **Nom, ville, pays et e-mail non modifiables** par l'école et l'intervenant ; profils de l'élève, du donateur et de
+  la Fondation en lecture seule (aucun point d'accès de modification).
+- **Avatars ajoutés** là où la maquette ne montre que du texte (détail d'une demande ou d'une rencontre chez
+  l'intervenant et la Fondation, auteur d'un retour) : même taille que les initiales existantes.
 
 ## Écarts maquette / backend
 
@@ -1310,8 +1436,8 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
    le CORS n'expose que `X-Request-Id` (`Access-Control-Expose-Headers`, vérifié le 23/11/2026). Le
    frontend affiche donc « Trop de tentatives. Patientez un peu avant de réessayer. » sans le délai.
    Correctif côté backend : ajouter `Retry-After` aux en-têtes exposés ; aucun changement frontend nécessaire.
-2. **Schéma d'erreur absent de `openapi.json`** (manque connu du backend) : le type `ApiError` est écrit
-   à la main. Seules les réponses 2xx sont documentées.
+2. **Schéma d'erreur** : documenté depuis le contrat de F13 (`ApiError` et ses codes, section « Codes d'erreur du
+   contrat ») ; il reste lu de façon défensive, les réponses d'erreur n'étant pas décrites pour chaque point d'accès.
 3. **`MeResponse` sans champs obligatoires** dans le contrat : le frontend rejette une réponse sans `id`,
    `role` ou `status` (`INVALID_RESPONSE`). Le backend envoie aussi des `null` explicites, non déclarés
    (`nullable`) dans le contrat ; le frontend les traite comme absents. Marquer ces champs `required` côté backend rendrait les types plus précis.
@@ -1455,6 +1581,19 @@ Passe de conformité valeur par valeur (couleurs, tailles, poids, rayons, paddin
 65. **Nombre de filles rencontrées** : l'école le saisit dans son retour (F9), mais l'intervenant n'y a pas accès.
     **Backend : un agrégat par intervenant (filles, présents) sans exposer le retour de l'école.**
 66. **« Le mot de la classe » transmis par la Fondation** : aucun canal (suite du point 43).
+67. **CSP** (F13) : si une Content-Security-Policy est posée au déploiement, autoriser `img-src https://res.cloudinary.com`
+    (affichage) et `connect-src https://api.cloudinary.com` (envoi). Le frontend n'en définit aucune aujourd'hui.
+68. **Remplacement immédiat chez Cloudinary** : la signature porte `overwrite` sur le `public_id` du compte ; la nouvelle
+    image remplace l'ancienne chez Cloudinary **avant** le `PUT /api/me/photo`. Si le PUT échoue, ou si l'utilisateur
+    choisit « Ne pas garder cette image », l'adresse déjà enregistrée peut servir la nouvelle image (cache invalidé).
+    **Backend : `public_id` distinct par envoi, ou remplacement confirmé par le PUT.**
+69. **`Retry-After` (suite du point 1)** : toujours non exposé ; sur un 429 de la signature, message sans délai.
+    **Backend : `Access-Control-Expose-Headers: Retry-After`.**
+70. **`maxFileSize` indicatif** : la taille annoncée par la signature est vérifiée côté client, mais la signature ne la
+    fait pas respecter par Cloudinary (seuls les paramètres signés le sont) ; la limite réelle reste celle du compte
+    Cloudinary.
+71. **Schémas fusionnés et `photoUrl` facultatif** : le contrat fusionne les profils, et `photoUrl` peut manquer là où il
+    est déclaré ; le frontend le traite comme facultatif partout et n'affiche que les adresses Cloudinary.
 
 ## Écarts de design restants
 
@@ -1561,3 +1700,5 @@ attendue (maquette) et la raison.
 | Mon impact | idem | Sous-ligne crème `#FDE7A6` sur la carte terracotta | Contraste 4,26:1 : `#FFF0C4` (4,60:1). |
 | Mon impact | `pages/speaker/ImpactPage.tsx` | « Les thèmes que vous avez abordés », citation « Le mot du Lycée … » | Retirés (aucune donnée, aucun canal). |
 | Mon impact | `pages/speaker/ImpactSummary.tsx` | — | Ajoutés : notes de fiabilité (effectif ou durée inconnus), rencontres en attente de confirmation, « D'après {n} retours sur {m} rencontres réalisées. ». |
+| « Mon profil » (toutes personas) | `pages/profile/ProfilePage.tsx` | Aucune maquette | Sections sur fond blanc, jetons existants (écart F13). |
+| Photo / logo | `pages/profile/PhotoField.tsx` | — | Pas de recadrage (décision 129) ; cadre blanc du logo 1,00:1 sur la carte (décoratif, décision 135). |

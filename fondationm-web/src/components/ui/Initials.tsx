@@ -1,5 +1,7 @@
 import { cn } from '../../lib/cn'
 import { initialsOf } from '../../lib/initials'
+import type { PhotoKind } from '../../lib/photo'
+import { Avatar } from './Avatar'
 
 type InitialsTone = 'school' | 'speaker' | 'user'
 
@@ -16,12 +18,16 @@ interface InitialsProps {
   /** 'list' : avatar de liste de la maquette (46 px, rayon 14). */
   size?: 'md' | 'lg' | 'list' | 'detail'
   max?: number
+  /** Photo ou logo (F13) : remplace les initiales à taille égale. */
+  photoUrl?: string | null
 }
 
-export function Initials({ name, tone, size = 'md', max = 2 }: InitialsProps) {
+export function Initials({ name, tone, size = 'md', max = 2, photoUrl = null }: InitialsProps) {
+  const kind: PhotoKind = tone === 'school' ? 'logo' : 'photo'
   return (
-    <span
-      aria-hidden="true"
+    <Avatar
+      photoUrl={photoUrl}
+      kind={kind}
       className={cn(
         'inline-flex shrink-0 items-center justify-center font-display leading-none',
         size === 'lg'
@@ -35,6 +41,6 @@ export function Initials({ name, tone, size = 'md', max = 2 }: InitialsProps) {
       )}
     >
       {initialsOf(name, max)}
-    </span>
+    </Avatar>
   )
 }

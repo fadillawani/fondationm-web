@@ -58,7 +58,7 @@ export function feedbackBackend(role: 'school' | 'speaker', initial: FeedbackSto
       const index = store.written.findIndex((feedback) => feedback.meeting.id === meetingId)
       const current = store.written[index]
       if (current === undefined) return jsonResponse(404, { code: 'NOT_FOUND', message: 'Aucun retour.', fieldErrors: [] })
-      if (current.status === 'PUBLISHED') return jsonResponse(409, { code: 'FEEDBACK_ALREADY_PUBLISHED', message: 'Retour déjà publié.', fieldErrors: [] })
+      if (current.status === 'PUBLISHED') return jsonResponse(409, { code: 'FEEDBACK_PUBLISHED', message: 'Retour déjà publié.', fieldErrors: [] })
       const body = JSON.parse(raw) as { comment?: string; rating?: string }
       const updated = { ...current, comment: body.comment ?? current.comment, rating: body.rating === undefined ? current.rating : Number(body.rating) }
       store.written[index] = updated

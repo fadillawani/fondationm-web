@@ -3,6 +3,7 @@ import { feedbackFormPath } from '../../auth/roles'
 import { cn } from '../../lib/cn'
 import { parseIso } from '../../lib/dateTime'
 import { initialsOf } from '../../lib/initials'
+import { Avatar } from '../../components/ui/Avatar'
 import type { FeedbackState, SchoolMeeting } from './meetingsData'
 import {
   DECISION_STYLE,
@@ -55,12 +56,13 @@ export function MeetingDetail({ meeting, jobTitle, feedback, upcoming }: Meeting
       </div>
 
       <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
+        <Avatar
+          photoUrl={meeting.speakerPhotoUrl}
+          kind="photo"
           className="hidden size-[52px] shrink-0 items-center justify-center rounded-2xl bg-canvas font-display text-[19px] text-ink lg:inline-flex"
         >
           {initialsOf(meeting.speakerName)}
-        </span>
+        </Avatar>
         <div className="flex min-w-0 flex-col">
           <h2 className="font-display text-[21px] leading-[1.1] text-ink lg:text-[22px]">{meeting.speakerName}</h2>
           {who && <span className="text-[13px] font-bold text-muted">{who}</span>}

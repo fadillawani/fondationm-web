@@ -9,6 +9,7 @@ import { Spinner } from '../../components/ui/Spinner'
 import { cn } from '../../lib/cn'
 import { formatTime, formatTimeRange, parseIso } from '../../lib/dateTime'
 import { initialsOf } from '../../lib/initials'
+import { Avatar } from '../../components/ui/Avatar'
 import { useNow } from '../../lib/useNow'
 import { placeLabel } from '../school/meetingText'
 import { useStudentMeetings, type StudentMeeting } from './studentData'
@@ -79,9 +80,13 @@ function MeetingDetail({ meeting, now }: { meeting: StudentMeeting; now: Date })
       </div>
       <div className="flex flex-col gap-4 p-5">
         <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="inline-flex size-14 shrink-0 items-center justify-center rounded-[16px] bg-yellow font-display text-xl text-ink">
+          <Avatar
+            photoUrl={meeting.speakerPhotoUrl}
+            kind="photo"
+            className="inline-flex size-14 shrink-0 items-center justify-center rounded-[16px] bg-yellow font-display text-xl text-ink"
+          >
             {initialsOf(meeting.speakerName)}
-          </span>
+          </Avatar>
           <span className="flex min-w-0 flex-col">
             <h2 className="text-[24px] leading-tight">{meeting.speakerName}</h2>
             {where && <span className="text-sm font-bold text-muted">{where}</span>}

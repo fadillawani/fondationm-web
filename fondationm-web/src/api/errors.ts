@@ -7,7 +7,28 @@ export const ERROR_CODES = {
   PASSWORD_CHANGE_REQUIRED: 'PASSWORD_CHANGE_REQUIRED',
   RATE_LIMITED: 'RATE_LIMITED',
   VALIDATION_ERROR: 'VALIDATION_ERROR',
+  /** Ancien code (avant le contrat documenté) : gardé comme synonyme d'INTERNAL_ERROR. */
   SERVER_ERROR: 'SERVER_ERROR',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  METHOD_NOT_ALLOWED: 'METHOD_NOT_ALLOWED',
+  NOT_ACCEPTABLE: 'NOT_ACCEPTABLE',
+  UNSUPPORTED_MEDIA_TYPE: 'UNSUPPORTED_MEDIA_TYPE',
+  PAYLOAD_TOO_LARGE: 'PAYLOAD_TOO_LARGE',
+  EMAIL_ALREADY_USED: 'EMAIL_ALREADY_USED',
+  INVALID_STATUS_TRANSITION: 'INVALID_STATUS_TRANSITION',
+  CLASS_NOT_EMPTY: 'CLASS_NOT_EMPTY',
+  CLASS_FULL: 'CLASS_FULL',
+  STUDENT_COUNT_TOO_LOW: 'STUDENT_COUNT_TOO_LOW',
+  SLOT_OVERLAP: 'SLOT_OVERLAP',
+  SLOT_NOT_AVAILABLE: 'SLOT_NOT_AVAILABLE',
+  CLASS_SLOT_OVERLAP: 'CLASS_SLOT_OVERLAP',
+  SLOT_PASSED: 'SLOT_PASSED',
+  CLASS_HAS_MEETINGS: 'CLASS_HAS_MEETINGS',
+  SLOT_HAS_PENDING_MEETINGS: 'SLOT_HAS_PENDING_MEETINGS',
+  MEETING_NOT_STARTED: 'MEETING_NOT_STARTED',
+  MEETING_NOT_COMPLETED: 'MEETING_NOT_COMPLETED',
+  FEEDBACK_ALREADY_EXISTS: 'FEEDBACK_ALREADY_EXISTS',
+  FEEDBACK_PUBLISHED: 'FEEDBACK_PUBLISHED',
   NETWORK_ERROR: 'NETWORK_ERROR',
   TIMEOUT: 'TIMEOUT',
   INVALID_RESPONSE: 'INVALID_RESPONSE',
@@ -69,7 +90,7 @@ function codeFromStatus(status: number): string {
   if (status === 403) return ERROR_CODES.FORBIDDEN
   if (status === 404) return ERROR_CODES.NOT_FOUND
   if (status === 429) return ERROR_CODES.RATE_LIMITED
-  if (status >= 500) return ERROR_CODES.SERVER_ERROR
+  if (status >= 500) return ERROR_CODES.INTERNAL_ERROR
   return ERROR_CODES.UNKNOWN_ERROR
 }
 
@@ -126,11 +147,38 @@ const MESSAGES: Partial<Record<string, string>> = {
   [ERROR_CODES.PASSWORD_CHANGE_REQUIRED]: 'Vous devez changer votre mot de passe avant de continuer.',
   [ERROR_CODES.VALIDATION_ERROR]: 'Certains champs sont à corriger.',
   [ERROR_CODES.SERVER_ERROR]: 'Le serveur a rencontré un problème. Réessayez dans un instant.',
+  [ERROR_CODES.INTERNAL_ERROR]: 'Le serveur a rencontré un problème. Réessayez dans un instant.',
+  [ERROR_CODES.METHOD_NOT_ALLOWED]: 'Cette action n’est pas possible ici. Rechargez la page puis réessayez.',
+  [ERROR_CODES.NOT_ACCEPTABLE]: 'Le serveur n’a pas pu répondre dans un format lisible. Réessayez plus tard.',
+  [ERROR_CODES.UNSUPPORTED_MEDIA_TYPE]: 'Le serveur n’a pas pu lire l’envoi. Rechargez la page puis réessayez.',
+  [ERROR_CODES.PAYLOAD_TOO_LARGE]: 'L’envoi est trop volumineux. Raccourcissez le texte puis réessayez.',
   [ERROR_CODES.NETWORK_ERROR]:
     'Impossible de joindre le serveur. Vérifiez votre connexion internet puis réessayez.',
   [ERROR_CODES.TIMEOUT]: 'Le serveur met trop de temps à répondre. Réessayez dans un instant.',
   [ERROR_CODES.INVALID_RESPONSE]: 'Le serveur a envoyé une réponse inattendue. Réessayez plus tard.',
   [ERROR_CODES.UNEXPECTED_ERROR]: "Une erreur inattendue s'est produite. Réessayez.",
+}
+
+/**
+ * Codes métier du contrat (`ApiError`) : le message français du serveur, plus précis, passe en premier ; ce texte ne
+ * sert que si le serveur n'en envoie pas (décision 126).
+ */
+const FALLBACK_MESSAGES: Partial<Record<string, string>> = {
+  [ERROR_CODES.EMAIL_ALREADY_USED]: 'Cette adresse e-mail est déjà utilisée.',
+  [ERROR_CODES.INVALID_STATUS_TRANSITION]: 'Cet élément a déjà été traité. Rechargez la page pour voir son état.',
+  [ERROR_CODES.CLASS_NOT_EMPTY]: 'Cette classe a encore des élèves : retirez-les avant de la supprimer.',
+  [ERROR_CODES.CLASS_FULL]: 'Cette classe est complète.',
+  [ERROR_CODES.STUDENT_COUNT_TOO_LOW]: 'L’effectif déclaré est inférieur au nombre d’élèves déjà rattachés.',
+  [ERROR_CODES.SLOT_OVERLAP]: 'Ce créneau chevauche un de vos créneaux existants.',
+  [ERROR_CODES.SLOT_NOT_AVAILABLE]: 'Ce créneau n’est plus disponible.',
+  [ERROR_CODES.CLASS_SLOT_OVERLAP]: 'Cette classe a déjà une rencontre sur ce créneau.',
+  [ERROR_CODES.SLOT_PASSED]: 'Ce créneau est déjà passé.',
+  [ERROR_CODES.CLASS_HAS_MEETINGS]: 'Cette classe a des rencontres : elle ne peut pas être supprimée.',
+  [ERROR_CODES.SLOT_HAS_PENDING_MEETINGS]: 'Ce créneau a reçu une demande en attente : il ne peut plus être retiré.',
+  [ERROR_CODES.MEETING_NOT_STARTED]: 'Cette rencontre n’a pas encore eu lieu.',
+  [ERROR_CODES.MEETING_NOT_COMPLETED]: 'Cette rencontre n’est pas encore marquée comme réalisée.',
+  [ERROR_CODES.FEEDBACK_ALREADY_EXISTS]: 'Un retour existe déjà pour cette rencontre.',
+  [ERROR_CODES.FEEDBACK_PUBLISHED]: 'Ce retour a déjà été validé par la Fondation M : il ne peut plus être modifié.',
 }
 
 export function errorMessage(error: unknown): string {
@@ -142,7 +190,7 @@ export function errorMessage(error: unknown): string {
   }
   return (
     MESSAGES[apiError.code] ??
-    (apiError.message || `Une erreur inattendue est survenue (${apiError.code}).`)
+    (apiError.message || FALLBACK_MESSAGES[apiError.code] || `Une erreur inattendue est survenue (${apiError.code}).`)
   )
 }
 
@@ -152,6 +200,7 @@ export function isRetryable(error: unknown): boolean {
     code === ERROR_CODES.NETWORK_ERROR ||
     code === ERROR_CODES.TIMEOUT ||
     code === ERROR_CODES.SERVER_ERROR ||
+    code === ERROR_CODES.INTERNAL_ERROR ||
     code === ERROR_CODES.UNEXPECTED_ERROR
   )
 }

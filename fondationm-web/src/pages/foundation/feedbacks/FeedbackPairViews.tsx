@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Initials } from '../../../components/ui/Initials'
 import { errorMessage } from '../../../api/errors'
 import { Alert } from '../../../components/ui/Alert'
 import { Button } from '../../../components/ui/Button'
@@ -106,7 +107,14 @@ function FeedbackCard({ part, pair, feedback, hiddenOnMobile, onPin }: FeedbackC
         <h3 className="font-sans text-xs font-black uppercase tracking-[0.08em] text-muted">{title}</h3>
         <StepBadge step={step} />
       </div>
-      <p className="font-black text-ink">{author}</p>
+      <p className="flex items-center gap-2.5 font-black text-ink">
+        <Initials
+          name={author}
+          tone={part === 'ecole' ? 'school' : 'speaker'}
+          photoUrl={part === 'ecole' ? (feedback?.schoolPhotoUrl ?? pair.school?.schoolPhotoUrl) : (feedback?.speakerPhotoUrl ?? pair.speaker?.speakerPhotoUrl)}
+        />
+        {author}
+      </p>
       {feedback === null ? (
         <p className="rounded-[12px] bg-canvas px-3 py-2 text-sm font-semibold text-ink">Ce retour n'a pas encore été écrit.</p>
       ) : (

@@ -29,7 +29,7 @@ export function AccountList({ label, accounts, selectedId, onSelect }: AccountLi
                 selected ? 'border-ink' : 'border-transparent hover:border-line',
               )}
             >
-              <Initials name={account.name} tone={account.role === 'SCHOOL' ? 'school' : 'speaker'} size="list" />
+              <Initials name={account.name} tone={account.role === 'SCHOOL' ? 'school' : 'speaker'} size="list" photoUrl={account.details?.photoUrl} />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate font-display text-lg leading-tight text-ink">{account.name}</span>
                 {context && <span className="truncate text-[13px] font-bold text-muted">{context}</span>}

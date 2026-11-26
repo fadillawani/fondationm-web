@@ -3,6 +3,7 @@ import { api, unwrap } from '../../../api/client'
 import { invalidResponseError } from '../../../api/errors'
 import { FETCH_PAGE_SIZE, fetchAllPages, type Collection } from '../../../api/paging'
 import { asRecord, integer, oneOf, text, textList } from '../../../api/wire'
+import { readPhotoUrl } from '../../../lib/photo'
 import { FOUNDATION_MEETINGS_KEY } from '../meetings/foundationMeetingsData'
 
 const ROLES = ['SCHOOL', 'SPEAKER'] as const
@@ -20,6 +21,9 @@ export interface FoundationFeedback {
   endAt: string | null
   schoolName: string
   schoolCity: string
+  /** Logo et photo (F13) : schémas fusionnés, donc facultatifs. */
+  schoolPhotoUrl: string | null
+  speakerPhotoUrl: string | null
   classTitle: string
   studentCount: number | null
   speakerName: string
@@ -52,6 +56,8 @@ export function readFoundationFeedback(value: unknown): FoundationFeedback | nul
     endAt: meeting && text(meeting, 'slotEndAt'),
     schoolName: (school && text(school, 'name')) ?? 'Établissement',
     schoolCity: (school && text(school, 'city')) ?? '',
+    schoolPhotoUrl: readPhotoUrl(school),
+    speakerPhotoUrl: readPhotoUrl(speaker),
     classTitle: (schoolClass && text(schoolClass, 'title')) ?? '',
     studentCount: schoolClass && integer(schoolClass, 'studentCount'),
     speakerName: (speaker && text(speaker, 'fullName')) ?? 'Intervenant',

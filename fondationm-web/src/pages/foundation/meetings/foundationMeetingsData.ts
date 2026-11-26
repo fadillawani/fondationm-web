@@ -3,6 +3,7 @@ import { api, unwrap } from '../../../api/client'
 import { invalidResponseError } from '../../../api/errors'
 import { FETCH_PAGE_SIZE, fetchAllPages } from '../../../api/paging'
 import { asRecord, integer, oneOf, text, textList } from '../../../api/wire'
+import { readPhotoUrl } from '../../../lib/photo'
 
 export const MEETING_STATUSES = ['PENDING', 'CONFIRMED', 'REFUSED', 'CANCELLED', 'COMPLETED'] as const
 export type FoundationMeetingStatus = (typeof MEETING_STATUSES)[number]
@@ -20,6 +21,9 @@ export interface FoundationMeeting {
   foundationDecision: PartyDecision | null
   schoolName: string
   schoolCity: string
+  /** Logo et photo (F13), facultatifs. */
+  schoolPhotoUrl: string | null
+  speakerPhotoUrl: string | null
   classTitle: string
   studentCount: number | null
   speakerName: string
@@ -54,6 +58,8 @@ export function readFoundationMeeting(value: unknown): FoundationMeeting | null 
     foundationDecision: oneOf(DECISIONS, text(record, 'foundationDecision')),
     schoolName: (school && text(school, 'name')) ?? 'Établissement',
     schoolCity: (school && text(school, 'city')) ?? '',
+    schoolPhotoUrl: readPhotoUrl(school),
+    speakerPhotoUrl: readPhotoUrl(speaker),
     classTitle: (schoolClass && text(schoolClass, 'title')) ?? '',
     studentCount: schoolClass ? integer(schoolClass, 'studentCount') : null,
     speakerName: (speaker && text(speaker, 'fullName')) ?? 'Intervenant',

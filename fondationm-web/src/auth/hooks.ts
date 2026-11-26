@@ -121,7 +121,11 @@ export function useRegister() {
   })
 }
 
-export function useChangePassword() {
+/**
+ * Changement de mot de passe : le nouveau jeton remplace l'ancien avant toute autre requête, puis `/api/me` est relu.
+ * `redirect` (par défaut) : vers l'accueil du rôle, comme la page obligatoire (F1) ; le profil (F13) reste sur place.
+ */
+export function useChangePassword({ redirect = true }: { redirect?: boolean } = {}) {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
@@ -131,7 +135,7 @@ export function useChangePassword() {
       return queryClient.fetchQuery({ ...meQuery, staleTime: 0 })
     },
     onSuccess: (user) => {
-      void navigate(destinationFor(user), { replace: true })
+      if (redirect) void navigate(destinationFor(user), { replace: true })
     },
   })
 }

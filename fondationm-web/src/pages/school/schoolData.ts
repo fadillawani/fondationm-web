@@ -4,6 +4,7 @@ import { invalidResponseError } from '../../api/errors'
 import { FETCH_PAGE_SIZE, fetchAllPages } from '../../api/paging'
 import { asRecord, integer, oneOf, recordList, text, textList } from '../../api/wire'
 import { normalizeName } from '../../lib/normalize'
+import { readPhotoUrl } from '../../lib/photo'
 import { SECTORS, type Sector } from '../../lib/referenceData'
 
 export type SlotFormats = 'IN_PERSON' | 'ONLINE' | 'BOTH'
@@ -22,6 +23,8 @@ export interface SpeakerSummary {
   organization: string
   sector: Sector | null
   motivation: string
+  /** Photo (F13), facultative. */
+  photoUrl: string | null
 }
 
 export interface AvailableSlot {
@@ -71,6 +74,7 @@ function readSummaryFields(value: unknown): SpeakerSummary | null {
     organization: text(record, 'organization') ?? '',
     sector: oneOf(SECTORS, text(record, 'sector')),
     motivation: text(record, 'motivation') ?? '',
+    photoUrl: readPhotoUrl(record),
   }
 }
 

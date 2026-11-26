@@ -2,9 +2,10 @@ import type { ComponentType } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { useCurrentUser } from '../../auth/currentUserContext'
 import { useLogout } from '../../auth/hooks'
-import { ROLE_TAGLINE, accountCard, navItemsFor, type NavIcon, type NavItem } from '../../auth/roles'
+import { ROLE_TAGLINE, accountCard, navItemsFor, profilePath, type NavIcon, type NavItem } from '../../auth/roles'
 import { cn } from '../../lib/cn'
 import { initialsOf } from '../../lib/initials'
+import { Avatar } from '../ui/Avatar'
 import { useNavBadges } from '../../nav/badges'
 import {
   AccountsIcon,
@@ -121,17 +122,28 @@ export function AppLayout() {
         </nav>
         <div className="flex flex-col gap-2">
           <div className={cn('flex items-center gap-3 rounded-2xl p-3.5', theme.card)}>
-            <span
-              aria-hidden="true"
+            <Avatar
+              photoUrl={card.photoUrl}
+              kind={card.photoKind ?? 'photo'}
               className={cn('inline-flex size-11 shrink-0 items-center justify-center rounded-[14px] font-display text-lg', theme.avatar)}
             >
               {initialsOf(card.name, card.initials)}
-            </span>
+            </Avatar>
             <div className="flex min-w-0 flex-col">
               <span className="truncate text-sm font-black text-white">{card.name}</span>
               <span className="truncate text-xs font-bold text-canvas">{card.detail}</span>
             </div>
           </div>
+          <NavLink
+            to={profilePath(user.role)}
+            className={cn(
+              'inline-flex min-h-touch items-center gap-2 self-start rounded-[12px] px-3.5 text-sm font-extrabold focus-visible:outline-2 focus-visible:outline-offset-2',
+              theme.link,
+              theme.focus,
+            )}
+          >
+            Mon profil
+          </NavLink>
           <button
             type="button"
             onClick={logout}

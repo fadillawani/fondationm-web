@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Initials } from '../../../components/ui/Initials'
 import { Link } from 'react-router'
 import { errorFromException } from '../../../api/errors'
 import { PATHS } from '../../../auth/roles'
@@ -100,7 +101,10 @@ export function RequestDetail({ meeting, all, onProcessed, onPin }: RequestDetai
       <div className="grid gap-2.5 lg:grid-cols-2 lg:gap-3">
         <div className="flex flex-col gap-0.5 rounded-[14px] bg-[#DCE3EF] p-3 lg:rounded-2xl lg:p-3.5">
           <span className="text-[10px] font-black uppercase text-indigo lg:text-[11px]">École</span>
-          <span className="font-display text-[19px] leading-[1.1] lg:text-xl">{meeting.schoolName}</span>
+          <span className="flex items-center gap-2">
+            <Initials name={meeting.schoolName} tone="school" photoUrl={meeting.schoolPhotoUrl} />
+            <span className="font-display text-[19px] leading-[1.1] lg:text-xl">{meeting.schoolName}</span>
+          </span>
           <span className="text-xs font-bold lg:text-[13px]">
             {meeting.schoolCity}
             <span className="lg:hidden">{classLine(meeting) && ` · ${classLine(meeting)}`}</span>
@@ -108,7 +112,10 @@ export function RequestDetail({ meeting, all, onProcessed, onPin }: RequestDetai
         </div>
         <div className="flex flex-col gap-0.5 rounded-[14px] bg-[#FDEBD3] p-3 lg:rounded-2xl lg:p-3.5">
           <span className="text-[10px] font-black uppercase text-[#7A4100] lg:text-[11px]">Intervenant</span>
-          <span className="font-display text-[19px] leading-[1.1] lg:text-xl">{meeting.speakerName}</span>
+          <span className="flex items-center gap-2">
+            <Initials name={meeting.speakerName} tone="speaker" photoUrl={meeting.speakerPhotoUrl} />
+            <span className="font-display text-[19px] leading-[1.1] lg:text-xl">{meeting.speakerName}</span>
+          </span>
           {speakerLine(meeting) && <span className="text-xs font-bold lg:text-[13px]">{speakerLine(meeting)}</span>}
         </div>
       </div>

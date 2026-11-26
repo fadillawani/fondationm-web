@@ -20,6 +20,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Enregistrer sa photo (ou son logo)
+         * @description photoUrl doit être exactement https://res.cloudinary.com/{cloudName}/image/upload/v{version}/{id du
+         *     compte}.{jpg|png|webp} (version facultative ; sans paramètre, fragment, transformation ni dossier dans le
+         *     chemin ; 300 caractères au plus). Sinon 400 VALIDATION_ERROR sur photoUrl. Remplace la photo précédente.
+         *     Réponse : le profil, comme GET /api/me.
+         */
+        put: operations["save"];
+        post?: never;
+        /**
+         * Retirer sa photo (ou son logo)
+         * @description Vide le champ, puis supprime l'image de Cloudinary « au mieux » : une panne de Cloudinary ne fait pas
+         *     échouer l'appel. Idempotent : 204 aussi sans photo.
+         */
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/speaker/slots": {
         parameters: {
             query?: never;
@@ -164,6 +192,31 @@ export interface paths {
         get: operations["listStudents"];
         put?: never;
         post: operations["createStudent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/photo/signature": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Signer l'envoi d'une photo vers Cloudinary
+         * @description Renvoie les paramètres d'un envoi signé (valable une heure après timestamp). Le navigateur envoie le
+         *     fichier directement à https://api.cloudinary.com/v1_1/{cloudName}/image/upload avec file, api_key,
+         *     timestamp, signature et exactement les paramètres signés : allowed_formats, asset_folder, invalidate,
+         *     overwrite, public_id, transformation (snake_case, mêmes valeurs). Puis il enregistre secure_url par
+         *     PUT /api/me/photo. Au plus 10 signatures par minute et par compte quand la limitation de débit est active
+         *     (429 RATE_LIMITED avec Retry-After).
+         */
+        post: operations["signature"];
         delete?: never;
         options?: never;
         head?: never;
@@ -449,7 +502,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["delete"];
+        delete: operations["delete_1"];
         options?: never;
         head?: never;
         patch: operations["update_2"];
@@ -481,7 +534,7 @@ export interface paths {
         get: operations["get_2"];
         put?: never;
         post?: never;
-        delete: operations["delete_1"];
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
         patch: operations["update_3"];
@@ -519,7 +572,7 @@ export interface paths {
         get: operations["get_3"];
         put?: never;
         post?: never;
-        delete: operations["delete_2"];
+        delete: operations["delete_3"];
         options?: never;
         head?: never;
         patch?: never;
@@ -995,6 +1048,7 @@ export interface components {
             phone?: string;
             /** Format: date-time */
             charterAcceptedAt?: string;
+            photoUrl?: string;
         };
         SpeakerProfileResponse: components["schemas"]["ProfileResponse"] & {
             type?: string;
@@ -1010,6 +1064,7 @@ export interface components {
             phone?: string;
             /** Format: date-time */
             charterAcceptedAt?: string;
+            photoUrl?: string;
         };
         StudentProfileResponse: components["schemas"]["ProfileResponse"] & {
             type?: string;
@@ -1018,6 +1073,24 @@ export interface components {
             /** Format: uuid */
             classId?: string;
             classTitle?: string;
+        };
+        UpdatePhotoRequest: {
+            /** @description https://res.cloudinary.com/{cloudName}/image/upload/v{version}/{id du compte}.{jpg|png|webp} */
+            photoUrl: string;
+        };
+        /** @description Format d'erreur unique de l'API : {code, message, fieldErrors[]}, messages en français. */
+        ApiError: {
+            /**
+             * @description Code d'erreur, avec son statut HTTP : VALIDATION_ERROR (400), UNAUTHENTICATED (401), INVALID_CREDENTIALS (401), ACCOUNT_NOT_VALIDATED (403), FORBIDDEN (403), PASSWORD_CHANGE_REQUIRED (403), NOT_FOUND (404), METHOD_NOT_ALLOWED (405), NOT_ACCEPTABLE (406), EMAIL_ALREADY_USED (409), INVALID_STATUS_TRANSITION (409), CLASS_NOT_EMPTY (409), CLASS_FULL (409), STUDENT_COUNT_TOO_LOW (409), SLOT_OVERLAP (409), SLOT_NOT_AVAILABLE (409), CLASS_SLOT_OVERLAP (409), SLOT_PASSED (409), CLASS_HAS_MEETINGS (409), SLOT_HAS_PENDING_MEETINGS (409), MEETING_NOT_STARTED (409), MEETING_NOT_COMPLETED (409), FEEDBACK_ALREADY_EXISTS (409), FEEDBACK_PUBLISHED (409), UNSUPPORTED_MEDIA_TYPE (415), PAYLOAD_TOO_LARGE (413), RATE_LIMITED (429), INTERNAL_ERROR (500).
+             * @enum {string}
+             */
+            code?: "VALIDATION_ERROR" | "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "ACCOUNT_NOT_VALIDATED" | "FORBIDDEN" | "PASSWORD_CHANGE_REQUIRED" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "NOT_ACCEPTABLE" | "EMAIL_ALREADY_USED" | "INVALID_STATUS_TRANSITION" | "CLASS_NOT_EMPTY" | "CLASS_FULL" | "STUDENT_COUNT_TOO_LOW" | "SLOT_OVERLAP" | "SLOT_NOT_AVAILABLE" | "CLASS_SLOT_OVERLAP" | "SLOT_PASSED" | "CLASS_HAS_MEETINGS" | "SLOT_HAS_PENDING_MEETINGS" | "MEETING_NOT_STARTED" | "MEETING_NOT_COMPLETED" | "FEEDBACK_ALREADY_EXISTS" | "FEEDBACK_PUBLISHED" | "UNSUPPORTED_MEDIA_TYPE" | "PAYLOAD_TOO_LARGE" | "RATE_LIMITED" | "INTERNAL_ERROR";
+            message?: string;
+            fieldErrors?: components["schemas"]["FieldErrorDetail"][];
+        };
+        FieldErrorDetail: {
+            field?: string;
+            message?: string;
         };
         CreateSlotRequest: {
             startAt: string;
@@ -1087,6 +1160,7 @@ export interface components {
             name?: string;
             city?: string;
             country?: string;
+            photoUrl?: string;
         };
         SpeakerMeetingResponse: {
             /** Format: uuid */
@@ -1165,6 +1239,7 @@ export interface components {
             city?: string;
             country?: string;
             skills?: string[];
+            photoUrl?: string;
         };
         CreateClassRequest: {
             title: string;
@@ -1204,6 +1279,46 @@ export interface components {
             classTitle?: string;
             /** Format: date-time */
             createdAt?: string;
+        };
+        /** @description Paramètres d'un envoi signé vers Cloudinary, valables une heure après timestamp. */
+        PhotoSignatureResponse: {
+            /** @description Nom du cloud Cloudinary */
+            cloudName?: string;
+            /** @description Clé publique de l'API (api_key) */
+            apiKey?: string;
+            /**
+             * Format: int64
+             * @description Horodatage signé, en secondes (timestamp)
+             */
+            timestamp?: number;
+            /** @description Signature SHA-1 hexadécimale (signature) */
+            signature?: string;
+            /**
+             * @description Paramètre signé asset_folder
+             * @example fondationm/profils
+             */
+            assetFolder?: string;
+            /** @description Paramètre signé public_id : identifiant du compte */
+            publicId?: string;
+            /** @description Paramètre signé overwrite (« true ») */
+            overwrite?: boolean;
+            /** @description Paramètre signé invalidate (« true ») */
+            invalidate?: boolean;
+            /**
+             * @description Paramètre signé allowed_formats
+             * @example jpg,png,webp
+             */
+            allowedFormats?: string;
+            /**
+             * @description Paramètre signé transformation (incoming transformation)
+             * @example c_limit,w_800,h_800
+             */
+            transformation?: string;
+            /**
+             * Format: int64
+             * @description Taille maximale conseillée, en octets (indicative : non signée, non appliquée par Cloudinary)
+             */
+            maxFileSize?: number;
         };
         ChangeOwnPasswordRequest: {
             currentPassword: string;
@@ -1439,6 +1554,7 @@ export interface components {
             jobTitle?: string;
             organization?: string;
             motivation?: string;
+            photoUrl?: string;
         };
         StudentMeetingResponse: {
             /** Format: uuid */
@@ -1564,6 +1680,7 @@ export interface components {
             /** @enum {string} */
             sector?: "DIGITAL" | "HEALTH" | "FINANCE" | "AGRICULTURE" | "CRAFTS" | "LAW" | "CONSTRUCTION_INDUSTRY" | "COMMERCE_ENTREPRENEURSHIP" | "EDUCATION_SOCIAL" | "ARTS_MEDIA" | "OTHER";
             motivation?: string;
+            photoUrl?: string;
         };
         AvailableSlotResponse: {
             /** Format: uuid */
@@ -1592,6 +1709,7 @@ export interface components {
             /** @enum {string} */
             sector?: "DIGITAL" | "HEALTH" | "FINANCE" | "AGRICULTURE" | "CRAFTS" | "LAW" | "CONSTRUCTION_INDUSTRY" | "COMMERCE_ENTREPRENEURSHIP" | "EDUCATION_SOCIAL" | "ARTS_MEDIA" | "OTHER";
             motivation?: string;
+            photoUrl?: string;
         };
         CityCount: {
             city?: string;
@@ -2019,6 +2137,192 @@ export interface operations {
                     "*/*": components["schemas"]["DonorProfileResponse"] | components["schemas"]["SchoolProfileResponse"] | components["schemas"]["SpeakerProfileResponse"] | components["schemas"]["StudentProfileResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePhotoRequest"];
+            };
+        };
+        responses: {
+            /** @description Profil mis à jour */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DonorProfileResponse"] | components["schemas"]["SchoolProfileResponse"] | components["schemas"]["SpeakerProfileResponse"] | components["schemas"]["StudentProfileResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR sur photoUrl */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN (élève, donateur, Fondation) ou ACCOUNT_NOT_VALIDATED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Photo retirée (ou déjà absente) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN (élève, donateur, Fondation) ou ACCOUNT_NOT_VALIDATED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     list: {
@@ -2042,6 +2346,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseSlotResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2068,6 +2408,69 @@ export interface operations {
                     "*/*": components["schemas"]["SlotResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description SLOT_OVERLAP : Ce créneau chevauche un de vos créneaux existants. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get: {
@@ -2088,6 +2491,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FeedbackResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2116,6 +2564,78 @@ export interface operations {
                     "*/*": components["schemas"]["FeedbackResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description MEETING_NOT_COMPLETED : Un retour d'expérience n'est possible que sur une rencontre réalisée. ; FEEDBACK_ALREADY_EXISTS : Vous avez déjà écrit un retour d'expérience sur cette rencontre. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     update: {
@@ -2140,6 +2660,78 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FeedbackResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FEEDBACK_PUBLISHED : Ce retour d'expérience est publié : il ne peut plus être modifié. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2168,6 +2760,78 @@ export interface operations {
                     "*/*": components["schemas"]["SpeakerMeetingResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     accept: {
@@ -2188,6 +2852,78 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SpeakerMeetingResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. ; SLOT_PASSED : Le créneau de cette rencontre a déjà commencé : la décision n'est plus possible. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2214,6 +2950,69 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     list_1: {
@@ -2237,6 +3036,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseSchoolMeetingResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2263,6 +3098,69 @@ export interface operations {
                     "*/*": components["schemas"]["SchoolMeetingResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description SLOT_NOT_AVAILABLE : Seul un créneau disponible peut être supprimé. ; CLASS_SLOT_OVERLAP : Cette classe a déjà une rencontre en cours sur un créneau qui se superpose. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get_1: {
@@ -2283,6 +3181,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FeedbackResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2311,6 +3254,78 @@ export interface operations {
                     "*/*": components["schemas"]["FeedbackResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description MEETING_NOT_COMPLETED : Un retour d'expérience n'est possible que sur une rencontre réalisée. ; FEEDBACK_ALREADY_EXISTS : Vous avez déjà écrit un retour d'expérience sur cette rencontre. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     update_1: {
@@ -2337,6 +3352,78 @@ export interface operations {
                     "*/*": components["schemas"]["FeedbackResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FEEDBACK_PUBLISHED : Ce retour d'expérience est publié : il ne peut plus être modifié. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     list_2: {
@@ -2358,6 +3445,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseClassResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2384,6 +3507,60 @@ export interface operations {
                     "*/*": components["schemas"]["ClassResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     listStudents: {
@@ -2407,6 +3584,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseStudentResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2435,6 +3657,161 @@ export interface operations {
                     "*/*": components["schemas"]["StudentResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description EMAIL_ALREADY_USED : Cette adresse e-mail est déjà utilisée. ; CLASS_FULL : Cette classe a atteint son nombre d'élèves. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    signature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paramètres signés */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PhotoSignatureResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN (élève, donateur, Fondation) ou ACCOUNT_NOT_VALIDATED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description RATE_LIMITED, en-tête Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     change: {
@@ -2459,6 +3836,69 @@ export interface operations {
                     "*/*": components["schemas"]["TokenResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description RATE_LIMITED : trop de requêtes ; l'en-tête Retry-After donne l'attente en secondes. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     validate: {
@@ -2479,6 +3919,78 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FoundationMeetingResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. ; SLOT_PASSED : Le créneau de cette rencontre a déjà commencé : la décision n'est plus possible. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2507,6 +4019,78 @@ export interface operations {
                     "*/*": components["schemas"]["FoundationMeetingResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     complete: {
@@ -2527,6 +4111,78 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FoundationMeetingResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. ; MEETING_NOT_STARTED : La rencontre n'a pas encore commencé : elle ne peut pas être marquée réalisée. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2555,6 +4211,78 @@ export interface operations {
                     "*/*": components["schemas"]["FoundationMeetingResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     publish: {
@@ -2575,6 +4303,78 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FoundationFeedbackResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2600,6 +4400,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseAccountResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     create_4: {
@@ -2622,6 +4458,69 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description EMAIL_ALREADY_USED : Cette adresse e-mail est déjà utilisée. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2650,6 +4549,78 @@ export interface operations {
                     "*/*": components["schemas"]["FoundationDonorRequestResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     validate_1: {
@@ -2670,6 +4641,78 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["AccountResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2698,6 +4741,78 @@ export interface operations {
                     "*/*": components["schemas"]["AccountResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_STATUS_TRANSITION : Ce changement de statut n'est pas autorisé. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     setPassword_1: {
@@ -2722,6 +4837,69 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     list_4: {
@@ -2744,6 +4922,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseDonorRequestResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2770,6 +4984,69 @@ export interface operations {
                     "*/*": components["schemas"]["DonorRequestResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description RATE_LIMITED : trop de requêtes ; l'en-tête Retry-After donne l'attente en secondes. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     registerSpeaker: {
@@ -2792,6 +5069,60 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MeResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description EMAIL_ALREADY_USED : Cette adresse e-mail est déjà utilisée. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description RATE_LIMITED : trop de requêtes ; l'en-tête Retry-After donne l'attente en secondes. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2818,6 +5149,60 @@ export interface operations {
                     "*/*": components["schemas"]["MeResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description EMAIL_ALREADY_USED : Cette adresse e-mail est déjà utilisée. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description RATE_LIMITED : trop de requêtes ; l'en-tête Retry-After donne l'attente en secondes. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     login: {
@@ -2840,6 +5225,60 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TokenResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INVALID_CREDENTIALS : adresse e-mail ou mot de passe incorrect. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description RATE_LIMITED : trop de requêtes ; l'en-tête Retry-After donne l'attente en secondes. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -2866,9 +5305,63 @@ export interface operations {
                     "*/*": components["schemas"]["DonorProfileResponse"] | components["schemas"]["SchoolProfileResponse"] | components["schemas"]["SpeakerProfileResponse"] | components["schemas"]["StudentProfileResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
-    delete: {
+    delete_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2885,6 +5378,51 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
             };
         };
     };
@@ -2912,6 +5450,78 @@ export interface operations {
                     "*/*": components["schemas"]["StudentResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description EMAIL_ALREADY_USED : Cette adresse e-mail est déjà utilisée. ; CLASS_FULL : Cette classe a atteint son nombre d'élèves. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     updateSchool: {
@@ -2936,6 +5546,60 @@ export interface operations {
                     "*/*": components["schemas"]["DonorProfileResponse"] | components["schemas"]["SchoolProfileResponse"] | components["schemas"]["SpeakerProfileResponse"] | components["schemas"]["StudentProfileResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get_2: {
@@ -2958,9 +5622,54 @@ export interface operations {
                     "*/*": components["schemas"]["ClassResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
-    delete_1: {
+    delete_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -2977,6 +5686,60 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description CLASS_NOT_EMPTY : Cette classe contient des comptes élèves et ne peut pas être supprimée. ; CLASS_HAS_MEETINGS : Cette classe a des rencontres et ne peut pas être supprimée. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
             };
         };
     };
@@ -3004,6 +5767,78 @@ export interface operations {
                     "*/*": components["schemas"]["ClassResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description STUDENT_COUNT_TOO_LOW : Le nombre d'élèves ne peut pas être inférieur au nombre de comptes élèves de la classe. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description PAYLOAD_TOO_LARGE : corps de plus de 64 Ko. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNSUPPORTED_MEDIA_TYPE : le corps doit être en application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     list_5: {
@@ -3029,6 +5864,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseStudentMeetingResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get_3: {
@@ -3051,9 +5922,54 @@ export interface operations {
                     "*/*": components["schemas"]["SlotResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
-    delete_2: {
+    delete_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -3070,6 +5986,60 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description SLOT_NOT_AVAILABLE : Seul un créneau disponible peut être supprimé. ; SLOT_HAS_PENDING_MEETINGS : Ce créneau a des demandes de rencontre en attente et ne peut pas être supprimé. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
             };
         };
     };
@@ -3095,6 +6065,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseSpeakerMeetingResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get_4: {
@@ -3115,6 +6121,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SpeakerMeetingResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3141,6 +6192,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseFeedbackResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     awaiting: {
@@ -3164,6 +6251,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseSpeakerAwaitingFeedbackResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     list_8: {
@@ -3185,6 +6308,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseStudentResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3215,6 +6374,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseSpeakerSummaryResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get_5: {
@@ -3237,6 +6432,51 @@ export interface operations {
                     "*/*": components["schemas"]["SpeakerDetailResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     stats: {
@@ -3255,6 +6495,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SpeakerStatsResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3277,6 +6553,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["SchoolMeetingResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3303,6 +6624,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseFeedbackResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     awaiting_1: {
@@ -3324,6 +6681,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseSchoolAwaitingFeedbackResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3351,6 +6744,42 @@ export interface operations {
                     "*/*": components["schemas"]["SchoolDashboardResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     me: {
@@ -3369,6 +6798,33 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MeResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3398,6 +6854,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseFoundationMeetingResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get_8: {
@@ -3418,6 +6910,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FoundationMeetingResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3443,6 +6980,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FoundationIndicatorsResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3473,6 +7046,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseFoundationFeedbackResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get_10: {
@@ -3493,6 +7102,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FoundationFeedbackResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3520,6 +7174,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseFoundationDonorRequestResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get_11: {
@@ -3540,6 +7230,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FoundationDonorRequestResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3567,6 +7302,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseDonorConsultationResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     list_15: {
@@ -3592,6 +7363,42 @@ export interface operations {
                     "*/*": components["schemas"]["PageResponseAccountResponse"];
                 };
             };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
     get_12: {
@@ -3612,6 +7419,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["DonorRequestResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description NOT_FOUND : ressource inexistante ou hors de votre périmètre. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3637,6 +7489,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["DonorImpactResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };
@@ -3665,6 +7553,42 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseDonorFeedbackResponse"];
+                };
+            };
+            /** @description VALIDATION_ERROR : champ invalide (fieldErrors), paramètre ou identifiant mal formé, corps illisible. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description UNAUTHENTICATED : jeton absent, invalide, expiré ou antérieur au dernier changement de mot de passe. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description FORBIDDEN : rôle non autorisé ; ACCOUNT_NOT_VALIDATED : compte pas encore validé ; PASSWORD_CHANGE_REQUIRED : mot de passe à changer d'abord (production). */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description INTERNAL_ERROR : erreur inattendue, sans détail. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };

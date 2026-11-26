@@ -1,4 +1,5 @@
 import { text, textList, oneOf, type WireRecord } from '../api/wire'
+import { readPhotoUrl } from './photo'
 import { SCHOOL_TYPES, SECTORS, type SchoolType, type Sector } from './referenceData'
 
 export interface SchoolDetails {
@@ -10,6 +11,8 @@ export interface SchoolDetails {
   referentRole: string
   phone: string
   charterAcceptedAt: string | null
+  /** Logo (F13), facultatif. */
+  photoUrl: string | null
 }
 
 export interface SpeakerDetails {
@@ -24,6 +27,8 @@ export interface SpeakerDetails {
   skills: string[]
   motivation: string
   charterAcceptedAt: string | null
+  /** Photo (F13), facultative. */
+  photoUrl: string | null
 }
 
 /** Profil élève (`StudentProfileResponse`) : aucun nom d'établissement dans le contrat. */
@@ -61,6 +66,7 @@ export function readSchoolDetails(profile: WireRecord): SchoolDetails {
     referentRole: text(profile, 'referentRole') ?? '',
     phone: text(profile, 'phone') ?? '',
     charterAcceptedAt: text(profile, 'charterAcceptedAt'),
+    photoUrl: readPhotoUrl(profile),
   }
 }
 
@@ -87,5 +93,6 @@ export function readSpeakerDetails(profile: WireRecord): SpeakerDetails {
     skills: textList(profile, 'skills'),
     motivation: text(profile, 'motivation') ?? '',
     charterAcceptedAt: text(profile, 'charterAcceptedAt'),
+    photoUrl: readPhotoUrl(profile),
   }
 }

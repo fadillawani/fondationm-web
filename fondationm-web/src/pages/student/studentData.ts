@@ -3,6 +3,7 @@ import { api, unwrap } from '../../api/client'
 import { FETCH_PAGE_SIZE, fetchAllPages } from '../../api/paging'
 import { asRecord, oneOf, text, textList } from '../../api/wire'
 import { parseIso } from '../../lib/dateTime'
+import { readPhotoUrl } from '../../lib/photo'
 
 /** Seuls CONFIRMED et COMPLETED sont attendus (description du contrat) ; tout autre statut est ignoré (décision 110). */
 const STATUSES = ['CONFIRMED', 'COMPLETED'] as const
@@ -15,6 +16,8 @@ export interface StudentMeeting {
   startAt: string
   endAt: string | null
   speakerName: string
+  /** Photo de l'intervenant (F13), facultative. */
+  speakerPhotoUrl: string | null
   city: string
   country: string
   skills: string[]
@@ -40,6 +43,7 @@ export function readStudentMeeting(value: unknown): StudentMeeting | null {
     startAt,
     endAt: text(record, 'endAt'),
     speakerName: (speaker && text(speaker, 'fullName')) ?? 'Intervenant',
+    speakerPhotoUrl: readPhotoUrl(speaker),
     city: (speaker && text(speaker, 'city')) ?? '',
     country: (speaker && text(speaker, 'country')) ?? '',
     skills: speaker ? textList(speaker, 'skills') : [],
